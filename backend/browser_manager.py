@@ -104,19 +104,30 @@ class BrowserManager:
     def save_profile(self, payload: dict[str, Any]) -> dict[str, Any]:
         profile = BrowserProfile.model_validate(payload)
         profile.updated_at = utc_now_iso()
-        existing = None
-        try:
-            existing = self.get_profile(profile.id)
-        except KeyError:
-            existing = None
-        if existing:
-            profile.created_at = existing.created_at
-            profile.last_used = existing.last_used
-        if profile.engine == "chrome" and profile.chrome.fingerprint.seed is None:
-            profile.chrome.fingerprint.seed = self._new_chrome_seed()
-        profile.name = self._ensure_sequence_name(profile.name, (item.name for item in self.storage.load_profiles() if item.id != profile.id))
-        self.storage.upsert_profile(profile)
-        return self._profile_response(profile)
+
+        def updater(profiles: list[BrowserProfile]) -> tuple[list[BrowserProfile], BrowserProfile]:
+            existing = next((item for item in profiles if item.id == profile.id), None)
+            if existing:
+                profile.created_at = existing.created_at
+                profile.last_used = existing.last_used
+            if profile.engine == "chrome" and profile.chrome.fingerprint.seed is None:
+                profile.chrome.fingerprint.seed = self._new_chrome_seed()
+            profile.name = self._ensure_sequence_name(profile.name, (item.name for item in profiles if item.id != profile.id))
+
+            replaced = False
+            updated_profiles: list[BrowserProfile] = []
+            for item in profiles:
+                if item.id == profile.id:
+                    updated_profiles.append(profile)
+                    replaced = True
+                else:
+                    updated_profiles.append(item)
+            if not replaced:
+                updated_profiles.append(profile)
+            return updated_profiles, profile
+
+        saved_profile = self.storage.update_profiles(updater)
+        return self._profile_response(saved_profile)
 
     def delete_profile(self, profile_id: str) -> None:
         profile = self.get_profile(profile_id)
