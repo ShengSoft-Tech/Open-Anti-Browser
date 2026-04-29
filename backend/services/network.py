@@ -24,7 +24,8 @@ from curl_cffi import requests
 
 
 DEFAULT_HTTP_TIMEOUT = 8
-GEO_PRIMARY_TIMEOUT = 4.5
+GEO_PRIMARY_TIMEOUT = 12
+GEO_SECONDARY_TIMEOUT = 6
 PROXY_CONNECT_TIMEOUT = 6
 PROXY_TEST_TARGET_HOST = "1.1.1.1"
 PROXY_TEST_TARGET_PORT = 443
@@ -504,7 +505,7 @@ def resolve_geo_profile(
 
     request_proxy = proxy["request_proxy"] if proxy else None
     session = create_http_session(request_proxy)
-    error_message: str | None = None
+    error_messages: list[str] = []
     try:
         try:
             response = session.get(
@@ -527,11 +528,23 @@ def resolve_geo_profile(
                 ip_data = {}
 
             _merge_geo_profile(geo_profile, data.get("ip"), ip_data)
+            if geo_profile.get("ip") and geo_profile.get("timezone_source") == "ip_data":
+                return geo_profile
+            if not geo_profile.get("ip"):
+                raise GeoProfileResolveError("browserscan 没有返回可用的 IP 信息")
+        except Exception as exc:
+            error_messages.append(str(exc) or "browserscan 请求失败")
+
+        try:
+            _merge_ip_api_geo_profile(geo_profile, _fetch_secondary_geo_data(session, geo_profile.get("ip")))
             if geo_profile.get("ip"):
                 return geo_profile
-            raise GeoProfileResolveError("browserscan 没有返回可用的 IP 信息")
+            raise GeoProfileResolveError("ip-api 没有返回可用的 IP 信息")
         except Exception as exc:
-            error_message = str(exc) or "browserscan 请求失败"
+            error_messages.append(str(exc) or "ip-api 请求失败")
+
+        if geo_profile.get("ip"):
+            return geo_profile
     finally:
         try:
             session.close()
@@ -542,8 +555,8 @@ def resolve_geo_profile(
         message = "IP 解析超时或失败，请检查当前网络或代理后重试。"
         if proxy:
             message = "代理 IP 解析超时或失败，请检查当前网络或代理后重试。"
-        if error_message:
-            raise GeoProfileResolveError(f"{message}（{error_message}）")
+        if error_messages:
+            raise GeoProfileResolveError(f"{message}（{'; '.join(error_messages)}）")
         raise GeoProfileResolveError(message)
     return geo_profile
 
@@ -582,8 +595,8 @@ def _merge_geo_profile(profile: dict[str, Any], ip_value: str | None, ip_data: d
         profile["ip"] = ip_value
     profile["source"] = "browserscan_visitor"
 
-    country_code = ip_data.get("country") or ip_data.get("countryCode")
-    timezone_name = ip_data.get("timezone")
+    country_code = _normalize_country_code(ip_data.get("country") or ip_data.get("countryCode"))
+    timezone_name = _normalize_timezone_name(ip_data.get("timezone"))
     latitude = ip_data.get("latitude", ip_data.get("lat"))
     longitude = ip_data.get("longitude", ip_data.get("lon"))
     profile["ip_scan_channel"] = ip_data.get("ip_scan_channel") or "ip2location"
@@ -604,9 +617,112 @@ def _merge_geo_profile(profile: dict[str, Any], ip_value: str | None, ip_data: d
         profile["country_code"] = country_code
         profile["language"] = language
         profile["locale"] = locale
-        profile["timezone"] = timezone_name or auto_timezone
+        if timezone_name and _timezone_matches_country(timezone_name, country_code):
+            profile["timezone"] = timezone_name
+            profile["timezone_source"] = "ip_data"
+        else:
+            profile["timezone"] = auto_timezone
+            profile["timezone_source"] = "country_default"
     elif timezone_name:
         profile["timezone"] = timezone_name
+        profile["timezone_source"] = "ip_data"
+
+
+def _fetch_secondary_geo_data(session: requests.Session, ip_value: str | None = None) -> dict[str, Any]:
+    resolved_ip = str(ip_value or "").strip()
+    if not resolved_ip:
+        try:
+            response = session.get(
+                "https://ipv4.icanhazip.com/",
+                timeout=GEO_SECONDARY_TIMEOUT,
+            )
+            response.raise_for_status()
+            candidate_ip = str(response.text or "").strip()
+            if _is_ip_literal(candidate_ip):
+                resolved_ip = candidate_ip
+        except Exception:
+            resolved_ip = ""
+
+    fields = "status,message,query,countryCode,timezone,lat,lon,regionName,city,isp,zip"
+    url = f"http://ip-api.com/json/{resolved_ip}" if resolved_ip else "http://ip-api.com/json/"
+    response = session.get(url, params={"fields": fields}, timeout=GEO_SECONDARY_TIMEOUT)
+    response.raise_for_status()
+    payload = response.json()
+    if not isinstance(payload, dict):
+        raise GeoProfileResolveError("ip-api 返回数据格式异常")
+    if str(payload.get("status") or "success").lower() == "fail":
+        raise GeoProfileResolveError(str(payload.get("message") or "ip-api 返回失败"))
+    if resolved_ip and not payload.get("query"):
+        payload["query"] = resolved_ip
+    return payload
+
+
+def _merge_ip_api_geo_profile(profile: dict[str, Any], payload: dict[str, Any]) -> None:
+    ip_value = payload.get("query")
+    if ip_value:
+        profile["ip"] = str(ip_value).strip()
+
+    country_code = _normalize_country_code(payload.get("countryCode"))
+    timezone_name = _normalize_timezone_name(payload.get("timezone"))
+    latitude = payload.get("lat")
+    longitude = payload.get("lon")
+
+    profile["source"] = "ip-api"
+    profile["ip_scan_channel"] = "ip-api"
+    profile["region"] = payload.get("regionName") or profile.get("region")
+    profile["city"] = payload.get("city") or profile.get("city")
+    profile["isp"] = payload.get("isp") or profile.get("isp")
+    profile["zipcode"] = payload.get("zip") or profile.get("zipcode")
+
+    if latitude is not None:
+        profile["latitude"] = latitude
+    if longitude is not None:
+        profile["longitude"] = longitude
+    if latitude is not None or longitude is not None:
+        profile["precision"] = 1200
+
+    if country_code:
+        language, locale, auto_timezone = get_country_language_timezone(country_code)
+        profile["country_code"] = country_code
+        profile["language"] = language
+        profile["locale"] = locale
+        if timezone_name and _timezone_matches_country(timezone_name, country_code):
+            profile["timezone"] = timezone_name
+            profile["timezone_source"] = "ip_data"
+        else:
+            profile["timezone"] = auto_timezone
+            profile["timezone_source"] = "country_default"
+    elif timezone_name:
+        profile["timezone"] = timezone_name
+        profile["timezone_source"] = "ip_data"
+
+
+def _normalize_country_code(value: Any) -> str | None:
+    raw = str(value or "").strip().upper()
+    if len(raw) != 2:
+        return None
+    return raw
+
+
+def _normalize_timezone_name(value: Any) -> str | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    lower_raw = raw.lower()
+    for timezone_name in pytz.all_timezones:
+        if timezone_name.lower() == lower_raw:
+            return timezone_name
+    if lower_raw == "utc":
+        return "UTC"
+    if lower_raw == "gmt":
+        return "Etc/GMT"
+    return None
+
+
+def _timezone_matches_country(timezone_name: str, country_code: str | None) -> bool:
+    if not country_code:
+        return True
+    return timezone_name in set(pytz.country_timezones.get(country_code.upper(), []))
 
 
 def _test_socks5_proxy_connectivity(proxy: dict[str, Any]) -> None:
