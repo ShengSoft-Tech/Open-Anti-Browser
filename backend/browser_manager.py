@@ -240,6 +240,22 @@ class BrowserManager:
                     result.append(payload)
         return result
 
+    def parse_proxy_url(self, url: str) -> dict[str, Any]:
+        from .services.network import normalize_proxy_config
+        raw = str(url or "").strip()
+        if not raw:
+            return ProxySettings().model_dump(mode="json")
+        config = normalize_proxy_config(raw)
+        if not config:
+            return ProxySettings().model_dump(mode="json")
+        return ProxySettings(
+            type=config["scheme"],
+            host=config["host"] or "",
+            port=config["port"],
+            username=config["username"] or "",
+            password=config["password"] or "",
+        ).model_dump(mode="json")
+
     def test_proxy(self, payload: dict[str, Any]) -> dict[str, Any]:
         proxy_config = proxy_to_profile_proxy(payload)
         connect_result = test_proxy_connectivity(proxy_config)

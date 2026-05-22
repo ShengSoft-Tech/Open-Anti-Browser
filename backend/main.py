@@ -152,6 +152,14 @@ def test_proxy(payload: dict) -> dict:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
+@app.post("/api/proxy/parse")
+def parse_proxy_url(payload: dict) -> dict:
+    try:
+        return manager.parse_proxy_url(payload.get("url") or "")
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 @app.get("/api/synchronizer/status")
 def get_synchronizer_status() -> dict:
     return manager.get_synchronizer_status()
@@ -516,6 +524,14 @@ def open_api_delete_extension(extension_id: str) -> dict[str, bool]:
 def open_api_test_proxy(payload: dict) -> dict:
     try:
         return manager.test_proxy(payload)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@open_api.post("/proxy/parse", dependencies=[Depends(verify_open_api_key)], summary="解析代理 URL")
+def open_api_parse_proxy_url(payload: dict) -> dict:
+    try:
+        return manager.parse_proxy_url(payload.get("url") or "")
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
