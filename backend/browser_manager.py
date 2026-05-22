@@ -136,6 +136,14 @@ class BrowserManager:
         self._delete_profile_user_data_dirs(profile, settings)
         self.storage.delete_profile(profile_id)
 
+    def delete_profile_by_name(self, name: str) -> None:
+        # 按名称删除第一个匹配的 profile，调用方需保证名称唯一
+        profiles = self.storage.load_profiles()
+        match = next((p for p in profiles if p.name == name), None)
+        if not match:
+            raise KeyError(f"找不到名称为 {name!r} 的配置")
+        self.delete_profile(match.id)
+
     def duplicate_profile(self, profile_id: str) -> dict[str, Any]:
         profile = self.storage.duplicate_profile(profile_id)
         if not profile:
@@ -239,22 +247,6 @@ class BrowserManager:
                 if payload:
                     result.append(payload)
         return result
-
-    def parse_proxy_url(self, url: str) -> dict[str, Any]:
-        from .services.network import normalize_proxy_config
-        raw = str(url or "").strip()
-        if not raw:
-            return ProxySettings().model_dump(mode="json")
-        config = normalize_proxy_config(raw)
-        if not config:
-            return ProxySettings().model_dump(mode="json")
-        return ProxySettings(
-            type=config["scheme"],
-            host=config["host"] or "",
-            port=config["port"],
-            username=config["username"] or "",
-            password=config["password"] or "",
-        ).model_dump(mode="json")
 
     def test_proxy(self, payload: dict[str, Any]) -> dict[str, Any]:
         proxy_config = proxy_to_profile_proxy(payload)

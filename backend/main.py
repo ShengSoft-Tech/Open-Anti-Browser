@@ -152,14 +152,6 @@ def test_proxy(payload: dict) -> dict:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@app.post("/api/proxy/parse")
-def parse_proxy_url(payload: dict) -> dict:
-    try:
-        return manager.parse_proxy_url(payload.get("url") or "")
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-
 @app.get("/api/synchronizer/status")
 def get_synchronizer_status() -> dict:
     return manager.get_synchronizer_status()
@@ -468,6 +460,19 @@ def open_api_delete_profile(profile_id: str) -> dict[str, bool]:
     return {"ok": True}
 
 
+@open_api.delete("/profiles", dependencies=[Depends(verify_open_api_key)], summary="按名称删除浏览器配置（body 传 profile_name）")
+def open_api_delete_profile_by_name(payload: dict) -> dict[str, bool]:
+    # 调用方需保证 profile_name 唯一，删除第一个匹配的
+    name = str(payload.get("profile_name") or "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="profile_name 不能为空")
+    try:
+        manager.delete_profile_by_name(name)
+        return {"ok": True}
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
 @open_api.post("/profiles/{profile_id}/start", dependencies=[Depends(verify_open_api_key)], summary="启动浏览器配置")
 def open_api_start_profile(profile_id: str) -> dict:
     try:
@@ -524,14 +529,6 @@ def open_api_delete_extension(extension_id: str) -> dict[str, bool]:
 def open_api_test_proxy(payload: dict) -> dict:
     try:
         return manager.test_proxy(payload)
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-
-@open_api.post("/proxy/parse", dependencies=[Depends(verify_open_api_key)], summary="解析代理 URL")
-def open_api_parse_proxy_url(payload: dict) -> dict:
-    try:
-        return manager.parse_proxy_url(payload.get("url") or "")
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
