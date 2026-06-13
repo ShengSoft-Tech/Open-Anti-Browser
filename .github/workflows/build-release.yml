@@ -1,9 +1,10 @@
-name: Build & Release Windows EXE
+name: Build & Release Windows Installer
 
 on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -35,16 +36,49 @@ jobs:
           npm install
           npm run build
 
-      - name: Build EXE with PyInstaller
+      - name: Prepare browser engines
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          function Fetch-Engine($url, $zip, $exeName, $dest) {
+            Write-Host "Downloading $url"
+            curl.exe -L --fail -o $zip $url
+            if ($LASTEXITCODE -ne 0) { throw "download failed: $url" }
+            # Extract to RUNNER_TEMP so the raw archive tree is never picked up by PyInstaller's engines/ add-data.
+            $extract = Join-Path $env:RUNNER_TEMP ("extract_" + [IO.Path]::GetFileNameWithoutExtension($zip))
+            if (Test-Path $extract) { Remove-Item $extract -Recurse -Force }
+            Expand-Archive -Path $zip -DestinationPath $extract -Force
+            $exe = Get-ChildItem -Path $extract -Recurse -Filter $exeName | Select-Object -First 1
+            if (-not $exe) { throw "$exeName not found inside $zip" }
+            New-Item -ItemType Directory -Force -Path $dest | Out-Null
+            Copy-Item -Path (Join-Path $exe.Directory.FullName '*') -Destination $dest -Recurse -Force
+            if (-not (Test-Path (Join-Path $dest $exeName))) { throw "$exeName missing in $dest after copy" }
+            Write-Host "Prepared $dest\$exeName"
+          }
+
+          New-Item -ItemType Directory -Force -Path engines | Out-Null
+          Fetch-Engine `
+            "https://github.com/adryfish/fingerprint-chromium/releases/download/144.0.7559.132/ungoogled-chromium_144.0.7559.132-1.1_windows_x64.zip" `
+            "chrome.zip" "chrome.exe" "engines/chrome"
+          Fetch-Engine `
+            "https://github.com/LoseNine/ruyipage/releases/download/151-ruyi/firefox-151.0a1.en-US.win64.zip" `
+            "firefox.zip" "firefox.exe" "engines/firefox"
+
+          Write-Host "=== engines layout ==="
+          Get-ChildItem engines/chrome/chrome.exe, engines/firefox/firefox.exe | Format-Table FullName, Length
+
+      - name: Build app with PyInstaller (onedir, engines bundled)
         run: >
           pyinstaller
           --noconfirm
-          --onefile
+          --onedir
           --windowed
           --name "Open-Anti-Browser"
           --icon "assets/app.ico"
           --add-data "frontend/dist;frontend/dist"
           --add-data "assets;assets"
+          --add-data "engines;engines"
           --hidden-import "websockets"
           --hidden-import "websockets.legacy"
           --hidden-import "websockets.legacy.client"
@@ -52,9 +86,31 @@ jobs:
           --collect-submodules "curl_cffi"
           launch_app.py
 
+      - name: Build installer with Inno Setup
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          choco install innosetup --no-progress -y
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { throw "ISCC.exe not found at $iscc" }
+          $v = "${{ github.ref_name }}" -replace '^v', ''
+          if (-not ($v -match '^\d+(\.\d+)+')) { $v = '0.0.0' }
+          Write-Host "Building installer version $v"
+          & $iscc "/DMyAppVersion=$v" "/DRepoRoot=$($PWD.Path)" ".github\installer.iss"
+          if ($LASTEXITCODE -ne 0) { throw "ISCC failed with exit code $LASTEXITCODE" }
+          Get-ChildItem installer_out
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Open-Anti-Browser-Setup
+          path: installer_out/Open-Anti-Browser-Setup.exe
+          if-no-files-found: error
+
       - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/Open-Anti-Browser.exe
+          files: installer_out/Open-Anti-Browser-Setup.exe
           generate_release_notes: true
           name: "Open-Anti-Browser ${{ github.ref_name }}"
