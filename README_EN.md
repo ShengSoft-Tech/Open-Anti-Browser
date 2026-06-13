@@ -6,6 +6,8 @@
 
 [中文说明](./README.md)
 
+> This build is a fork of [Wtcity22/Open-Anti-Browser](https://github.com/Wtcity22/Open-Anti-Browser), maintained and released by ShengSoft-Tech. It tracks upstream and preserves the original open-source notice and engine-source attribution.
+
 Open-Anti-Browser is a local desktop manager for fingerprint browser profiles
 
 It brings two publicly available fingerprint browser engines into one interface for profile creation, proxy management, extension management, browser launching, and local API automation
@@ -67,8 +69,9 @@ The interface follows an iOS-inspired style and supports light and dark mode swi
 
 ## Download
 
-- Installer release page: [Releases](https://github.com/Wtcity22/Open-Anti-Browser/releases)
-- Source repository: [Wtcity22/Open-Anti-Browser](https://github.com/Wtcity22/Open-Anti-Browser)
+- Installer release page (this fork): [Releases](https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases)
+- This fork's source: [ShengSoft-Tech/Open-Anti-Browser](https://github.com/ShengSoft-Tech/Open-Anti-Browser)
+- Original project: [Wtcity22/Open-Anti-Browser](https://github.com/Wtcity22/Open-Anti-Browser)
 
 ## Contact Me
 - email: wtcity22@gmail.com

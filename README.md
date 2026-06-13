@@ -6,6 +6,8 @@
 
 [English README](./README_EN.md)
 
+> 本构建是 [Wtcity22/Open-Anti-Browser](https://github.com/Wtcity22/Open-Anti-Browser) 的 fork，由 ShengSoft-Tech 维护与构建发布。功能与上游保持一致，并保留原项目的开源声明与内核来源署名。
+
 Open-Anti-Browser 是一个本地桌面端指纹浏览器管理器
 
 它把两套可公开获取的指纹内核整理到同一个界面里，方便创建配置、管理代理、统一扩展、启动浏览器，以及通过本地 API 接入自动化流程
@@ -67,8 +69,9 @@ Open-Anti-Browser 是一个本地桌面端指纹浏览器管理器
 
 ## 下载
 
-- 安装包发布页: [Releases](https://github.com/Wtcity22/Open-Anti-Browser/releases)
-- 源码仓库: [Wtcity22/Open-Anti-Browser](https://github.com/Wtcity22/Open-Anti-Browser)
+- 安装包发布页（本 fork）: [Releases](https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases)
+- 本 fork 源码: [ShengSoft-Tech/Open-Anti-Browser](https://github.com/ShengSoft-Tech/Open-Anti-Browser)
+- 原始项目: [Wtcity22/Open-Anti-Browser](https://github.com/Wtcity22/Open-Anti-Browser)
 
 ## 联系我
 - email: wtcity22@gmail.com
