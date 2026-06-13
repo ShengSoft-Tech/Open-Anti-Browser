@@ -566,6 +566,49 @@ const endpoints = computed(() => [
     response: JSON.stringify({ ok: true }, null, 2),
   },
   {
+    method: 'DELETE',
+    path: '/profiles',
+    title: locale.value === 'en-US' ? 'Delete a profile by name' : '按名称删除浏览器配置',
+    desc: locale.value === 'en-US'
+      ? 'Deletes the first profile matching the given name, so keep names unique. Returns 404 when nothing matches.'
+      : '按名称删除配置，删除第一个匹配项，请自行保证名称唯一；找不到时返回 404。',
+    params: [
+      authParam.value,
+      { name: 'profile_name', position: copy.value.body, required: copy.value.yes, desc: locale.value === 'en-US' ? 'Name of the profile to delete' : '要删除的配置名称' },
+    ],
+    request: `curl -X DELETE "${baseUrl.value}/profiles" \\
+  -H "X-API-Key: ${apiKey.value}" \\
+  -H "Content-Type: application/json" \\
+  -d "{\\"profile_name\\":\\"Test Chrome\\"}"`,
+    response: JSON.stringify({ ok: true }, null, 2),
+  },
+  {
+    method: 'POST',
+    path: '/profiles/create-and-start',
+    title: locale.value === 'en-US' ? 'Create a profile and start it' : '创建配置并启动',
+    desc: locale.value === 'en-US'
+      ? 'Creates a profile from task_id and a proxy URL string, starts it, and returns debug_url (the CDP WebSocket proxy). Returns 409 when the task id is already running.'
+      : '用 task_id 和代理 URL 字符串创建配置并立即启动，返回 debug_url（CDP WebSocket 代理地址）；同名任务已在运行时返回 409。',
+    params: [
+      authParam.value,
+      { name: 'task_id', position: copy.value.body, required: copy.value.yes, desc: locale.value === 'en-US' ? 'Unique task id, also used as the profile name' : '唯一任务标识，同时作为配置名称' },
+      { name: 'proxy', position: copy.value.body, required: copy.value.yes, desc: locale.value === 'en-US' ? 'Proxy URL string, e.g. http://user:pass@host:port' : '代理 URL 字符串，如 http://user:pass@host:port' },
+      { name: 'engine', position: copy.value.body, required: copy.value.no, desc: locale.value === 'en-US' ? 'chrome / firefox, defaults to chrome' : 'chrome / firefox，默认 chrome' },
+    ],
+    request: `curl -X POST "${baseUrl.value}/profiles/create-and-start" \\
+  -H "X-API-Key: ${apiKey.value}" \\
+  -H "Content-Type: application/json" \\
+  -d "{\\"task_id\\":\\"task-001\\",\\"proxy\\":\\"http://user:pass@127.0.0.1:7890\\",\\"engine\\":\\"chrome\\"}"`,
+    response: JSON.stringify({
+      id: profileId.value,
+      name: 'task-001',
+      engine: 'chrome',
+      status: 'running',
+      port: 9222,
+      debug_url: `ws://127.0.0.1:8000/ws/cdp/${profileId.value}`,
+    }, null, 2),
+  },
+  {
     method: 'GET',
     path: '/settings',
     title: copy.value.endpoints.settingsTitle,
@@ -617,6 +660,20 @@ const endpoints = computed(() => [
     response: JSON.stringify({ id: 'ext_id', engine: 'chrome', name: 'My Extension', enabled: false }, null, 2),
   },
   {
+    method: 'DELETE',
+    path: '/extensions/{extension_id}',
+    title: locale.value === 'en-US' ? 'Delete an extension' : '删除扩展',
+    desc: locale.value === 'en-US'
+      ? 'Removes a globally managed extension. Returns 404 when the id does not exist.'
+      : '删除一个全局扩展，id 不存在时返回 404。',
+    params: [
+      authParam.value,
+      { name: 'extension_id', position: copy.value.path, required: copy.value.yes, desc: locale.value === 'en-US' ? 'Extension id returned by GET /extensions' : 'GET /extensions 返回的扩展 id' },
+    ],
+    request: `curl -X DELETE -H "X-API-Key: ${apiKey.value}" "${baseUrl.value}/extensions/ext_id"`,
+    response: JSON.stringify({ ok: true }, null, 2),
+  },
+  {
     method: 'POST',
     path: '/proxy/test',
     title: copy.value.endpoints.proxyTestTitle,
@@ -633,6 +690,32 @@ const endpoints = computed(() => [
   -H "Content-Type: application/json" \\
   -d "{\\"type\\":\\"http\\",\\"host\\":\\"127.0.0.1\\",\\"port\\":7890}"`,
     response: JSON.stringify({ ok: true, data: { ip: '203.0.113.10', language: 'ja-JP', timezone: 'Asia/Tokyo' } }, null, 2),
+  },
+  {
+    method: 'POST',
+    path: '/proxy/check-ip',
+    title: locale.value === 'en-US' ? 'Check proxy IP quality' : '检测代理 IP 质量',
+    desc: locale.value === 'en-US'
+      ? 'Resolves geo info for a proxy URL string: IP, country, city, timezone, and whether it is a datacenter IP.'
+      : '解析代理 URL 字符串的地理信息：IP、国家、城市、时区，以及是否数据中心 IP。',
+    params: [
+      authParam.value,
+      { name: 'proxy', position: copy.value.body, required: copy.value.yes, desc: locale.value === 'en-US' ? 'Proxy URL string, e.g. http://user:pass@host:port' : '代理 URL 字符串，如 http://user:pass@host:port' },
+    ],
+    request: `curl -X POST "${baseUrl.value}/proxy/check-ip" \\
+  -H "X-API-Key: ${apiKey.value}" \\
+  -H "Content-Type: application/json" \\
+  -d "{\\"proxy\\":\\"http://user:pass@127.0.0.1:7890\\"}"`,
+    response: JSON.stringify({
+      ipAddress: '203.0.113.10',
+      country: 'Japan',
+      countryCode: 'JP',
+      city: 'Tokyo',
+      lat: 35.68,
+      lon: 139.69,
+      timezone: 'Asia/Tokyo',
+      isDataCenter: false,
+    }, null, 2),
   },
 ])
 
