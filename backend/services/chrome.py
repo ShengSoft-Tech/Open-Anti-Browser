@@ -74,8 +74,7 @@ def launch_chrome_profile(
         _upsert_arg(launch_args, "--fingerprint-hardware-concurrency", hardware_concurrency)
     if chrome_fp.disable_spoofing:
         _upsert_arg(launch_args, "--disable-spoofing", ",".join(chrome_fp.disable_spoofing))
-    if profile.chrome.startup.window_size:
-        _upsert_arg(launch_args, "--window-size", profile.chrome.startup.window_size)
+    _upsert_arg(launch_args, "--window-size", profile.chrome.startup.window_size or "1200,800")
     enabled_extensions = _collect_enabled_chrome_extensions(profile, app_settings)
     if enabled_extensions:
         extension_arg = ",".join(enabled_extensions)

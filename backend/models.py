@@ -168,6 +168,18 @@ class BrowserProfile(ModelBase):
         if not isinstance(data, dict):
             return data
         payload = dict(data)
+        proxy = payload.get("proxy")
+        if isinstance(proxy, str) and proxy.strip():
+            from .services.network import normalize_proxy_config
+            config = normalize_proxy_config(proxy.strip())
+            if config:
+                payload["proxy"] = {
+                    "type": config["scheme"],
+                    "host": config["host"] or "",
+                    "port": config["port"],
+                    "username": config["username"] or "",
+                    "password": config["password"] or "",
+                }
         current_rules = payload.get("proxy_bypass_rules")
         legacy_domains = payload.get("proxy_bypass_domains")
         if current_rules:

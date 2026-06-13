@@ -640,7 +640,7 @@ def _build_window_size(screen_profile: dict[str, int]) -> tuple[int, int]:
     else:
         width_margin = random.randint(120, 260)
         height_margin = random.randint(150, 260)
-    return max(1024, width - width_margin), max(720, height - height_margin)
+    return max(1200, width - width_margin), max(720, height - height_margin)
 
 
 def _build_language_value(language: str) -> str:

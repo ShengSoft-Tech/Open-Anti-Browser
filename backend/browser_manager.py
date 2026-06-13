@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import random
+import urllib.request
 import secrets
 import shutil
 import threading
@@ -34,6 +35,25 @@ from .services.network import (
 from .services.synchronizer import BrowserSynchronizer, CdpPageClient
 from .services.window_manager import arrange_windows, list_monitors, set_uniform_size, show_windows
 from .storage import JsonStorage
+
+
+def _fetch_ws_debugger_url(port: int, timeout: float = 10.0) -> str | None:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            req = urllib.request.Request(
+                f"http://127.0.0.1:{port}/json/version",
+                headers={"User-Agent": "Open-Anti-Browser"},
+            )
+            with urllib.request.urlopen(req, timeout=2) as resp:
+                data = json.loads(resp.read().decode("utf-8", errors="ignore"))
+                ws_url = data.get("webSocketDebuggerUrl")
+                if ws_url:
+                    return ws_url
+        except Exception:
+            pass
+        time.sleep(0.5)
+    return None
 
 
 class BrowserManager:
@@ -136,6 +156,14 @@ class BrowserManager:
         self._delete_profile_user_data_dirs(profile, settings)
         self.storage.delete_profile(profile_id)
 
+    def delete_profile_by_name(self, name: str) -> None:
+        # 按名称删除第一个匹配的 profile，调用方需保证名称唯一
+        profiles = self.storage.load_profiles()
+        match = next((p for p in profiles if p.name == name), None)
+        if not match:
+            raise KeyError(f"找不到名称为 {name!r} 的配置")
+        self.delete_profile(match.id)
+
     def duplicate_profile(self, profile_id: str) -> dict[str, Any]:
         profile = self.storage.duplicate_profile(profile_id)
         if not profile:
@@ -197,6 +225,19 @@ class BrowserManager:
         finally:
             with self._session_lock:
                 self.pending_starts.discard(profile_id)
+
+    def create_and_start_profile(self, task_id: str, proxy: str, engine: str = "chrome") -> dict[str, Any]:
+        task_id = task_id.strip()
+        proxy = proxy.strip()
+        profiles = self.storage.load_profiles()
+        if any(p.name == task_id for p in profiles):
+            raise RuntimeError(f"task_id {task_id!r} 已存在")
+        saved = self.save_profile({"name": task_id, "engine": engine, "proxy": proxy})
+        result = self.start_profile(saved["id"])
+        port = result.get("port")
+        if port:
+            result["debug_url"] = _fetch_ws_debugger_url(port) or result.get("debug_url")
+        return result
 
     def stop_profile(self, profile_id: str, quiet: bool = False) -> dict[str, Any] | None:
         self._refresh_runtime_sessions()
@@ -812,6 +853,15 @@ class BrowserManager:
         if not payload:
             return None
         return payload["session"].model_dump(mode="json")
+
+    def get_profile_cdp_ws_url(self, profile_id: str) -> str | None:
+        session = self._resolve_runtime_session(profile_id)
+        if not session:
+            return None
+        port = session.get("remote_debugging_port")
+        if not port:
+            return None
+        return _fetch_ws_debugger_url(int(port), timeout=3.0)
 
     def _resolve_profile_summary(self, profile_id: str) -> dict[str, Any] | None:
         try:
