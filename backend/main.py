@@ -20,10 +20,10 @@ from .ui_bridge import request_exit_ui, request_pick_directory
 
 
 manager = BrowserManager()
-app = FastAPI(title="Open-Anti-Browser API", version="0.1.7")
+app = FastAPI(title="Open-Anti-Browser API", version="0.1.8")
 open_api = FastAPI(
     title="Open-Anti-Browser Open API",
-    version="0.1.7",
+    version="0.1.8",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
