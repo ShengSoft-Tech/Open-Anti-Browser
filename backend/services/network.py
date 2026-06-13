@@ -44,6 +44,7 @@ DEFAULT_GEO_PROFILE = {
     "city": None,
     "isp": None,
     "zipcode": None,
+    "is_datacenter": False,
 }
 
 
@@ -643,7 +644,7 @@ def _fetch_secondary_geo_data(session: requests.Session, ip_value: str | None = 
         except Exception:
             resolved_ip = ""
 
-    fields = "status,message,query,countryCode,timezone,lat,lon,regionName,city,isp,zip"
+    fields = "status,message,query,countryCode,timezone,lat,lon,regionName,city,isp,zip,proxy"
     url = f"http://ip-api.com/json/{resolved_ip}" if resolved_ip else "http://ip-api.com/json/"
     response = session.get(url, params={"fields": fields}, timeout=GEO_SECONDARY_TIMEOUT)
     response.raise_for_status()
@@ -669,6 +670,7 @@ def _merge_ip_api_geo_profile(profile: dict[str, Any], payload: dict[str, Any]) 
 
     profile["source"] = "ip-api"
     profile["ip_scan_channel"] = "ip-api"
+    profile["is_datacenter"] = bool(payload.get("proxy"))
     profile["region"] = payload.get("regionName") or profile.get("region")
     profile["city"] = payload.get("city") or profile.get("city")
     profile["isp"] = payload.get("isp") or profile.get("isp")

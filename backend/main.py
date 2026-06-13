@@ -5,7 +5,9 @@ import webbrowser
 from pathlib import Path
 from urllib.parse import urlparse
 
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, Security, UploadFile
+import asyncio
+
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, Security, UploadFile, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.security import APIKeyHeader
@@ -142,6 +144,65 @@ def stop_group(group_name: str) -> list[dict]:
     if group_name == "_ungrouped_":
         group_name = ""
     return manager.stop_group(group_name)
+
+
+def _cdp_proxy_url(request: Request, profile_id: str) -> str:
+    scheme = "wss" if request.url.scheme == "https" else "ws"
+    return f"{scheme}://{request.url.netloc}/ws/cdp/{profile_id}"
+
+
+@app.websocket("/ws/cdp/{profile_id}")
+async def cdp_ws_proxy(websocket: WebSocket, profile_id: str) -> None:
+    import websockets as _ws
+
+    cdp_url = await asyncio.to_thread(manager.get_profile_cdp_ws_url, profile_id)
+    await websocket.accept()
+    if not cdp_url:
+        await websocket.close(code=1008, reason="profile not running")
+        return
+
+    try:
+        async with _ws.connect(cdp_url) as chrome:
+            async def pump_in() -> None:
+                try:
+                    while True:
+                        msg = await websocket.receive()
+                        if msg["type"] == "websocket.disconnect":
+                            return
+                        text = msg.get("text")
+                        data = msg.get("bytes")
+                        if text is not None:
+                            await chrome.send(text)
+                        elif data is not None:
+                            await chrome.send(data)
+                except Exception:
+                    pass
+
+            async def pump_out() -> None:
+                try:
+                    async for msg in chrome:
+                        if isinstance(msg, str):
+                            await websocket.send_text(msg)
+                        else:
+                            await websocket.send_bytes(msg)
+                except Exception:
+                    pass
+
+            tasks = [asyncio.create_task(pump_in()), asyncio.create_task(pump_out())]
+            _, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+            for t in pending:
+                t.cancel()
+                try:
+                    await t
+                except (asyncio.CancelledError, Exception):
+                    pass
+    except Exception:
+        pass
+    finally:
+        try:
+            await websocket.close()
+        except Exception:
+            pass
 
 
 @app.post("/api/proxy/test")
@@ -474,13 +535,16 @@ def open_api_delete_profile_by_name(payload: dict) -> dict[str, bool]:
 
 
 @open_api.post("/profiles/{profile_id}/start", dependencies=[Depends(verify_open_api_key)], summary="启动浏览器配置")
-def open_api_start_profile(profile_id: str) -> dict:
+def open_api_start_profile(request: Request, profile_id: str) -> dict:
     try:
-        return manager.start_profile(profile_id)
+        result = manager.start_profile(profile_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if result.get("id"):
+        result["debug_url"] = _cdp_proxy_url(request, result["id"])
+    return result
 
 
 @open_api.post("/profiles/{profile_id}/stop", dependencies=[Depends(verify_open_api_key)], summary="停止浏览器配置")
@@ -489,6 +553,30 @@ def open_api_stop_profile(profile_id: str) -> dict:
         return manager.stop_profile(profile_id) or {"ok": True}
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@open_api.post(
+    "/profiles/create-and-start",
+    dependencies=[Depends(verify_open_api_key)],
+    summary="创建浏览器配置并启动（传 task_id 和 proxy URL）",
+)
+def open_api_create_and_start_profile(request: Request, payload: dict) -> dict:
+    task_id = str(payload.get("task_id") or "").strip()
+    proxy = str(payload.get("proxy") or "").strip()
+    engine = str(payload.get("engine") or "chrome").strip()
+    if not task_id:
+        raise HTTPException(status_code=400, detail="task_id 不能为空")
+    if not proxy:
+        raise HTTPException(status_code=400, detail="proxy 不能为空")
+    try:
+        result = manager.create_and_start_profile(task_id, proxy, engine)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if result.get("id"):
+        result["debug_url"] = _cdp_proxy_url(request, result["id"])
+    return result
 
 
 @open_api.get("/settings", dependencies=[Depends(verify_open_api_key)], summary="读取全局设置")
@@ -531,6 +619,41 @@ def open_api_test_proxy(payload: dict) -> dict:
         return manager.test_proxy(payload)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@open_api.post("/proxy/check-ip", dependencies=[Depends(verify_open_api_key)], summary="检测代理 IP 质量")
+def open_api_check_proxy_ip(payload: dict) -> dict:
+    import pycountry
+    from .services.network import normalize_proxy_config, resolve_geo_profile
+
+    proxy_url = str(payload.get("proxy") or "").strip()
+    if not proxy_url:
+        raise HTTPException(status_code=400, detail="proxy 不能为空")
+    try:
+        proxy = normalize_proxy_config(proxy_url)
+        geo = resolve_geo_profile(proxy, strict=True)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    country_code = geo.get("country_code") or ""
+    country_name = ""
+    if country_code:
+        try:
+            c = pycountry.countries.get(alpha_2=country_code)
+            country_name = c.name if c else country_code
+        except Exception:
+            country_name = country_code
+
+    return {
+        "ipAddress": geo.get("ip") or "",
+        "country": country_name,
+        "countryCode": country_code,
+        "city": geo.get("city") or "",
+        "lat": geo.get("latitude"),
+        "lon": geo.get("longitude"),
+        "timezone": geo.get("timezone") or "",
+        "isDataCenter": bool(geo.get("is_datacenter", False)),
+    }
 
 
 app.mount("/open-api", open_api)
