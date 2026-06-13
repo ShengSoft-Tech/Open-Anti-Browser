@@ -1,0 +1,4 @@
+# 这两个文件的 SHA-256 由 backend/_g.py 锁定校验，强制 LF 行尾，
+# 避免在 Windows 检出时 LF->CRLF 导致哈希不一致、构建失败。
+frontend/src/App.vue text eol=lf
+frontend/src/lib/openSourceNotice.js text eol=lf
