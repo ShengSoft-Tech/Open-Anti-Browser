@@ -14,16 +14,16 @@ from fastapi.security import APIKeyHeader
 from fastapi.staticfiles import StaticFiles
 
 from .browser_manager import BrowserManager
-from .config import FRONTEND_DIST_DIR
+from .config import BIND_HOST, FRONTEND_DIST_DIR
 from .runtime_control import get_backend_only_status, start_backend_only, stop_backend_only
 from .ui_bridge import request_exit_ui, request_pick_directory
 
 
 manager = BrowserManager()
-app = FastAPI(title="Open-Anti-Browser API", version="0.1.9")
+app = FastAPI(title="Open-Anti-Browser API", version="0.1.10")
 open_api = FastAPI(
     title="Open-Anti-Browser Open API",
-    version="0.1.9",
+    version="0.1.10",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
@@ -38,12 +38,25 @@ app.add_middleware(
 )
 
 
+def _public_host_base(request: Request) -> str:
+    # 调用地址优先展示安装时配置的监听地址（bind-host.txt / BIND_HOST），
+    # 而不是桌面壳固定走的 127.0.0.1，方便绑定 0.0.0.0 后从其他机器访问。
+    scheme = request.url.scheme
+    port = request.url.port
+    if BIND_HOST and BIND_HOST not in ("127.0.0.1", "localhost"):
+        host = BIND_HOST
+    else:
+        host = request.url.hostname or "127.0.0.1"
+    netloc = host if port is None else f"{host}:{port}"
+    return f"{scheme}://{netloc}"
+
+
 def _request_open_api_base_url(request: Request) -> str:
-    return f"{str(request.base_url).rstrip('/')}/open-api"
+    return f"{_public_host_base(request)}/open-api"
 
 
 def _request_manual_docs_url(request: Request) -> str:
-    return f"{str(request.base_url).rstrip('/')}?view=apiDocs"
+    return f"{_public_host_base(request)}?view=apiDocs"
 
 
 def verify_open_api_key(

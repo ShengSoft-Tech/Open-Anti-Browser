@@ -42,13 +42,20 @@ def clear_backend_only_state() -> None:
         pass
 
 
+def _display_host() -> str:
+    # 后端模式展示的调用地址，跟随安装时配置的监听地址。
+    if BIND_HOST and BIND_HOST not in ("127.0.0.1", "localhost"):
+        return BIND_HOST
+    return "127.0.0.1"
+
+
 def write_backend_only_state(pid: int, port: int) -> dict[str, Any]:
     payload = {
         "running": True,
         "pid": pid,
         "port": port,
-        "base_url": f"http://127.0.0.1:{port}/open-api",
-        "docs_url": f"http://127.0.0.1:{port}/open-api/docs",
+        "base_url": f"http://{_display_host()}:{port}/open-api",
+        "docs_url": f"http://{_display_host()}:{port}/open-api/docs",
     }
     _write_state_file(payload)
     return payload
@@ -81,15 +88,15 @@ def get_backend_only_status(default_port: int = 18000) -> dict[str, Any]:
             "running": False,
             "pid": None,
             "port": default_port,
-            "base_url": f"http://127.0.0.1:{default_port}/open-api",
-            "docs_url": f"http://127.0.0.1:{default_port}/open-api/docs",
+            "base_url": f"http://{_display_host()}:{default_port}/open-api",
+            "docs_url": f"http://{_display_host()}:{default_port}/open-api/docs",
         }
     return {
         "running": True,
         "pid": int(pid),
         "port": port,
-        "base_url": f"http://127.0.0.1:{port}/open-api",
-        "docs_url": f"http://127.0.0.1:{port}/open-api/docs",
+        "base_url": f"http://{_display_host()}:{port}/open-api",
+        "docs_url": f"http://{_display_host()}:{port}/open-api/docs",
     }
 
 
