@@ -226,13 +226,16 @@ class BrowserManager:
             with self._session_lock:
                 self.pending_starts.discard(profile_id)
 
-    def create_and_start_profile(self, task_id: str, proxy: str, engine: str = "chrome") -> dict[str, Any]:
+    def create_and_start_profile(self, task_id: str, proxy: str = "", engine: str = "chrome") -> dict[str, Any]:
         task_id = task_id.strip()
-        proxy = proxy.strip()
+        proxy = (proxy or "").strip()
         profiles = self.storage.load_profiles()
         if any(p.name == task_id for p in profiles):
             raise RuntimeError(f"task_id {task_id!r} 已存在")
-        saved = self.save_profile({"name": task_id, "engine": engine, "proxy": proxy})
+        payload: dict[str, Any] = {"name": task_id, "engine": engine}
+        if proxy:
+            payload["proxy"] = proxy
+        saved = self.save_profile(payload)
         result = self.start_profile(saved["id"])
         port = result.get("port")
         if port:

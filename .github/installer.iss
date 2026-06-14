@@ -47,3 +47,53 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExe}"; Tasks: desk
 
 [Run]
 Filename: "{app}\{#MyAppExe}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
+
+[UninstallDelete]
+Type: files; Name: "{app}\bind-host.txt"
+
+[Code]
+var
+  HostPage: TInputQueryWizardPage;
+
+{ Read /HOST=<addr> from the installer command line (for silent installs). }
+function GetHostParam(): String;
+var
+  i: Integer;
+  s: String;
+begin
+  Result := '';
+  for i := 1 to ParamCount do
+  begin
+    s := ParamStr(i);
+    if CompareText(Copy(s, 1, 6), '/HOST=') = 0 then
+      Result := Copy(s, 7, Length(s));
+  end;
+end;
+
+procedure InitializeWizard();
+var
+  def: String;
+begin
+  HostPage := CreateInputQueryPage(wpSelectDir,
+    'Server bind address',
+    'Which address should the local server listen on?',
+    'Enter 127.0.0.1 for local-only access, or 0.0.0.0 to allow access from other machines on the network. Saved to bind-host.txt in the install folder.');
+  HostPage.Add('Bind host:', False);
+  def := Trim(GetHostParam());
+  if def = '' then
+    def := '127.0.0.1';
+  HostPage.Values[0] := def;
+end;
+
+function ResolvedHost(): String;
+begin
+  Result := Trim(HostPage.Values[0]);
+  if Result = '' then
+    Result := '127.0.0.1';
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall then
+    SaveStringToFile(ExpandConstant('{app}\bind-host.txt'), ResolvedHost(), False);
+end;

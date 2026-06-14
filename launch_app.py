@@ -12,7 +12,7 @@ from pathlib import Path
 
 from uvicorn import Config, Server
 
-from backend.config import APP_ROOT, ASSETS_DIR, FRONTEND_DIST_DIR
+from backend.config import APP_ROOT, ASSETS_DIR, BIND_HOST, FRONTEND_DIST_DIR
 from backend.main import app
 from backend._g import _7 as _0x2f
 from backend.runtime_control import clear_backend_only_state, find_available_port as find_backend_port, write_backend_only_state
@@ -27,7 +27,7 @@ def find_available_port(preferred: int = 8000, span: int = 20) -> int:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             try:
-                sock.bind(("127.0.0.1", port))
+                sock.bind((BIND_HOST, port))
                 return port
             except OSError:
                 continue
@@ -63,7 +63,7 @@ def resolve_window_icon_path() -> Path | None:
 def build_server(port: int) -> tuple[Server, threading.Thread]:
     config = Config(
         app=app,
-        host="127.0.0.1",
+        host=BIND_HOST,
         port=port,
         log_level="warning",
         access_log=False,
@@ -115,7 +115,7 @@ def run_backend_only(port: int | None = None) -> int:
         server = Server(
             Config(
                 app=app,
-                host="127.0.0.1",
+                host=BIND_HOST,
                 port=target_port,
                 log_level="warning",
                 access_log=False,

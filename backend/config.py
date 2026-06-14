@@ -42,6 +42,32 @@ EXTENSIONS_DIR = APP_ROOT / "extensions"
 FRONTEND_DIST_DIR = RESOURCE_ROOT / "frontend" / "dist"
 ASSETS_DIR = RESOURCE_ROOT / "assets"
 ENGINES_DIR = RESOURCE_ROOT / "engines"
+BIND_HOST_MARKER = "bind-host.txt"
+
+
+def _exe_dir() -> Path:
+    if _is_packaged():
+        return Path(sys.executable).resolve().parent
+    return PROJECT_ROOT
+
+
+def _resolve_bind_host() -> str:
+    """本地服务监听地址。优先环境变量，其次安装目录的 bind-host.txt（安装时写入），默认仅本机。"""
+    override = os.environ.get("OPEN_ANTI_BROWSER_HOST")
+    if override and override.strip():
+        return override.strip()
+    try:
+        marker = _exe_dir() / BIND_HOST_MARKER
+        if marker.exists():
+            value = marker.read_text(encoding="utf-8").strip()
+            if value:
+                return value
+    except OSError:
+        pass
+    return "127.0.0.1"
+
+
+BIND_HOST = _resolve_bind_host()
 
 
 def _current_username() -> str:

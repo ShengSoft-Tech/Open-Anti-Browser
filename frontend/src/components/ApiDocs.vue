@@ -587,12 +587,12 @@ const endpoints = computed(() => [
     path: '/profiles/create-and-start',
     title: locale.value === 'en-US' ? 'Create a profile and start it' : '创建配置并启动',
     desc: locale.value === 'en-US'
-      ? 'Creates a profile from task_id and a proxy URL string, starts it, and returns debug_url (the CDP WebSocket proxy). Returns 409 when the task id is already running.'
-      : '用 task_id 和代理 URL 字符串创建配置并立即启动，返回 debug_url（CDP WebSocket 代理地址）；同名任务已在运行时返回 409。',
+      ? 'Creates a profile from task_id (proxy optional — omit for a direct connection), starts it, and returns debug_url (the CDP WebSocket proxy). Returns 409 when the task id already exists.'
+      : '用 task_id 创建配置并立即启动（proxy 可选，省略即直连），返回 debug_url（CDP WebSocket 代理地址）；同名任务已存在时返回 409。',
     params: [
       authParam.value,
       { name: 'task_id', position: copy.value.body, required: copy.value.yes, desc: locale.value === 'en-US' ? 'Unique task id, also used as the profile name' : '唯一任务标识，同时作为配置名称' },
-      { name: 'proxy', position: copy.value.body, required: copy.value.yes, desc: locale.value === 'en-US' ? 'Proxy URL string, e.g. http://user:pass@host:port' : '代理 URL 字符串，如 http://user:pass@host:port' },
+      { name: 'proxy', position: copy.value.body, required: copy.value.no, desc: locale.value === 'en-US' ? 'Proxy URL string, e.g. http://user:pass@host:port. Omit for a direct connection.' : '代理 URL 字符串，如 http://user:pass@host:port；省略即直连不使用代理。' },
       { name: 'engine', position: copy.value.body, required: copy.value.no, desc: locale.value === 'en-US' ? 'chrome / firefox, defaults to chrome' : 'chrome / firefox，默认 chrome' },
     ],
     request: `curl -X POST "${baseUrl.value}/profiles/create-and-start" \\

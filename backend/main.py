@@ -20,10 +20,10 @@ from .ui_bridge import request_exit_ui, request_pick_directory
 
 
 manager = BrowserManager()
-app = FastAPI(title="Open-Anti-Browser API", version="0.1.8")
+app = FastAPI(title="Open-Anti-Browser API", version="0.1.9")
 open_api = FastAPI(
     title="Open-Anti-Browser Open API",
-    version="0.1.8",
+    version="0.1.9",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
@@ -558,7 +558,7 @@ def open_api_stop_profile(profile_id: str) -> dict:
 @open_api.post(
     "/profiles/create-and-start",
     dependencies=[Depends(verify_open_api_key)],
-    summary="创建浏览器配置并启动（传 task_id 和 proxy URL）",
+    summary="创建浏览器配置并启动（传 task_id；proxy 可选，省略即直连）",
 )
 def open_api_create_and_start_profile(request: Request, payload: dict) -> dict:
     task_id = str(payload.get("task_id") or "").strip()
@@ -566,8 +566,6 @@ def open_api_create_and_start_profile(request: Request, payload: dict) -> dict:
     engine = str(payload.get("engine") or "chrome").strip()
     if not task_id:
         raise HTTPException(status_code=400, detail="task_id 不能为空")
-    if not proxy:
-        raise HTTPException(status_code=400, detail="proxy 不能为空")
     try:
         result = manager.create_and_start_profile(task_id, proxy, engine)
     except RuntimeError as exc:
