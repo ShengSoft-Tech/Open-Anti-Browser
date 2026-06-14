@@ -525,7 +525,7 @@ const endpoints = computed(() => [
     request: `curl -X POST "${baseUrl.value}/profiles" \\
   -H "X-API-Key: ${apiKey.value}" \\
   -H "Content-Type: application/json" \\
-  -d "{\\"name\\":\\"Test Chrome\\",\\"engine\\":\\"chrome\\",\\"proxy\\":{\\"type\\":\\"none\\"}}"`,
+  -d "{\\"name\\":\\"Test Chrome\\",\\"engine\\":\\"chrome\\",\\"args\\":[\\"--enable-unsafe-swiftshader\\",\\"--fingerprint-hardware-concurrency=16\\"],\\"proxy\\":{\\"type\\":\\"none\\"}}"`,
     response: JSON.stringify({
       id: profileId.value,
       name: 'Test Chrome',
