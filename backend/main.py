@@ -20,10 +20,10 @@ from .ui_bridge import request_exit_ui, request_pick_directory
 
 
 manager = BrowserManager()
-app = FastAPI(title="Open-Anti-Browser API", version="0.1.10")
+app = FastAPI(title="Open-Anti-Browser API", version="0.1.11")
 open_api = FastAPI(
     title="Open-Anti-Browser Open API",
-    version="0.1.10",
+    version="0.1.11",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
@@ -162,6 +162,17 @@ def stop_group(group_name: str) -> list[dict]:
 def _cdp_proxy_url(request: Request, profile_id: str) -> str:
     scheme = "wss" if request.url.scheme == "https" else "ws"
     return f"{scheme}://{request.url.netloc}/ws/cdp/{profile_id}"
+
+
+def _attach_ws_url(request: Request, result: dict) -> dict:
+    # 凡是带调试端口的返回值，都补上 CDP WebSocket 代理地址（puppeteer/playwright 直接连这个）。
+    profile_id = result.get("id")
+    port = result.get("debug_port") or result.get("port")
+    if profile_id and port:
+        ws_url = _cdp_proxy_url(request, str(profile_id))
+        result["ws_url"] = ws_url
+        result["debug_url"] = ws_url
+    return result
 
 
 @app.websocket("/ws/cdp/{profile_id}")
@@ -516,8 +527,16 @@ def open_api_health() -> dict[str, str]:
 
 
 @open_api.get("/profiles", dependencies=[Depends(verify_open_api_key)], summary="获取浏览器配置列表")
-def open_api_list_profiles() -> list[dict]:
-    return manager.list_profiles()
+def open_api_list_profiles(request: Request) -> list[dict]:
+    items = manager.list_profiles()
+    for item in items:
+        runtime = item.get("runtime") or {}
+        port = runtime.get("remote_debugging_port")
+        if item.get("id") and port:
+            item["debug_port"] = port
+            item["port"] = port
+            _attach_ws_url(request, item)
+    return items
 
 
 @open_api.post("/profiles", dependencies=[Depends(verify_open_api_key)], summary="创建或更新浏览器配置")
@@ -555,8 +574,7 @@ def open_api_start_profile(request: Request, profile_id: str) -> dict:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    if result.get("id"):
-        result["debug_url"] = _cdp_proxy_url(request, result["id"])
+    _attach_ws_url(request, result)
     return result
 
 
@@ -571,22 +589,22 @@ def open_api_stop_profile(profile_id: str) -> dict:
 @open_api.post(
     "/profiles/create-and-start",
     dependencies=[Depends(verify_open_api_key)],
-    summary="创建浏览器配置并启动（传 task_id；proxy 可选，省略即直连）",
+    summary="创建浏览器配置并启动（传 task_id；proxy 可选，省略即直连；args 可选，追加启动参数）",
 )
 def open_api_create_and_start_profile(request: Request, payload: dict) -> dict:
     task_id = str(payload.get("task_id") or "").strip()
     proxy = str(payload.get("proxy") or "").strip()
     engine = str(payload.get("engine") or "chrome").strip()
+    args = payload.get("args")
     if not task_id:
         raise HTTPException(status_code=400, detail="task_id 不能为空")
     try:
-        result = manager.create_and_start_profile(task_id, proxy, engine)
+        result = manager.create_and_start_profile(task_id, proxy, engine, args)
     except RuntimeError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    if result.get("id"):
-        result["debug_url"] = _cdp_proxy_url(request, result["id"])
+    _attach_ws_url(request, result)
     return result
 
 

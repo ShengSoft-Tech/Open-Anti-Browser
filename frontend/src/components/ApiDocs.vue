@@ -210,6 +210,11 @@ const store = useProfileStore()
 
 const apiInfo = computed(() => store.apiInfo)
 const baseUrl = computed(() => apiInfo.value?.current_base_url || 'http://127.0.0.1:8000/open-api')
+// CDP WebSocket 代理挂在根路径（非 /open-api 下），把 http(s) 调用地址转成 ws(s) 同源地址
+const wsBaseUrl = computed(() => {
+  const origin = (baseUrl.value || 'http://127.0.0.1:8000/open-api').replace(/\/open-api\/?$/, '')
+  return origin.replace(/^http/, 'ws')
+})
 const apiKey = computed(() => apiInfo.value?.api_key || 'YOUR_API_KEY')
 const profileId = computed(() => store.profiles?.[0]?.id || 'PROFILE_ID')
 
@@ -222,7 +227,7 @@ const copy = computed(() => {
       apiKey: 'API Key',
       authHeader: 'Required request header',
       debugPort: 'Launch response',
-      debugPortDesc: 'The start API returns port, debug_port, debug_url and runtime.remote_debugging_port. Firefox also returns marionette_port, selenium_port and runtime.marionette_port',
+      debugPortDesc: 'The start APIs return debug_port (Chrome DevTools port) plus ws_url and debug_url — the CDP WebSocket proxy you connect automation to — and runtime.remote_debugging_port. Firefox also returns marionette_port, selenium_port and runtime.marionette_port',
       quickStartTitle: 'Quick start',
       quickStartDesc: 'Call the API, launch a browser profile, then connect your automation client to the returned port',
       quickSteps: [
@@ -245,7 +250,7 @@ const copy = computed(() => {
       automationTitle: 'Browser automation examples',
       automationDesc: 'Use the port returned by the start API to control the launched browser instance',
       chromeAutomationTitle: 'Patchright for Chrome',
-      chromeAutomationDesc: 'Patchright follows the Playwright style API and connects to the Chromium debugging port returned by the API',
+      chromeAutomationDesc: 'Patchright follows the Playwright style API. Connect over CDP using the ws_url returned by the API, which works locally and from remote machines',
       firefoxAutomationTitle: 'RuyiPage / Selenium for Firefox',
       firefoxAutomationDesc: 'RuyiPage attaches to the port returned by the API. Selenium connects through GeckoDriver with selenium_port or marionette_port',
       yes: 'Yes',
@@ -259,7 +264,7 @@ const copy = computed(() => {
         healthTitle: 'Check API status',
         healthDesc: 'Returns whether the local Open API service is alive',
         listTitle: 'List browser profiles',
-        listDesc: 'Returns all saved Chrome and Firefox profiles, including runtime status',
+        listDesc: 'Returns all saved Chrome and Firefox profiles with runtime status; running profiles also include debug_port and ws_url',
         createTitle: 'Create or update a browser profile',
         createDesc: 'Creates a profile when id is new, or updates the profile when id already exists',
         startTitle: 'Start a browser profile',
@@ -285,7 +290,7 @@ const copy = computed(() => {
     apiKey: 'API Key',
     authHeader: '请求必须携带的请求头',
     debugPort: '启动接口返回',
-    debugPortDesc: '启动接口会返回 port、debug_port、debug_url 和 runtime.remote_debugging_port，Firefox 还会返回 marionette_port、selenium_port 和 runtime.marionette_port',
+    debugPortDesc: '启动类接口会返回 debug_port（Chrome 调试端口）以及 ws_url、debug_url（自动化连接用的 CDP WebSocket 代理地址）和 runtime.remote_debugging_port，Firefox 还会返回 marionette_port、selenium_port 和 runtime.marionette_port',
     quickStartTitle: '快速流程',
     quickStartDesc: '先查配置，再启动浏览器，最后用返回的端口接入自动化工具',
     quickSteps: [
@@ -308,7 +313,7 @@ const copy = computed(() => {
     automationTitle: '浏览器自动化示例',
     automationDesc: '启动接口返回的 port 就是后续自动化连接要用的端口',
     chromeAutomationTitle: 'Chrome 使用 Patchright',
-    chromeAutomationDesc: 'Patchright 用法和 Playwright 风格一致，使用返回端口连接 Chrome 的 CDP 调试地址',
+    chromeAutomationDesc: 'Patchright 用法和 Playwright 风格一致，直接用返回的 ws_url 连接 CDP，本机和远程机器都能用',
     firefoxAutomationTitle: 'Firefox 使用 RuyiPage / Selenium',
     firefoxAutomationDesc: 'RuyiPage 使用启动接口返回的 port 连接内核，Selenium 通过 GeckoDriver 使用 selenium_port 或 marionette_port 连接',
     yes: '是',
@@ -322,7 +327,7 @@ const copy = computed(() => {
       healthTitle: '检查 API 状态',
       healthDesc: '确认本地 Open API 服务是否可用',
       listTitle: '获取浏览器配置列表',
-      listDesc: '返回所有 Chrome 和 Firefox 配置，并带上当前运行状态',
+      listDesc: '返回所有 Chrome 和 Firefox 配置及当前运行状态；运行中的配置还会带 debug_port 和 ws_url',
       createTitle: '创建或更新浏览器配置',
       createDesc: 'id 不存在时创建配置，id 已存在时更新配置',
       startTitle: '启动浏览器配置',
@@ -356,6 +361,7 @@ const chromeProfileFields = computed(() => {
       { name: 'group', required: copy.value.no, desc: 'Optional profile group' },
       { name: 'remark', required: copy.value.no, desc: 'Optional note for this profile' },
       { name: 'engine', required: copy.value.yes, desc: 'Use chrome' },
+      { name: 'args', required: copy.value.no, desc: 'Convenience: extra launch args as a list or space-separated string, merged into chrome.launch_args (e.g. --enable-unsafe-swiftshader, --fingerprint-hardware-concurrency=16)' },
       { name: 'proxy.type / host / port / username / password', required: copy.value.no, desc: 'Proxy object for this profile' },
       { name: 'storage.root_dir', required: copy.value.no, desc: 'Custom user-data root for this profile' },
       { name: 'chrome.fingerprint.seed', required: copy.value.no, desc: 'Fixed fingerprint id. Leave empty to auto-generate once on save' },
@@ -380,6 +386,7 @@ const chromeProfileFields = computed(() => {
     { name: 'group', required: copy.value.no, desc: '可选分组' },
     { name: 'remark', required: copy.value.no, desc: '备注说明' },
     { name: 'engine', required: copy.value.yes, desc: '固定填 chrome' },
+    { name: 'args', required: copy.value.no, desc: '便捷字段：额外启动参数，数组或空格分隔字符串，会并入 chrome.launch_args（如 --enable-unsafe-swiftshader、--fingerprint-hardware-concurrency=16）' },
     { name: 'proxy.type / host / port / username / password', required: copy.value.no, desc: '当前配置要使用的代理对象' },
     { name: 'storage.root_dir', required: copy.value.no, desc: '当前配置单独使用的用户目录根路径' },
     { name: 'chrome.fingerprint.seed', required: copy.value.no, desc: '固定 fingerprint id，留空时保存时自动生成一个固定值' },
@@ -406,6 +413,7 @@ const firefoxProfileFields = computed(() => {
       { name: 'group', required: copy.value.no, desc: 'Optional profile group' },
       { name: 'remark', required: copy.value.no, desc: 'Optional note for this profile' },
       { name: 'engine', required: copy.value.yes, desc: 'Use firefox' },
+      { name: 'args', required: copy.value.no, desc: 'Convenience: extra launch args as a list or space-separated string, merged into firefox.launch_args' },
       { name: 'proxy.type / host / port / username / password', required: copy.value.no, desc: 'Proxy object for this profile' },
       { name: 'storage.root_dir', required: copy.value.no, desc: 'Custom user-data root for this profile' },
       { name: 'firefox.fingerprint.auto_timezone', required: copy.value.no, desc: 'Resolve language and timezone from IP automatically' },
@@ -435,6 +443,7 @@ const firefoxProfileFields = computed(() => {
     { name: 'group', required: copy.value.no, desc: '可选分组' },
     { name: 'remark', required: copy.value.no, desc: '备注说明' },
     { name: 'engine', required: copy.value.yes, desc: '固定填 firefox' },
+    { name: 'args', required: copy.value.no, desc: '便捷字段：额外启动参数，数组或空格分隔字符串，会并入 firefox.launch_args' },
     { name: 'proxy.type / host / port / username / password', required: copy.value.no, desc: '当前配置要使用的代理对象' },
     { name: 'storage.root_dir', required: copy.value.no, desc: '当前配置单独使用的用户目录根路径' },
     { name: 'firefox.fingerprint.auto_timezone', required: copy.value.no, desc: '是否按 IP 自动解析语言和时区' },
@@ -478,10 +487,20 @@ const endpoints = computed(() => [
     response: JSON.stringify([
       {
         id: profileId.value,
-        name: 'Example Profile',
+        name: 'Running Profile',
+        engine: 'chrome',
+        status: 'running',
+        port: 9222,
+        debug_port: 9222,
+        ws_url: `${wsBaseUrl.value}/ws/cdp/${profileId.value}`,
+        debug_url: `${wsBaseUrl.value}/ws/cdp/${profileId.value}`,
+        runtime: { remote_debugging_port: 9222 },
+      },
+      {
+        id: 'STOPPED_PROFILE_ID',
+        name: 'Stopped Profile',
         engine: 'chrome',
         status: 'stopped',
-        port: null,
         runtime: null,
       },
     ], null, 2),
@@ -497,6 +516,7 @@ const endpoints = computed(() => [
       { name: 'name', position: copy.value.body, required: copy.value.no, desc: locale.value === 'en-US' ? 'Profile name, auto-numbered when empty' : '配置名称，留空会自动按序号生成' },
       { name: 'group / remark', position: copy.value.body, required: copy.value.no, desc: locale.value === 'en-US' ? 'Optional group and remark fields' : '可选分组和备注' },
       { name: 'engine', position: copy.value.body, required: copy.value.yes, desc: 'chrome / firefox' },
+      { name: 'args', position: copy.value.body, required: copy.value.no, desc: locale.value === 'en-US' ? 'Extra launch args as a list or space-separated string, merged into the active engine launch_args' : '额外启动参数，数组或空格分隔字符串，会并入对应引擎的 launch_args' },
       { name: 'proxy', position: copy.value.body, required: copy.value.no, desc: locale.value === 'en-US' ? 'Proxy object: type, host, port, username, password' : '代理对象，包含 type、host、port、username、password' },
       { name: 'storage.root_dir', position: copy.value.body, required: copy.value.no, desc: locale.value === 'en-US' ? 'Custom user-data root for this profile' : '当前配置单独使用的用户目录根路径' },
       { name: 'chrome.*', position: copy.value.body, required: copy.value.no, desc: locale.value === 'en-US' ? 'Chrome fingerprint, startup, args and extension override fields listed below' : 'Chrome 的指纹、启动参数、扩展禁用字段见下方完整字段表' },
@@ -529,12 +549,10 @@ const endpoints = computed(() => [
       status: 'running',
       port: 9222,
       debug_port: 9222,
-      debug_url: 'http://127.0.0.1:9222',
-      marionette_port: 2828,
-      selenium_port: 2828,
+      ws_url: `${wsBaseUrl.value}/ws/cdp/${profileId.value}`,
+      debug_url: `${wsBaseUrl.value}/ws/cdp/${profileId.value}`,
       runtime: {
         remote_debugging_port: 9222,
-        marionette_port: 2828,
         resolved_ip: '203.0.113.10',
         resolved_timezone: 'Asia/Tokyo',
         resolved_language: 'ja-JP',
@@ -587,25 +605,28 @@ const endpoints = computed(() => [
     path: '/profiles/create-and-start',
     title: locale.value === 'en-US' ? 'Create a profile and start it' : '创建配置并启动',
     desc: locale.value === 'en-US'
-      ? 'Creates a profile from task_id (proxy optional — omit for a direct connection), starts it, and returns debug_url (the CDP WebSocket proxy). Returns 409 when the task id already exists.'
-      : '用 task_id 创建配置并立即启动（proxy 可选，省略即直连），返回 debug_url（CDP WebSocket 代理地址）；同名任务已存在时返回 409。',
+      ? 'Creates a profile from task_id (proxy optional — omit for a direct connection; args optional — extra launch args), starts it, and returns ws_url / debug_url (the CDP WebSocket proxy). Returns 409 when the task id already exists.'
+      : '用 task_id 创建配置并立即启动（proxy 可选，省略即直连；args 可选，追加启动参数），返回 ws_url / debug_url（CDP WebSocket 代理地址）；同名任务已存在时返回 409。',
     params: [
       authParam.value,
       { name: 'task_id', position: copy.value.body, required: copy.value.yes, desc: locale.value === 'en-US' ? 'Unique task id, also used as the profile name' : '唯一任务标识，同时作为配置名称' },
       { name: 'proxy', position: copy.value.body, required: copy.value.no, desc: locale.value === 'en-US' ? 'Proxy URL string, e.g. http://user:pass@host:port. Omit for a direct connection.' : '代理 URL 字符串，如 http://user:pass@host:port；省略即直连不使用代理。' },
       { name: 'engine', position: copy.value.body, required: copy.value.no, desc: locale.value === 'en-US' ? 'chrome / firefox, defaults to chrome' : 'chrome / firefox，默认 chrome' },
+      { name: 'args', position: copy.value.body, required: copy.value.no, desc: locale.value === 'en-US' ? 'Extra launch args as a list or space-separated string, e.g. ["--enable-unsafe-swiftshader"]' : '额外启动参数，数组或空格分隔字符串，如 ["--enable-unsafe-swiftshader"]' },
     ],
     request: `curl -X POST "${baseUrl.value}/profiles/create-and-start" \\
   -H "X-API-Key: ${apiKey.value}" \\
   -H "Content-Type: application/json" \\
-  -d "{\\"task_id\\":\\"task-001\\",\\"proxy\\":\\"http://user:pass@127.0.0.1:7890\\",\\"engine\\":\\"chrome\\"}"`,
+  -d "{\\"task_id\\":\\"task-001\\",\\"proxy\\":\\"http://user:pass@127.0.0.1:7890\\",\\"engine\\":\\"chrome\\",\\"args\\":[\\"--enable-unsafe-swiftshader\\",\\"--fingerprint-hardware-concurrency=16\\"]}"`,
     response: JSON.stringify({
       id: profileId.value,
       name: 'task-001',
       engine: 'chrome',
       status: 'running',
       port: 9222,
-      debug_url: `ws://127.0.0.1:8000/ws/cdp/${profileId.value}`,
+      debug_port: 9222,
+      ws_url: `${wsBaseUrl.value}/ws/cdp/${profileId.value}`,
+      debug_url: `${wsBaseUrl.value}/ws/cdp/${profileId.value}`,
     }, null, 2),
   },
   {
@@ -818,10 +839,10 @@ PROFILE_ID = "${profileId.value}"
 
 headers = {"X-API-Key": API_KEY}
 result = requests.post(f"{BASE_URL}/profiles/{PROFILE_ID}/start", headers=headers).json()
-port = result["port"]
+ws_url = result["ws_url"]  # CDP WebSocket proxy, works locally and from remote machines
 
 with sync_playwright() as p:
-    browser = p.chromium.connect_over_cdp(f"http://127.0.0.1:{port}")
+    browser = p.chromium.connect_over_cdp(ws_url)
     context = browser.contexts[0] if browser.contexts else browser.new_context()
     page = context.pages[0] if context.pages else context.new_page()
     page.goto("https://browserleaks.com/client-hints")
