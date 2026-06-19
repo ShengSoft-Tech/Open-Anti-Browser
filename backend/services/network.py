@@ -499,12 +499,17 @@ def resolve_geo_profile(
     proxy: dict[str, Any] | None = None,
     auto_timezone: bool = True,
     strict: bool = False,
+    probe_proxy_url: str | None = None,
 ) -> dict[str, Any]:
     geo_profile = dict(DEFAULT_GEO_PROFILE)
     if not auto_timezone:
         return geo_profile
 
-    request_proxy = proxy["request_proxy"] if proxy else None
+    # probe_proxy_url（如本地转发 bridge 的无凭据本地口）优先于 request_proxy：
+    # 含 @:/ 等特殊字符的凭据经 request_proxy 被 quote(safe='') 重度百分号编码后塞 curl_cffi 时，
+    # 探测会失灵、绕过代理退回探到本机 IP；改走 bridge（原始凭据 base64 进 Proxy-Authorization）
+    # 则与浏览器同一出口 IP，自检时区/语言与实际出口一致。
+    request_proxy = probe_proxy_url or (proxy["request_proxy"] if proxy else None)
     session = create_http_session(request_proxy)
     error_messages: list[str] = []
     try:

@@ -34,11 +34,25 @@ def launch_chrome_profile(
 
     proxy_config = proxy_to_profile_proxy(profile.proxy.model_dump(mode="json"))
     chrome_fp = profile.chrome.fingerprint
+
+    # 账号代理：先起本地转发 bridge（剥离传入 Proxy-Auth、注入正确的 Basic 原始凭据再转发上游）。
+    # 浏览器与 geo 自检都经它出网，确保自检到的时区/语言与实际出口 IP 一致。
+    proxy_bridge = None
+    browser_proxy = proxy_config["server"] if proxy_config else None
+    if proxy_config and proxy_config["username"] is not None:
+        if proxy_config["scheme"] not in ("http", "https"):
+            raise ValueError("Chrome 账号代理目前仅支持 http/https。")
+        proxy_bridge = LocalHttpProxyBridge(proxy_config).start()
+        browser_proxy = proxy_bridge.local_proxy
+
     try:
+        # geo 自检经 bridge 出网（probe_proxy_url）：修复含特殊字符凭据经 request_proxy 塞 curl_cffi
+        # 时探测失灵、退回探到本机 IP 的问题。无 bridge（无账号代理）时回退 request_proxy。
         geo_profile = resolve_geo_profile(
             proxy_config,
             chrome_fp.auto_timezone,
             strict=False,
+            probe_proxy_url=proxy_bridge.local_proxy if proxy_bridge else None,
         )
     except Exception as exc:
         geo_profile = fallback_geo_profile(exc)
@@ -80,14 +94,6 @@ def launch_chrome_profile(
         extension_arg = ",".join(enabled_extensions)
         _upsert_arg(launch_args, "--disable-extensions-except", extension_arg)
         _upsert_arg(launch_args, "--load-extension", extension_arg)
-
-    proxy_bridge = None
-    browser_proxy = proxy_config["server"] if proxy_config else None
-    if proxy_config and proxy_config["username"] is not None:
-        if proxy_config["scheme"] not in ("http", "https"):
-            raise ValueError("Chrome 账号代理目前仅支持 http/https。")
-        proxy_bridge = LocalHttpProxyBridge(proxy_config).start()
-        browser_proxy = proxy_bridge.local_proxy
 
     if browser_proxy:
         _upsert_arg(launch_args, "--proxy-server", browser_proxy)
