@@ -59,7 +59,7 @@ jobs:
 
           New-Item -ItemType Directory -Force -Path engines | Out-Null
           Fetch-Engine `
-            "https://github.com/adryfish/fingerprint-chromium/releases/download/144.0.7559.132/ungoogled-chromium_144.0.7559.132-1.1_windows_x64.zip" `
+            "https://github.com/adryfish/fingerprint-chromium/releases/download/148.0.7778.215/ungoogled-chromium_148.0.7778.215-1.1_windows_x64.zip" `
             "chrome.zip" "chrome.exe" "engines/chrome"
           Fetch-Engine `
             "https://github.com/LoseNine/ruyipage/releases/download/151-ruyi/firefox-151.0a1.en-US.win64.zip" `

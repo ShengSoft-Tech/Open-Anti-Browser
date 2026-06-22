@@ -91,7 +91,7 @@ DEFAULT_FIREFOX_WEBRTC_BLOCK_EXTENSION = (
 
 CHROME_INSTALLER_URL = (
     "https://github.com/adryfish/fingerprint-chromium/releases/download/"
-    "144.0.7559.132/ungoogled-chromium_144.0.7559.132-1.1_installer_x64.exe"
+    "148.0.7778.215/ungoogled-chromium_148.0.7778.215-1.1_installer_x64.exe"
 )
 FIREFOX_INSTALLER_URL = (
     "https://github.com/LoseNine/ruyipage/releases/download/151-ruyi/"
@@ -100,11 +100,11 @@ FIREFOX_INSTALLER_URL = (
 
 ENGINE_METADATA = {
     "chrome": {
-        "name": "Fingerprint Chromium 144",
+        "name": "Fingerprint Chromium 148",
         "default_executable": str(DEFAULT_CHROME_EXECUTABLE),
         "system_executable": str(SYSTEM_CHROME_EXECUTABLE),
         "installer_url": CHROME_INSTALLER_URL,
-        "download_name": "fingerprint-chromium-144-installer.exe",
+        "download_name": "fingerprint-chromium-148-installer.exe",
         "engine_dir": "chrome",
         "bundle_dir": str(ENGINES_DIR / "chrome"),
     },

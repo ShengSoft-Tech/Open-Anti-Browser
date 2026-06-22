@@ -313,7 +313,7 @@ export default {
     userDataRootPlaceholder: 'Example D:\\BrowserData',
     userDataRootTip: 'The app will automatically create separate chrome and firefox folders underneath.',
     chromeTitle: 'Chrome fingerprint engine',
-    chromeDesc: 'Chromium 144 is bundled with the app.',
+    chromeDesc: 'Chromium 148 is bundled with the app.',
     firefoxTitle: 'Firefox fingerprint engine',
     firefoxDesc: 'Firefox 151 is bundled with the app.',
     browserPath: 'Browser path',

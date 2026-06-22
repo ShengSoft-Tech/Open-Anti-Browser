@@ -313,7 +313,7 @@ export default {
     userDataRootPlaceholder: '例如 D:\\BrowserData',
     userDataRootTip: '实际使用时会自动在这里再分成 chrome 和 firefox 两个文件夹',
     chromeTitle: 'Chrome 指纹内核',
-    chromeDesc: '程序内置 Chromium 144',
+    chromeDesc: '程序内置 Chromium 148',
     firefoxTitle: 'Firefox 指纹内核',
     firefoxDesc: '程序内置 Firefox 151',
     browserPath: '浏览器路径',
