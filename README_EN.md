@@ -87,10 +87,10 @@ You are welcome to join the QQ group to share usage tips, report issues, and exc
 
 ## Engine sources
 
-### Chromium 148
+### Chromium 149
 
 - Project: [adryfish/fingerprint-chromium](https://github.com/adryfish/fingerprint-chromium)
-- Bundled version used by this project: Chromium 148
+- Bundled version used by this project: Chromium 149
 
 ### Firefox 151
 
