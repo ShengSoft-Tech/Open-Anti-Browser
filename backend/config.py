@@ -91,7 +91,7 @@ DEFAULT_FIREFOX_WEBRTC_BLOCK_EXTENSION = (
 
 CHROME_INSTALLER_URL = (
     "https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases/download/"
-    "kernel-149.0.7827.114/ungoogled-chromium_149.0.7827.114-1.1_installer_x64.exe"
+    "kernel-149.0.7827.114-1.2/ungoogled-chromium_149.0.7827.114-1.2_installer_x64.exe"
 )
 FIREFOX_INSTALLER_URL = (
     "https://github.com/LoseNine/ruyipage/releases/download/151-ruyi/"
@@ -104,7 +104,7 @@ ENGINE_METADATA = {
         "default_executable": str(DEFAULT_CHROME_EXECUTABLE),
         "system_executable": str(SYSTEM_CHROME_EXECUTABLE),
         "installer_url": CHROME_INSTALLER_URL,
-        "download_name": "fingerprint-chromium-149-installer.exe",
+        "download_name": "fingerprint-chromium-149-1.2-installer.exe",
         "engine_dir": "chrome",
         "bundle_dir": str(ENGINES_DIR / "chrome"),
     },
