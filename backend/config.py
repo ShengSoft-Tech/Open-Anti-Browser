@@ -89,9 +89,20 @@ DEFAULT_FIREFOX_WEBRTC_BLOCK_EXTENSION = (
     ASSETS_DIR / "firefox-extensions" / "jid1-5Fs7iTLscUaZBgwr@jetpack.xpi"
 )
 
-CHROME_INSTALLER_URL = (
+# Chrome kernel engine assets. Single source of truth for BOTH the runtime installer
+# download AND the CI engine-bundle fetch — .github/workflows/build-release.yml reads
+# CHROME_ENGINE_ZIP_URL from here instead of hardcoding a kernel URL. The -1.2 revision
+# adds patch 020 (speech-synthesis Google voices / browser_name "Chrome" fix); assets
+# live on the kernel-149.0.7827.114 release.
+_CHROME_KERNEL_BASE = (
     "https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases/download/"
-    "kernel-149.0.7827.114/ungoogled-chromium_149.0.7827.114-1.1_installer_x64.exe"
+    "kernel-149.0.7827.114"
+)
+CHROME_INSTALLER_URL = (
+    f"{_CHROME_KERNEL_BASE}/ungoogled-chromium_149.0.7827.114-1.2_installer_x64.exe"
+)
+CHROME_ENGINE_ZIP_URL = (
+    f"{_CHROME_KERNEL_BASE}/ungoogled-chromium_149.0.7827.114-1.2_windows_x64.zip"
 )
 FIREFOX_INSTALLER_URL = (
     "https://github.com/LoseNine/ruyipage/releases/download/151-ruyi/"
@@ -104,7 +115,7 @@ ENGINE_METADATA = {
         "default_executable": str(DEFAULT_CHROME_EXECUTABLE),
         "system_executable": str(SYSTEM_CHROME_EXECUTABLE),
         "installer_url": CHROME_INSTALLER_URL,
-        "download_name": "fingerprint-chromium-149-installer.exe",
+        "download_name": "fingerprint-chromium-149-1.2-installer.exe",
         "engine_dir": "chrome",
         "bundle_dir": str(ENGINES_DIR / "chrome"),
     },

@@ -58,9 +58,11 @@ jobs:
           }
 
           New-Item -ItemType Directory -Force -Path engines | Out-Null
-          Fetch-Engine `
-            "https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases/download/kernel-149.0.7827.114/ungoogled-chromium_149.0.7827.114-1.1_windows_x64.zip" `
-            "chrome.zip" "chrome.exe" "engines/chrome"
+          # Chrome kernel URL comes from backend/config.py (single source of truth) — no hardcoded kernel version here.
+          $chromeZipUrl = (python -c "from backend.config import CHROME_ENGINE_ZIP_URL; print(CHROME_ENGINE_ZIP_URL)").Trim()
+          if (-not $chromeZipUrl) { throw "CHROME_ENGINE_ZIP_URL is empty from backend.config" }
+          Write-Host "Chrome kernel zip (from config.py): $chromeZipUrl"
+          Fetch-Engine $chromeZipUrl "chrome.zip" "chrome.exe" "engines/chrome"
           Fetch-Engine `
             "https://github.com/LoseNine/ruyipage/releases/download/151-ruyi/firefox-151.0a1.en-US.win64.zip" `
             "firefox.zip" "firefox.exe" "engines/firefox"
