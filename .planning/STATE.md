@@ -4,15 +4,15 @@ milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 1
 current_phase_name: 后端跨平台基础适配
-status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-07-24T20:20:00.623Z"
-last_activity: 2026-07-23
-last_activity_desc: ROADMAP.md created for milestone v0.2 (6 phases, 22 requirements mapped)
+status: ready_to_execute
+stopped_at: Phase 1 planned (4 plans, 3 waves)
+last_updated: "2026-07-24T21:30:00.000Z"
+last_activity: 2026-07-24
+last_activity_desc: Phase 1 planned — 4 PLAN.md created, checker passed, all 17 items covered
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
+  total_plans: 4
   completed_plans: 0
   percent: 0
 ---
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 1 of 6 (后端跨平台基础适配)
-Plan: — of — (not yet planned)
-Status: Roadmap created — ready to plan Phase 1
-Last activity: 2026-07-23 — ROADMAP.md created for milestone v0.2 (6 phases, 22 requirements mapped)
+Plan: 0 of 4 (planned, ready to execute)
+Status: Ready to execute — Phase 1 planned (4 plans in 3 waves, checker passed)
+Last activity: 2026-07-24 — Phase 1 planned: 4 PLAN.md created, verification passed, requirements/decision coverage 17/17
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -85,6 +85,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-24T20:20:00.617Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-backend-cross-platform/01-CONTEXT.md
+Last session: 2026-07-24T21:30:00.000Z
+Stopped at: Phase 1 planned (4 plans, 3 waves) — ready for /gsd-execute-phase 1
+Resume file: .planning/phases/01-backend-cross-platform/01-01-PLAN.md

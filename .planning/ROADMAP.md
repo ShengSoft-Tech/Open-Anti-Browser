@@ -7,6 +7,7 @@
 ## Phases
 
 **Phase Numbering:**
+
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
@@ -22,74 +23,100 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: 后端跨平台基础适配
+
 **Goal**: 后端在 macOS 上可以正常安装依赖、导入并启动(含纯后端模式),路径全部解析到 macOS 约定位置,同时 Windows 现行为字节级不变
 **Depends on**: Nothing (first phase)
 **Requirements**: XPLAT-01, XPLAT-02, XPLAT-03, XPLAT-04
 **Success Criteria** (what must be TRUE):
+
   1. macOS 上执行 `pip install -r requirements.txt` 直接成功,不因 pywin32 等 Windows-only 依赖报错(`sys_platform` 环境标记生效)
   2. 后端在 macOS 上可以正常导入与启动,不再因 `window_manager` 顶层 `import win32api` 崩溃;调用窗口排列相关 API 时返回"仅 Windows 支持"的错误提示
   3. macOS 冻结态下应用数据写入 `~/Library/Application Support/Open-Anti-Browser/`,Chrome 引擎默认可执行文件路径解析到 `Chromium.app/Contents/MacOS/Chromium`
   4. `--backend-only` 纯后端模式可在 macOS 上派生、通过 psutil 检活、并正常停止(`creationflags` 平台条件化,不再向 POSIX 传入 Windows 专属参数)
   5. Windows 上以上路径/导入/启动相关的现有行为与既有 unittest 套件保持字节级不变
+
 **Plans**: 4 plans
+**Wave 1**
+
 - [ ] 01-01-PLAN.md — macOS 可安装/可导入/可派生纵切(requirements 标记 + window_manager 条件导入 + runtime_control creationflags)[XPLAT-01/02/04]
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 01-02-PLAN.md — config.py 平台感知路径解析(macOS 可写根 + Chrome 引擎路径 + firefox 条目保留)[XPLAT-03]
 - [ ] 01-03-PLAN.md — 同步器启动平台门禁 + main.py os.startfile 核销 [XPLAT-02]
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 01-04-PLAN.md — 双 runner CI 测试 workflow(windows-latest 全量 + macos 实测范围)[XPLAT-01/02/03/04]
 
 ### Phase 2: macOS 内核构建与发布
+
 **Goal**: fingerprint-chromium 149.0.7827.114 的 macOS arm64 与 Intel x64 两个内核已在本地(`../fingerprint-chromium`)构建完成,并作为 kernel release 资产可供下载
 **Depends on**: Nothing (independent/parallel track — 本地构建发生在兄弟仓库,不阻塞 Phase 1)
 **Requirements**: KERNEL-01, KERNEL-02, KERNEL-03
 **Success Criteria** (what must be TRUE):
+
   1. macOS arm64 内核可从 kernel release(如 `kernel-149.0.7827.114`)下载,产物经 ditto 打包保留符号链接并附带 ad-hoc 签名
   2. 兄弟仓库已补齐 `downloads-macos-x64.ini`,Intel x64 内核在 arm64 Mac 上交叉编译产出,同样可从同一 kernel release 下载
   3. 两个内核资产在上传前都通过 file/lipo 架构验证(确认各自架构匹配)与本机启动冒烟测试,文件名包含明确架构标识(如 `-arm64`/`-x64`)
+
 **Plans**: TBD
 
 ### Phase 3: macOS Chrome 启动与能力 API
+
 **Goal**: macOS 用户可以完整走通"创建配置 → 启动指纹 Chrome → 使用代理/扩展/批量启动 → 停止"的核心链路,后端同时暴露平台能力供前端消费
 **Depends on**: Phase 1 (config/路径分支基础); Phase 2 (需要至少一份本机内核用于联调验证)
 **Requirements**: LAUNCH-01, LAUNCH-02, LAUNCH-03, XPLAT-05
 **Success Criteria** (what must be TRUE):
+
   1. macOS 用户创建 Chrome 引擎配置后可一键启动,指纹参数、独立用户数据目录、CDP 调试端口、psutil 会话跟踪均正常工作(直接 `Popen` 嵌套 `.app` 内二进制,不经 `open -a`)
   2. 代理(含本地代理桥)、扩展安装、按 IP 地理解析、批量启动在 macOS 上的 Chrome 配置中均验证可用
   3. 停止单个配置或退出应用能正确终止 macOS 上的 Chrome 进程树,不留残留进程
   4. 请求平台能力接口(如 `GET /api/capabilities`)可获知当前平台可用引擎与窗口功能状态,为前端门控提供依据
+
 **Plans**: TBD
 
 ### Phase 4: 前端平台门控
+
 **Goal**: macOS 用户在界面上只看到与当前平台能力匹配的选项,并获得清晰的平台差异说明与首次运行放行指引
 **Depends on**: Phase 3 (依赖 capabilities API)
 **Requirements**: UI-01, UI-02, UI-03, UI-04
 **Success Criteria** (what must be TRUE):
+
   1. macOS 上创建/编辑配置界面完全不出现 Firefox 引擎选项
   2. macOS 上窗口同步/窗口排列控件呈置灰状态并显示"仅 Windows 支持"提示,而非直接隐藏
   3. 应用内可查看"macOS 限制说明"内容,zh-CN 与 en-US 文案同步
   4. macOS 首次运行时应用内展示 Gatekeeper 放行指引("仍要打开"步骤 + `xattr -dr com.apple.quarantine` 命令),zh-CN 与 en-US 文案同步
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 5: CI 打包发布
+
 **Goal**: 推送 v* tag 后 CI 自动产出 macOS arm64 与 Intel x64 两个签名 dmg,并与 Windows 安装包一并挂到同一 GitHub Release
 **Depends on**: Phase 1 (跨平台后端代码需已就绪); Phase 2 (需要可下载的内核资产); Phase 3 (Chrome 启动链路需已验证)
 **Requirements**: PKG-01, PKG-02, PKG-03, PKG-04, PKG-05
 **Success Criteria** (what must be TRUE):
+
   1. 推送 v* tag 后 CI 并行触发 macOS job(matrix:arm64=macos-15、x64=macos-15-intel),与既有 Windows job 互不影响
   2. CI 产出真正的 `.app` bundle(正确 Info.plist、.icns 图标):菜单栏/Dock 显示正确应用名与图标,Cmd+Q 可正常退出
   3. 内核经 ditto 注入 `.app` 后整体做 ad-hoc 重签,`codesign --verify --deep --strict` 作为 CI 硬门禁,校验失败即中止发布
   4. 两个 dmg(含 `.app` + Applications 别名 + 拖拽安装背景图)以版本+架构命名(如 `Open-Anti-Browser-0.2.0-arm64.dmg`)并与 Windows 安装包一起出现在同一 GitHub Release
   5. `backend/_g.py` 开源声明完整性校验在 macOS 构建与启动过程中保持有效,不因打包流程被破坏
+
 **Plans**: TBD
 
 ### Phase 6: 发布文档与端到端验证
+
 **Goal**: macOS 用户拿到未签名的 dmg 后,无需开发者协助即可自行完成放行、安装并开始使用
 **Depends on**: Phase 5 (需要真实 CI 产出的 dmg 才能验证)
 **Requirements**: DOCS-01, DOCS-02
 **Success Criteria** (what must be TRUE):
+
   1. Release notes 提供分步放行说明(启动被拦 → 系统设置 → 隐私与安全性 → 仍要打开),并附 `xattr -dr com.apple.quarantine` 终端替代方案
   2. Release notes/README 提供双架构下载选择指引,帮助用户判断自己的 Mac 是 Apple Silicon 还是 Intel
   3. 在一台从未安装过本应用的 Mac 上(arm64 与 x64 分别原生验证,不借助 Rosetta),用户仅依据发布文档即可完成下载、放行、安装、创建配置并启动 Chrome 配置的完整流程
+
 **Plans**: TBD
 
 ## Progress

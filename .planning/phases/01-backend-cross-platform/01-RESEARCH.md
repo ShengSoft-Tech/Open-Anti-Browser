@@ -452,14 +452,16 @@ else:
 
 **说明:** 本次研究里绝大多数关键判断(subprocess creationflags 行为、pip sys_platform 标记生效、现有代码结构)都通过**在本机直接执行验证**,因此标记为 `[VERIFIED]` 而非训练知识推测,风险敞口很小。上面两条 `[ASSUMED]` 都是低风险的外围细节,不影响本 phase 五条 Success Criteria 的可验证性。
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **CI workflow 的 macOS runner 具体跑哪些测试子集(D-12 留给 Claude 裁量)**
+   - RESOLVED: 已转化为 01-04 Task 1 的实测圈定任务(先在 macOS 实跑 `python -m unittest discover` 再据此确定 CI 测试范围)。
    - What we know: 现有 7 个测试文件中,3 个(`test_firefox_extensions_and_selenium.py`、`test_concurrent_profile_storage.py`、`test_api_docs_content.py`)当前因导入链触达 `backend.browser_manager`/`backend.main` 而间接触达 `win32api`,在 Phase 1 完成后这条导入链会被打通(window_manager 改为条件导入后,这三个文件在 macOS 上应该都能正常导入并运行,只是其中依赖真实 Windows 行为的具体用例可能需要额外 skip)。`test_sync_regressions.py` 依赖 `backend.services.synchronizer`,该模块顶层导入不含 win32,本身在 macOS 上早已能正常导入(受阻的是 `websocket`/`ruyipage` 等包是否装,不是 win32)。
    - What's unclear: Phase 1 完成后,7 个测试文件是否**全部**可以直接在 macOS CI 上跑(即"全量"还是"子集"),需要在实现阶段实际跑一遍来确认是否有真正依赖 Windows 专属行为(如窗口句柄断言)的测试用例需要额外 skip。
    - Recommendation: 规划时把"跑一遍 macOS 上 `python -m unittest discover -s tests -v` 看哪些用例失败"作为一个显式验证步骤,再据此决定 CI workflow 里 macOS job 的测试范围(全量 or 子集 + skip 列表),不要在计划阶段就假设"全部能跑"或"只能跑一部分"。
 
 2. **Chromium.app 在开发机上的实际安装位置(SYSTEM_CHROME_EXECUTABLE 的现实校准)**
+   - RESOLVED: 已由 01-02 Task 1 采用占位值 `/Applications/Chromium.app/Contents/MacOS/Chromium` 并注释"Phase 2/3 校准",不阻塞 Phase 1 验收。
    - What we know: fingerprint-chromium 项目本身是 ungoogled-chromium 的一个 fork,macOS 上通常以 `.app` bundle 形式分发,可执行文件位于 `<AppName>.app/Contents/MacOS/<AppName>`。
    - What's unclear: 用户系统上实际安装的 Chromium.app 应用名/路径("Chromium" vs "Chromium.app" 内部可执行文件名是否也叫 "Chromium")在 Phase 2 内核发布之前无法从本仓库确认。
    - Recommendation: 这属于 Claude's Discretion 范围且验收标准未锁定该值,规划时可以先用一个合理占位值(`/Applications/Chromium.app/Contents/MacOS/Chromium`),标记为"Phase 2/3 校准"的后续 TODO,不阻塞 Phase 1 验收。
