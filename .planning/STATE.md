@@ -4,15 +4,15 @@ milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 2
 current_phase_name: macOS 内核构建与发布
-status: planning
+status: executing
 stopped_at: Phase 2 context gathered
-last_updated: "2026-07-24T22:43:50.637Z"
+last_updated: "2026-07-24T23:28:04.545Z"
 last_activity: 2026-07-24
 last_activity_desc: Phase 01 complete, transitioned to Phase 2
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 4
+  total_plans: 8
   completed_plans: 4
   percent: 17
 ---
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 
 Phase: 2 — macOS 内核构建与发布
 Plan: Not started
-Status: Ready to plan
+Status: Ready to execute
 Last activity: 2026-07-24 — Phase 01 complete, transitioned to Phase 2
 
 Progress: [██████████] 100%
