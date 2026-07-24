@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import queue
 import random
+import sys
 import threading
 import time
 import urllib.request
@@ -1391,6 +1392,8 @@ class BrowserSynchronizer:
         self._session: _SyncSession | None = None
 
     def start(self, master_profile_id: str, follower_profile_ids: list[str], options: dict[str, Any] | None = None) -> dict[str, Any]:
+        if sys.platform != "win32":
+            raise RuntimeError("窗口同步仅在 Windows 上可用")
         master_profile_id = str(master_profile_id or "").strip()
         if not master_profile_id:
             raise ValueError("请选择主浏览器")
