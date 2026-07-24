@@ -62,12 +62,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 *(边界收窄:讨论 D-03/D-05 已澄清 Chromium 构建/交叉编译/lipo/冒烟归兄弟仓库 `../fingerprint-chromium`;本仓库职责 = 上传前二次把关 + gh 发布 + config.py URL 回填。verifier 以此口径校验。)*
 
-**Plans**: 1/4 plans executed
+**Plans**: 2/4 plans executed
 
 **Wave 1** *(可并行,无文件重叠)*
 
 - [x] 02-01-PLAN.md — 上传前把关+发布脚本 verify_and_upload_macos_kernel.sh(tracer:arm64 verify 流水线端到端 + x64 Rosetta 冒烟分支 + gh 上传)[KERNEL-01/02/03]
-- [ ] 02-02-PLAN.md — config.py 回填 macOS arm64/x64 内核 URL 常量 + test_config_platform 断言 [KERNEL-01/02]
+- [x] 02-02-PLAN.md — config.py 回填 macOS arm64/x64 内核 URL 常量 + test_config_platform 断言 [KERNEL-01/02]
 
 **Wave 2** *(depends on Wave 1;人工把关,受兄弟仓库产物阻塞)*
 
@@ -140,7 +140,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. 后端跨平台基础适配 | 4/4 | Complete    | 2026-07-24 |
-| 2. macOS 内核构建与发布 | 1/4 | In Progress|  |
+| 2. macOS 内核构建与发布 | 2/4 | In Progress|  |
 | 3. macOS Chrome 启动与能力 API | 0/TBD | Not started | - |
 | 4. 前端平台门控 | 0/TBD | Not started | - |
 | 5. CI 打包发布 | 0/TBD | Not started | - |

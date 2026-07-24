@@ -5,15 +5,15 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 02
 current_phase_name: macos
 status: executing
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-07-24T23:47:28.370Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-07-24T23:50:15.966Z"
 last_activity: 2026-07-24
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 8
-  completed_plans: 5
+  completed_plans: 6
   percent: 17
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 02 (macos) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-07-24 — Phase 02 execution started
 
-Progress: [██████░░░░] 63%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [██████░░░░] 63%
 | Phase 01 P03 | 12min | 2 tasks | 2 files |
 | Phase 01 P04 | 12min | 2 tasks | 2 files |
 | Phase 02 P01 | 20min | 2 tasks | 1 files |
+| Phase 02 P02 | 8min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,7 @@ Recent decisions affecting current work:
 - [Phase ?]: D-12: independent ci-tests.yml (push/PR/workflow_dispatch) added; build-release.yml (v* tag release) untouched
 - [Phase ?]: macOS CI test range = full suite (72/72 pass after installer-test file-existence guard fix, no subset needed)
 - [Phase ?]: Upload asset always re-staged to $SCRATCH/$ZIP_NAME (config.py-resolved name) before gh release upload, guaranteeing published asset name matches SSOT constant regardless of local artifact filename
+- [Phase ?]: 02-02: 沿用 _CHROME_KERNEL_BASE f-string 模式回填 macOS arm64/x64 内核 URL 常量(-1.3 revision),不用 platform.machine() 运行时分支
 
 ### Pending Todos
 
@@ -102,6 +104,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-24T23:47:28.362Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-07-24T23:50:15.958Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None
