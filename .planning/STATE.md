@@ -4,17 +4,17 @@ milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 01
 current_phase_name: backend-cross-platform
-status: executing
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-07-24T21:19:44.701Z"
+status: verifying
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-07-24T21:23:49.393Z"
 last_activity: 2026-07-24
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 0
+  completed_plans: 4
+  percent: 17
 ---
 
 # Project State
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 
 Phase: 01 (backend-cross-platform) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-07-24 — Phase 01 execution started
 
-Progress: [████████░░] 75%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [████████░░] 75%
 | Phase 01 P01 | 20min | 2 tasks | 5 files |
 | Phase 01 P02 | 12min | 1 tasks | 2 files |
 | Phase 01 P03 | 12min | 2 tasks | 2 files |
+| Phase 01 P04 | 12min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,8 @@ Recent decisions affecting current work:
 - [Phase ?]: config.py 路径解析平台化(D-05/06/07/08):macOS 冻结态可写根锁定 Application Support,Chrome 路径锁定 .app bundle 内二进制,ENGINE_METADATA 保留 firefox 条目,Windows 路径值逐字不变
 - [Phase ?]: D-03: Synchronizer start gate lives inside BrowserSynchronizer.start (not main.py route or browser_manager) — same convention as window_manager.py's per-function win32 gate
 - [Phase ?]: D-04: main.py open_system_url already cross-platform since initial commit — closed as verification-only, zero code change
+- [Phase ?]: D-12: independent ci-tests.yml (push/PR/workflow_dispatch) added; build-release.yml (v* tag release) untouched
+- [Phase ?]: macOS CI test range = full suite (72/72 pass after installer-test file-existence guard fix, no subset needed)
 
 ### Pending Todos
 
@@ -97,6 +100,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-24T21:19:44.694Z
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-07-24T21:23:49.387Z
+Stopped at: Completed 01-04-PLAN.md
 Resume file: None

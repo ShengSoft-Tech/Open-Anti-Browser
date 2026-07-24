@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. `--backend-only` 纯后端模式可在 macOS 上派生、通过 psutil 检活、并正常停止(`creationflags` 平台条件化,不再向 POSIX 传入 Windows 专属参数)
   5. Windows 上以上路径/导入/启动相关的现有行为与既有 unittest 套件保持字节级不变
 
-**Plans**: 3/4 plans executed
+**Plans**: 4/4 plans executed
 **Wave 1**
 
 - [x] 01-01-PLAN.md — macOS 可安装/可导入/可派生纵切(requirements 标记 + window_manager 条件导入 + runtime_control creationflags)[XPLAT-01/02/04]
@@ -47,7 +47,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 01-04-PLAN.md — 双 runner CI 测试 workflow(windows-latest 全量 + macos 实测范围)[XPLAT-01/02/03/04]
+- [x] 01-04-PLAN.md — 双 runner CI 测试 workflow(windows-latest 全量 + macos 实测范围)[XPLAT-01/02/03/04]
 
 ### Phase 2: macOS 内核构建与发布
 
@@ -127,7 +127,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 后端跨平台基础适配 | 3/4 | In Progress|  |
+| 1. 后端跨平台基础适配 | 4/4 | In Progress|  |
 | 2. macOS 内核构建与发布 | 0/TBD | Not started | - |
 | 3. macOS Chrome 启动与能力 API | 0/TBD | Not started | - |
 | 4. 前端平台门控 | 0/TBD | Not started | - |
