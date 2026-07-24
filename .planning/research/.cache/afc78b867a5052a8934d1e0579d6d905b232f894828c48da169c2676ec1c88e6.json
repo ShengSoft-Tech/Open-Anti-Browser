@@ -1,0 +1,1 @@
+{"content":"ungoogled-chromium-macos ships signed+notarized per-architecture dmg files named ungoogled-chromium_<version>_<arm64|x86_64>-macos.dmg, each containing a single .app bundle. Confirms separate-arch-dmg convention, no universal binary.","source":"web","provider":"websearch","confidence":"MEDIUM","fetched_at":"2026-07-24T00:37:32.123Z","ttl":86400000,"kind":"web"}
