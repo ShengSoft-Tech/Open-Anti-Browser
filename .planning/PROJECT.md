@@ -26,13 +26,13 @@
 - ✓ 对外自动化 API(/open-api,X-API-Key 鉴权)+ 纯后端模式 — v0.1
 - ✓ CI 自动发版:推 v* tag → Windows runner 打包 PyInstaller + Inno Setup → GitHub Release — v0.1
 - ✓ 开源声明完整性校验(backend/_g.py 哈希锁定)— v0.1
+- ✓ 后端跨平台适配:pywin32 条件依赖(PEP 508 标记)、window_manager 平台分支 + 非 Windows 明确报错、config.py 平台路径(macOS 冻结态 `~/Library/Application Support/`、`.app` 引擎路径)、runtime_control 跨平台派生、同步器 Windows-only 门禁、CI 双平台测试 workflow — Validated in Phase 1: 后端跨平台基础适配(v0.2)
 
 ### Active
 
 <!-- 里程碑 v0.2:macOS 支持(仅 Chrome 内核) -->
 
 - [ ] macOS 内核:从 ../fingerprint-chromium(149.0.7827.114)构建 arm64 与 Intel x64 两个内核并上传 kernel release
-- [ ] 后端跨平台适配:pywin32 条件依赖、window_manager 条件导入、config.py 平台分支路径、runtime_control creationflags 修复
 - [ ] macOS 核心功能可用:配置管理、指纹启动、代理、扩展、批量启动(Chrome 引擎)
 - [ ] macOS 上窗口排列/窗口同步禁用并明确提示"仅 Windows";Firefox 引擎在 macOS 隐藏
 - [ ] CI 增加 macOS job:PyInstaller .app + 内核打包,产出 arm64/x64 两个 dmg 挂到 release
@@ -81,6 +81,8 @@
 - 后端跨平台适配(Chrome-only,窗口功能禁用)
 - CI macOS job 产出两个 dmg 并挂到 release
 
+**Progress:** Phase 1(后端跨平台基础适配)complete — 后端在 macOS 可安装/导入/启动(含 --backend-only),路径解析到 macOS 约定位置,Windows 零回归(72 unittest 全过),CI 双平台测试 workflow 上线。
+
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
@@ -99,4 +101,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-23 after starting milestone v0.2*
+*Last updated: 2026-07-24 after Phase 1 completion (backend-cross-platform)*
