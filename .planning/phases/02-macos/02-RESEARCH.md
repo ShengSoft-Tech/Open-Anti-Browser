@@ -314,22 +314,27 @@ echo "Verified OK: $app ($expected_arch, adhoc-signed)"
 | A2 | CDP `/json/version` HTTP polling is an acceptable "启动冒烟测试" per D-04's "能拉起进程 / 能响应 CDP 端口等" discretion language | Pattern 4, Standard Stack | Low — CONTEXT.md explicitly lists "能响应 CDP 端口" as one of two acceptable granularities; this is directly supported by the user's own words, not an external assumption |
 | A3 | The `--headless=new` flag works identically on this fingerprint-patched Chromium build as on stock Chromium 149 (used in the Rosetta smoke test example) | Pattern 4 | Medium — if the fingerprint patches alter headless-mode behavior in any way, the smoke test flags may need adjustment; the planner/executor should confirm this against the sibling repo's actual launch flags (`services/chrome.py` in THIS repo already has the canonical flag set used for real launches and should be consulted/reused rather than inventing new flags) |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+*All three open questions had recommendations the Phase 2 plans act on; each is closed by a specific plan/task below (resolved 2026-07-24 during plan-phase).*
 
 1. **Has the sibling repo's D-02 rebuild (removing the LOG(INFO) calibration line) landed yet?**
    - What we know: 07-01-SUMMARY.md explicitly flags this as a "Phase-8 hand-off: must be removed or DLOG-guarded before Windows packaging" — and CONTEXT.md's D-02 says the same applies to the Mac zip this repo will receive.
    - What's unclear: This research found the CURRENT arm64 build (`Framework` binary mtime 2026-07-22) predates any visible confirmation that the diagnostic-removal rebuild has run. The zip handed to this repo for upload needs to be the POST-D-02 rebuild, not today's build.
    - Recommendation: Planner should make the first task a check/checkpoint: confirm with the sibling repo (or re-run the calibration diagnostic check) that the LOG(INFO) line is gone/guarded BEFORE running the verify+upload script against the "final" arm64 zip — do not assume today's `build/src/out/Default/Chromium.app` is already the artifact to upload.
+   - **Resolved:** 02-03 Task 1 is a `checkpoint:human-verify` (gate=blocking) that confirms the sibling repo's post-D-02 rebuild landed (LOG(INFO) removed/DLOG-guarded) and captures the final arm64 zip path before 02-03 Task 2 uploads. The dry-run tracer (02-01 Task 1) runs against today's pre-D-02 build only to exercise script logic, never as the upload target.
 
 2. **Has the x64 cross-compile happened yet?**
    - What we know: `downloads-macos-x64.ini` does not exist in `../fingerprint-chromium` as of this research (confirmed via `find`); `build/src/out/Release/` contains only GN tooling, no Chromium build.
    - What's unclear: Timeline for the sibling repo's cross-compile completion is outside this repo's control (STATE.md blocker).
    - Recommendation: Planner should structure the plan so the arm64 upload+config-backfill work (KERNEL-01, half of KERNEL-03) can proceed and be verified independently of x64 readiness, with the x64 leg (KERNEL-02, other half of KERNEL-03) either gated behind a `checkpoint:human-verify` / blocked-task marker, or split into a separate plan/wave that starts once the sibling repo signals the x64 zip is ready. Do not block the entire phase on x64 if arm64 can ship first.
+   - **Resolved:** arm64 (02-03) and x64 (02-04) are split into separate wave-2 plans, each `autonomous: false` with its own blocking handoff checkpoint. arm64 ships and is verified independently; x64 stays blocked on the sibling repo's cross-compile without blocking arm64.
 
 3. **Exact naming/structure of the macOS URL constants in `config.py`**
    - What we know: CONTEXT.md explicitly marks "config.py 里 macOS URL 的平台分支写法...常量命名" as Claude's Discretion.
    - What's unclear: Whether Phase 5's CI (not yet planned) will want a single dynamic `CHROME_ENGINE_ZIP_URL` that resolves per-`platform.machine()`, or explicit separate constants (`CHROME_ENGINE_ZIP_URL_MACOS_ARM64` / `_X64`) that a future CI matrix job selects by job name.
    - Recommendation: Favor explicit separate named constants (as shown in Pattern 5) — simpler to reason about, no runtime branching logic needed in `config.py` itself, and trivially greppable/testable. The planner can revise this when Phase 5 is actually planned if a different shape turns out to be more ergonomic for the CI matrix.
+   - **Resolved:** 02-02 Task 1 adds explicit module-level `CHROME_ENGINE_ZIP_URL_MACOS_ARM64` / `CHROME_ENGINE_ZIP_URL_MACOS_X64` constants (no `platform.machine()` runtime branch), covered by 02-02 Task 2's `test_macos_arm64_kernel_url` / `test_macos_x64_kernel_url`.
 
 ## Environment Availability
 
