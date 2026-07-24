@@ -117,6 +117,14 @@ CHROME_INSTALLER_URL = (
 CHROME_ENGINE_ZIP_URL = (
     f"{_CHROME_KERNEL_BASE}/ungoogled-chromium_149.0.7827.114-1.2_windows_x64.zip"
 )
+# macOS 内核资产（arm64/x64 分开出包，不做 universal binary）。-1.3 revision 标识
+# 021 基线（macOS 首次构建），与 Windows 现有 -1.2 区分，同样复用 _CHROME_KERNEL_BASE。
+CHROME_ENGINE_ZIP_URL_MACOS_ARM64 = (
+    f"{_CHROME_KERNEL_BASE}/ungoogled-chromium_149.0.7827.114-1.3_macos_arm64.zip"
+)
+CHROME_ENGINE_ZIP_URL_MACOS_X64 = (
+    f"{_CHROME_KERNEL_BASE}/ungoogled-chromium_149.0.7827.114-1.3_macos_x64.zip"
+)
 FIREFOX_INSTALLER_URL = (
     "https://github.com/LoseNine/ruyipage/releases/download/151-ruyi/"
     "firefox-151.0a1.en-US.win64.installer.exe"
