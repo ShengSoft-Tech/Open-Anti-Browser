@@ -83,6 +83,30 @@ class ConfigPlatformTests(unittest.TestCase):
         window = source[block_start:block_end]
         self.assertNotIn("sys.executable", window)
 
+    def test_macos_arm64_kernel_url(self) -> None:
+        # 常量是平台无关静态字符串，无需 patch sys.platform。
+        url = config.CHROME_ENGINE_ZIP_URL_MACOS_ARM64
+        self.assertTrue(url.startswith(config._CHROME_KERNEL_BASE))
+        self.assertIn("-1.3", url)
+        self.assertIn("_macos_arm64", url)
+        self.assertTrue(url.endswith(".zip"))
+        self.assertEqual(
+            url,
+            f"{config._CHROME_KERNEL_BASE}/ungoogled-chromium_149.0.7827.114-1.3_macos_arm64.zip",
+        )
+
+    def test_macos_x64_kernel_url(self) -> None:
+        # 常量是平台无关静态字符串，无需 patch sys.platform。
+        url = config.CHROME_ENGINE_ZIP_URL_MACOS_X64
+        self.assertTrue(url.startswith(config._CHROME_KERNEL_BASE))
+        self.assertIn("-1.3", url)
+        self.assertIn("_macos_x64", url)
+        self.assertTrue(url.endswith(".zip"))
+        self.assertEqual(
+            url,
+            f"{config._CHROME_KERNEL_BASE}/ungoogled-chromium_149.0.7827.114-1.3_macos_x64.zip",
+        )
+
     # ------------------------------------------------------------------
     # 开发态（非冻结）
     # ------------------------------------------------------------------
