@@ -5,15 +5,15 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 01
 current_phase_name: backend-cross-platform
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-07-24T21:10:45.589Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-07-24T21:17:02.462Z"
 last_activity: 2026-07-24
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 01 (backend-cross-platform) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-07-24 — Phase 01 execution started
 
-Progress: [███░░░░░░░] 25%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Progress: [███░░░░░░░] 25%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 01 P01 | 20min | 2 tasks | 5 files |
+| Phase 01 P02 | 12min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,7 @@ Recent decisions affecting current work:
 - v0.2 scope: 内核打包进 dmg,非首启下载;窗口排列/同步在 macOS 禁用(置灰提示);不做签名/公证,arm64+x64 双内核双 dmg
 - [Phase ?]: D-01: window_manager.py Windows branch moved verbatim into if sys.platform == "win32" block; non-Windows branch exports identically-named/signed stub functions raising RuntimeError — zero browser_manager.py changes needed
 - [Phase ?]: D-09/D-10: requirements.txt uses PEP 508 sys_platform == "win32" markers on pywin32/ruyipage (versions unchanged); no requirements-build.txt split
+- [Phase ?]: config.py 路径解析平台化(D-05/06/07/08):macOS 冻结态可写根锁定 Application Support,Chrome 路径锁定 .app bundle 内二进制,ENGINE_METADATA 保留 firefox 条目,Windows 路径值逐字不变
 
 ### Pending Todos
 
@@ -92,6 +94,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-24T21:10:45.583Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-07-24T21:17:02.456Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None
