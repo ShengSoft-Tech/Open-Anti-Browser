@@ -22,15 +22,20 @@ def _resource_root() -> Path:
 
 def _writable_root() -> Path:
     if _is_packaged():
-        executable_dir = Path(sys.executable).resolve().parent
-        if os.environ.get("OPEN_ANTI_BROWSER_PORTABLE") == "1":
-            return executable_dir
-        if (executable_dir / PORTABLE_MARKER).exists():
-            return executable_dir
-        local_appdata = os.environ.get("LOCALAPPDATA")
-        if local_appdata:
-            return Path(local_appdata) / APP_NAME
-        return Path.home() / "AppData" / "Local" / APP_NAME
+        if sys.platform == "win32":
+            executable_dir = Path(sys.executable).resolve().parent
+            if os.environ.get("OPEN_ANTI_BROWSER_PORTABLE") == "1":
+                return executable_dir
+            if (executable_dir / PORTABLE_MARKER).exists():
+                return executable_dir
+            local_appdata = os.environ.get("LOCALAPPDATA")
+            if local_appdata:
+                return Path(local_appdata) / APP_NAME
+            return Path.home() / "AppData" / "Local" / APP_NAME
+        if sys.platform == "darwin":
+            # macOS：忽略 portable 标记与环境变量（D-07），固定写用户级 Application Support，
+            # 不使用任何基于 sys.executable 的路径推导（Pitfall 4：.app bundle 内部结构不适用）。
+            return Path.home() / "Library" / "Application Support" / APP_NAME
     return PROJECT_ROOT
 
 
@@ -78,12 +83,20 @@ def _current_username() -> str:
 
 
 USERNAME = _current_username()
-SYSTEM_CHROME_EXECUTABLE = Path(
-    fr"C:\Users\{USERNAME}\AppData\Local\Chromium\Application\chrome.exe"
-)
-SYSTEM_FIREFOX_EXECUTABLE = Path(r"C:\Program Files\Mozilla Firefox\firefox.exe")
-DEFAULT_CHROME_EXECUTABLE = ENGINES_DIR / "chrome" / "chrome.exe"
-DEFAULT_FIREFOX_EXECUTABLE = ENGINES_DIR / "firefox" / "firefox.exe"
+if sys.platform == "darwin":
+    # 系统级已安装浏览器检测路径（辅助能力，非 XPLAT-03 验收锁定值）。
+    # 具体位置属 Claude's Discretion，Phase 2/3 结合内核打包形态校准。
+    SYSTEM_CHROME_EXECUTABLE = Path("/Applications/Chromium.app/Contents/MacOS/Chromium")
+    SYSTEM_FIREFOX_EXECUTABLE = Path("/Applications/Firefox.app/Contents/MacOS/firefox")  # macOS 无 firefox 内核（D-08），字段保留但不启用
+    DEFAULT_CHROME_EXECUTABLE = ENGINES_DIR / "chrome" / "Chromium.app" / "Contents" / "MacOS" / "Chromium"
+    DEFAULT_FIREFOX_EXECUTABLE = ENGINES_DIR / "firefox" / "firefox"  # 路径存在但文件不存在，天然不可用（D-08）
+else:
+    SYSTEM_CHROME_EXECUTABLE = Path(
+        fr"C:\Users\{USERNAME}\AppData\Local\Chromium\Application\chrome.exe"
+    )
+    SYSTEM_FIREFOX_EXECUTABLE = Path(r"C:\Program Files\Mozilla Firefox\firefox.exe")
+    DEFAULT_CHROME_EXECUTABLE = ENGINES_DIR / "chrome" / "chrome.exe"
+    DEFAULT_FIREFOX_EXECUTABLE = ENGINES_DIR / "firefox" / "firefox.exe"
 DEFAULT_USER_DATA_ROOT = APP_ROOT / "browser-data"
 DEFAULT_FIREFOX_WEBRTC_BLOCK_EXTENSION = (
     ASSETS_DIR / "firefox-extensions" / "jid1-5Fs7iTLscUaZBgwr@jetpack.xpi"
