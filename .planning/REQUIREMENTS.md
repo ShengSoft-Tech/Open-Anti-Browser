@@ -77,13 +77,36 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (由 roadmap 填充) | | |
+| XPLAT-01 | Phase 1 | Pending |
+| XPLAT-02 | Phase 1 | Pending |
+| XPLAT-03 | Phase 1 | Pending |
+| XPLAT-04 | Phase 1 | Pending |
+| KERNEL-01 | Phase 2 | Pending |
+| KERNEL-02 | Phase 2 | Pending |
+| KERNEL-03 | Phase 2 | Pending |
+| LAUNCH-01 | Phase 3 | Pending |
+| LAUNCH-02 | Phase 3 | Pending |
+| LAUNCH-03 | Phase 3 | Pending |
+| XPLAT-05 | Phase 3 | Pending |
+| UI-01 | Phase 4 | Pending |
+| UI-02 | Phase 4 | Pending |
+| UI-03 | Phase 4 | Pending |
+| UI-04 | Phase 4 | Pending |
+| PKG-01 | Phase 5 | Pending |
+| PKG-02 | Phase 5 | Pending |
+| PKG-03 | Phase 5 | Pending |
+| PKG-04 | Phase 5 | Pending |
+| PKG-05 | Phase 5 | Pending |
+| DOCS-01 | Phase 6 | Pending |
+| DOCS-02 | Phase 6 | Pending |
 
 **Coverage:**
-- v0.2 requirements: 19 total
-- Mapped to phases: 0
-- Unmapped: 19 ⚠️ (roadmap pending)
+- v0.2 requirements: 22 total
+- Mapped to phases: 22
+- Unmapped: 0 ✓
+
+*Note: the "19 total" figure that appeared in the initial draft of this section undercounted XPLAT (5, not 2). The count above (22) was reconciled against the actual requirement list during roadmap creation on 2026-07-23.*
 
 ---
 *Requirements defined: 2026-07-23*
-*Last updated: 2026-07-23 after initial definition*
+*Last updated: 2026-07-23 after roadmap creation (traceability mapped, count reconciled 19→22)*
