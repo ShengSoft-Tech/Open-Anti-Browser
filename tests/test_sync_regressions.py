@@ -410,6 +410,11 @@ class SynchronizerRegressionTests(unittest.TestCase):
 
     def test_installer_closes_existing_desktop_app_before_install(self):
         installer_script = Path(__file__).resolve().parents[1] / "installer" / "Open-Anti-Browser.iss"
+        if not installer_script.exists():
+            self.skipTest(
+                "installer/Open-Anti-Browser.iss 未纳入版本控制(打包脚本已 gitignore,"
+                "参见 CLAUDE.md),CI/fresh checkout 上不存在此文件,跳过内容断言"
+            )
         content = installer_script.read_text(encoding="utf-8")
         self.assertIn("CloseApplications=force", content)
         self.assertIn("CloseApplicationsFilter=Open-Anti-Browser.exe", content)
