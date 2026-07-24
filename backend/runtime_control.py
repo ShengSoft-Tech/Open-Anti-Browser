@@ -140,15 +140,20 @@ def start_backend_only(preferred_port: int = 18000) -> dict[str, Any]:
 
     port = find_available_port(preferred_port, 20)
     command = _backend_only_command(port)
+    _POPEN_KWARGS: dict[str, Any] = {}
+    if sys.platform == "win32":
+        _POPEN_KWARGS["creationflags"] = DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
+    else:
+        _POPEN_KWARGS["start_new_session"] = True
     process = subprocess.Popen(
         command,
         cwd=_launcher_cwd(),
         stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
-        creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
         close_fds=True,
         env={**os.environ},
+        **_POPEN_KWARGS,
     )
     if not _wait_for_port(port):
         try:
