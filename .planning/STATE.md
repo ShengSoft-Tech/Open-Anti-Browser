@@ -5,8 +5,8 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 2
 current_phase_name: macOS 内核构建与发布
 status: planning
-stopped_at: Completed 01-04-PLAN.md
-last_updated: "2026-07-24T21:36:20.745Z"
+stopped_at: Phase 2 context gathered
+last_updated: "2026-07-24T22:43:50.637Z"
 last_activity: 2026-07-24
 last_activity_desc: Phase 01 complete, transitioned to Phase 2
 progress:
@@ -100,6 +100,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-24T21:23:49.387Z
-Stopped at: Completed 01-04-PLAN.md
-Resume file: None
+Last session: 2026-07-24T22:43:50.629Z
+Stopped at: Phase 2 context gathered
+Resume file: .planning/phases/02-macos/02-CONTEXT.md
