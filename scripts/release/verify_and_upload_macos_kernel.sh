@@ -195,3 +195,46 @@ smoke_test() {
 smoke_test "$LAUNCHER" "$ARCH"
 
 echo "Verified OK: $APP ($ARCH, adhoc-signed)"
+
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  echo "dry-run: skipping upload"
+  exit 0
+fi
+
+echo "== 发布: gh release upload(KERNEL-01/02,D-10 幂等)=="
+
+# 上传文件名从 backend.config 常量解析(SSOT),脚本内不第二次硬编码内核版本号/revision/文件名。
+if [[ "$ARCH" == "arm64" ]]; then
+  ZIP_URL="$(python3 -c "from backend.config import CHROME_ENGINE_ZIP_URL_MACOS_ARM64; print(CHROME_ENGINE_ZIP_URL_MACOS_ARM64)")" \
+    || { echo "错误: 无法从 backend.config 解析 CHROME_ENGINE_ZIP_URL_MACOS_ARM64" >&2; exit 1; }
+else
+  ZIP_URL="$(python3 -c "from backend.config import CHROME_ENGINE_ZIP_URL_MACOS_X64; print(CHROME_ENGINE_ZIP_URL_MACOS_X64)")" \
+    || { echo "错误: 无法从 backend.config 解析 CHROME_ENGINE_ZIP_URL_MACOS_X64" >&2; exit 1; }
+fi
+
+if [[ -z "$ZIP_URL" ]]; then
+  echo "错误: backend.config 解析出的上传 URL 为空" >&2
+  exit 1
+fi
+
+ZIP_NAME="$(basename "$ZIP_URL")"
+UPLOAD_FILE="$SCRATCH/$ZIP_NAME"
+
+# 上传资产名必须与 config.py 解析出的名字逐字节一致(SSOT):若入参已是 zip,复制并按该
+# 名字落盘;若入参是已解压目录,重新用 ditto 打包(全程 ditto,不引入 cp -R/unzip/zip)。
+if [[ "$ARTIFACT" == *.zip ]]; then
+  cp "$ARTIFACT" "$UPLOAD_FILE" \
+    || { echo "错误: 复制上传资产失败: $ARTIFACT" >&2; exit 1; }
+else
+  ditto -c -k --keepParent --sequesterRsrc "$APP" "$UPLOAD_FILE" \
+    || { echo "错误: 打包上传资产失败: $APP" >&2; exit 1; }
+fi
+
+echo "上传资产: $UPLOAD_FILE -> kernel-149.0.7827.114 (资产名: $ZIP_NAME)"
+gh release upload kernel-149.0.7827.114 \
+  "$UPLOAD_FILE" \
+  --clobber \
+  --repo ShengSoft-Tech/Open-Anti-Browser \
+  || { echo "错误: gh release upload 失败,--clobber 已先删后传,请排查后重跑本脚本(不得假定原资产仍在,Pitfall 3)" >&2; exit 1; }
+
+echo "上传完成: $ZIP_NAME -> kernel-149.0.7827.114"
