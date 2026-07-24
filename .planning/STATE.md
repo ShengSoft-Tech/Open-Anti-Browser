@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
-current_phase: 2
-current_phase_name: macOS 内核构建与发布
+current_phase: 02
+current_phase_name: macos
 status: executing
-stopped_at: Phase 2 context gathered
-last_updated: "2026-07-24T23:28:04.545Z"
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-07-24T23:47:28.370Z"
 last_activity: 2026-07-24
-last_activity_desc: Phase 01 complete, transitioned to Phase 2
+last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 8
-  completed_plans: 4
+  completed_plans: 5
   percent: 17
 ---
 
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-23)
 
 **Core value:** 一键创建并启动相互隔离、指纹可信的浏览器环境——配置即用,无需用户理解指纹参数细节。
-**Current focus:** Phase 01 — backend-cross-platform
+**Current focus:** Phase 02 — macos
 
 ## Current Position
 
-Phase: 2 — macOS 内核构建与发布
-Plan: Not started
+Phase: 02 (macos) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-07-24 — Phase 01 complete, transitioned to Phase 2
+Last activity: 2026-07-24 — Phase 02 execution started
 
-Progress: [██████████] 100%
+Progress: [██████░░░░] 63%
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [██████████] 100%
 | Phase 01 P02 | 12min | 1 tasks | 2 files |
 | Phase 01 P03 | 12min | 2 tasks | 2 files |
 | Phase 01 P04 | 12min | 2 tasks | 2 files |
+| Phase 02 P01 | 20min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,7 @@ Recent decisions affecting current work:
 - [Phase ?]: D-04: main.py open_system_url already cross-platform since initial commit — closed as verification-only, zero code change
 - [Phase ?]: D-12: independent ci-tests.yml (push/PR/workflow_dispatch) added; build-release.yml (v* tag release) untouched
 - [Phase ?]: macOS CI test range = full suite (72/72 pass after installer-test file-existence guard fix, no subset needed)
+- [Phase ?]: Upload asset always re-staged to $SCRATCH/$ZIP_NAME (config.py-resolved name) before gh release upload, guaranteeing published asset name matches SSOT constant regardless of local artifact filename
 
 ### Pending Todos
 
@@ -100,6 +102,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-24T22:43:50.629Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-macos/02-CONTEXT.md
+Last session: 2026-07-24T23:47:28.362Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: None

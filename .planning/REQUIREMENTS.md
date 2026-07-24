@@ -9,9 +9,9 @@ Requirements for the macOS support milestone. Each maps to roadmap phases.
 
 ### 内核构建与分发 (KERNEL)
 
-- [ ] **KERNEL-01**: macOS arm64 指纹内核可从 kernel release 下载(基于 ../fingerprint-chromium 149.0.7827.114 本地构建,ditto 打包保符号链接,含 ad-hoc 签名)
-- [ ] **KERNEL-02**: macOS Intel x64 指纹内核可从 kernel release 下载(先在兄弟项目补 downloads-macos-x64.ini,arm64 Mac 交叉编译)
-- [ ] **KERNEL-03**: 内核资产上传前通过架构验证(file/lipo)与本机启动冒烟测试,文件名含明确架构标识
+- [x] **KERNEL-01**: macOS arm64 指纹内核可从 kernel release 下载(基于 ../fingerprint-chromium 149.0.7827.114 本地构建,ditto 打包保符号链接,含 ad-hoc 签名)
+- [x] **KERNEL-02**: macOS Intel x64 指纹内核可从 kernel release 下载(先在兄弟项目补 downloads-macos-x64.ini,arm64 Mac 交叉编译)
+- [x] **KERNEL-03**: 内核资产上传前通过架构验证(file/lipo)与本机启动冒烟测试,文件名含明确架构标识
 
 ### 后端跨平台 (XPLAT)
 
@@ -81,9 +81,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | XPLAT-02 | Phase 1 | Complete |
 | XPLAT-03 | Phase 1 | Complete |
 | XPLAT-04 | Phase 1 | Complete |
-| KERNEL-01 | Phase 2 | Pending |
-| KERNEL-02 | Phase 2 | Pending |
-| KERNEL-03 | Phase 2 | Pending |
+| KERNEL-01 | Phase 2 | Complete |
+| KERNEL-02 | Phase 2 | Complete |
+| KERNEL-03 | Phase 2 | Complete |
 | LAUNCH-01 | Phase 3 | Pending |
 | LAUNCH-02 | Phase 3 | Pending |
 | LAUNCH-03 | Phase 3 | Pending |
