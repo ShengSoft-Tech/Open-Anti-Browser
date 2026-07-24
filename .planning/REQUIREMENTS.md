@@ -15,10 +15,10 @@ Requirements for the macOS support milestone. Each maps to roadmap phases.
 
 ### 后端跨平台 (XPLAT)
 
-- [ ] **XPLAT-01**: macOS 用户可以直接 `pip install -r requirements.txt` 成功(pywin32 等仅 Windows 依赖加 sys_platform 环境标记)
-- [ ] **XPLAT-02**: 后端在 macOS 可正常导入与启动(window_manager 条件导入;窗口排列 API 在 macOS 返回"仅 Windows 支持"错误,Windows 行为字节级不变)
+- [x] **XPLAT-01**: macOS 用户可以直接 `pip install -r requirements.txt` 成功(pywin32 等仅 Windows 依赖加 sys_platform 环境标记)
+- [x] **XPLAT-02**: 后端在 macOS 可正常导入与启动(window_manager 条件导入;窗口排列 API 在 macOS 返回"仅 Windows 支持"错误,Windows 行为字节级不变)
 - [ ] **XPLAT-03**: config.py 平台分支生效:冻结态可写根为 `~/Library/Application Support/Open-Anti-Browser/`,Chrome 引擎路径为 `Chromium.app/Contents/MacOS/Chromium`
-- [ ] **XPLAT-04**: 纯后端模式(`--backend-only`)在 macOS 可派生、检活与停止(creationflags 平台条件化)
+- [x] **XPLAT-04**: 纯后端模式(`--backend-only`)在 macOS 可派生、检活与停止(creationflags 平台条件化)
 - [ ] **XPLAT-05**: 后端暴露平台能力信息(如 capabilities 字段/端点),标明当前平台可用引擎与窗口功能
 
 ### macOS Chrome 启动 (LAUNCH)
@@ -77,10 +77,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| XPLAT-01 | Phase 1 | Pending |
-| XPLAT-02 | Phase 1 | Pending |
+| XPLAT-01 | Phase 1 | Complete |
+| XPLAT-02 | Phase 1 | Complete |
 | XPLAT-03 | Phase 1 | Pending |
-| XPLAT-04 | Phase 1 | Pending |
+| XPLAT-04 | Phase 1 | Complete |
 | KERNEL-01 | Phase 2 | Pending |
 | KERNEL-02 | Phase 2 | Pending |
 | KERNEL-03 | Phase 2 | Pending |
@@ -101,6 +101,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOCS-02 | Phase 6 | Pending |
 
 **Coverage:**
+
 - v0.2 requirements: 22 total
 - Mapped to phases: 22
 - Unmapped: 0 ✓
