@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
-current_phase: 01
-current_phase_name: backend-cross-platform
-status: verifying
+current_phase: 2
+current_phase_name: macOS 内核构建与发布
+status: planning
 stopped_at: Completed 01-04-PLAN.md
-last_updated: "2026-07-24T21:23:49.393Z"
+last_updated: "2026-07-24T21:36:20.745Z"
 last_activity: 2026-07-24
-last_activity_desc: Phase 01 execution started
+last_activity_desc: Phase 01 complete, transitioned to Phase 2
 progress:
   total_phases: 6
   completed_phases: 1
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 
 ## Current Position
 
-Phase: 01 (backend-cross-platform) — EXECUTING
-Plan: 4 of 4
-Status: Phase complete — ready for verification
-Last activity: 2026-07-24 — Phase 01 execution started
+Phase: 2 — macOS 内核构建与发布
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-07-24 — Phase 01 complete, transitioned to Phase 2
 
 Progress: [██████████] 100%
 
@@ -39,7 +39,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 0
+- Total plans completed: 4
 - Average duration: — min
 - Total execution time: 0 hours
 
@@ -47,7 +47,7 @@ Progress: [██████████] 100%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01 | 4 | - | - |
 
 **Recent Trend:**
 

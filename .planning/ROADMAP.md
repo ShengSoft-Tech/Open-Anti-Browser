@@ -13,7 +13,7 @@
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: 后端跨平台基础适配** - pip 安装、导入、启动、路径解析在 macOS 上全部跑通,Windows 行为零回归
+- [x] **Phase 1: 后端跨平台基础适配** - pip 安装、导入、启动、路径解析在 macOS 上全部跑通,Windows 行为零回归 (completed 2026-07-24)
 - [ ] **Phase 2: macOS 内核构建与发布** - 本地构建 arm64/x64 两个 fingerprint-chromium 内核并发布为 kernel release 资产
 - [ ] **Phase 3: macOS Chrome 启动与能力 API** - macOS 用户可一键启动指纹 Chrome 配置,后端暴露平台能力供前端门控
 - [ ] **Phase 4: 前端平台门控** - macOS 上 Firefox 隐藏、窗口同步/排列置灰提示、平台说明与放行指引上线
@@ -127,7 +127,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 后端跨平台基础适配 | 4/4 | In Progress|  |
+| 1. 后端跨平台基础适配 | 4/4 | Complete    | 2026-07-24 |
 | 2. macOS 内核构建与发布 | 0/TBD | Not started | - |
 | 3. macOS Chrome 启动与能力 API | 0/TBD | Not started | - |
 | 4. 前端平台门控 | 0/TBD | Not started | - |
