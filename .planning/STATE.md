@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 
 ## Current Position
 
-Phase: 02 (macos) — PAUSED (Wave 1 complete 2/4; Wave 2 blocked on sibling repo)
+Phase: 02 (macos) — PARTIAL (3/4 plans complete; 02-04 blocked on sibling repo x64)
 Plan: 4 of 4
-Status: 02-03 paused at Task 1 human-verify checkpoint (no commits); 02-04 not dispatched
+Status: 02-01/02-02/02-03 complete (arm64 kernel published); 02-04 paused — downloads-macos-x64.ini still missing in sibling repo
 Last activity: 2026-07-24 — Phase 02 execution started
 
 Progress: [█████████░] 88%
@@ -93,8 +93,8 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 2 Wave 2 阻塞事实(2026-07-24 核实):兄弟仓库 D-02 修复已落地(`a5d342a7`,2026-07-22 17:47)但 macOS arm64 未从该 tip 重构建(现存产物 mtime 早于提交;兄弟仓库自身 GSD 处于 Phase 08,构建排期 Windows 优先)。02-03 暂停于 Task 1 handoff checkpoint,等待 post-D-02 arm64 ditto zip 绝对路径
-- Phase 2 (macOS 内核构建与发布) 依赖兄弟仓库 `../fingerprint-chromium` 先补齐 `downloads-macos-x64.ini`(2026-07-24 核实仍缺失,仅有 downloads-macos-arm64.ini),该仓库的进度不在本仓库掌控范围内 — 02-04 未 dispatch
+- ~~arm64 重构建阻塞~~ 已解决(2026-07-25):兄弟仓库产出 post-D-02 arm64 ditto zip,02-03 已验证并发布到 kernel-149.0.7827.114
+- Phase 2 仅剩 02-04 (x64) 阻塞:依赖兄弟仓库 `../fingerprint-chromium` 先补齐 `downloads-macos-x64.ini` 并交叉编译(2026-07-25 复核仍缺失,仅有 downloads-macos-arm64.ini),该仓库的进度不在本仓库掌控范围内
 - Phase 5 (CI 打包发布) 需要 Phase 2 产出的真实内核资产才能端到端验证,不能仅靠本地 mock 测试签名/打包流程
 
 ## Deferred Items
