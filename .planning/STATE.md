@@ -5,7 +5,7 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 02
 current_phase_name: macos
 status: executing
-stopped_at: Completed 02-02-PLAN.md
+stopped_at: Phase 02 Wave 2 paused at 02-03 Task 1 checkpoint — awaiting sibling repo post-D-02 arm64 rebuild
 last_updated: "2026-07-24T23:50:15.966Z"
 last_activity: 2026-07-24
 last_activity_desc: Phase 02 execution started
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 
 ## Current Position
 
-Phase: 02 (macos) — EXECUTING
+Phase: 02 (macos) — PAUSED (Wave 1 complete 2/4; Wave 2 blocked on sibling repo)
 Plan: 3 of 4
-Status: Ready to execute
+Status: 02-03 paused at Task 1 human-verify checkpoint (no commits); 02-04 not dispatched
 Last activity: 2026-07-24 — Phase 02 execution started
 
 Progress: [████████░░] 75%
@@ -91,7 +91,8 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 2 (macOS 内核构建与发布) 依赖兄弟仓库 `../fingerprint-chromium` 先补齐 `downloads-macos-x64.ini`,该仓库的进度不在本仓库掌控范围内
+- Phase 2 Wave 2 阻塞事实(2026-07-24 核实):兄弟仓库 D-02 修复已落地(`a5d342a7`,2026-07-22 17:47)但 macOS arm64 未从该 tip 重构建(现存产物 mtime 早于提交;兄弟仓库自身 GSD 处于 Phase 08,构建排期 Windows 优先)。02-03 暂停于 Task 1 handoff checkpoint,等待 post-D-02 arm64 ditto zip 绝对路径
+- Phase 2 (macOS 内核构建与发布) 依赖兄弟仓库 `../fingerprint-chromium` 先补齐 `downloads-macos-x64.ini`(2026-07-24 核实仍缺失,仅有 downloads-macos-arm64.ini),该仓库的进度不在本仓库掌控范围内 — 02-04 未 dispatch
 - Phase 5 (CI 打包发布) 需要 Phase 2 产出的真实内核资产才能端到端验证,不能仅靠本地 mock 测试签名/打包流程
 
 ## Deferred Items
