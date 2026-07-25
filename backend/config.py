@@ -104,18 +104,18 @@ DEFAULT_FIREFOX_WEBRTC_BLOCK_EXTENSION = (
 
 # Chrome kernel engine assets. Single source of truth for BOTH the runtime installer
 # download AND the CI engine-bundle fetch — .github/workflows/build-release.yml reads
-# CHROME_ENGINE_ZIP_URL from here instead of hardcoding a kernel URL. The -1.2 revision
-# adds patch 020 (speech-synthesis Google voices / browser_name "Chrome" fix); assets
+# CHROME_ENGINE_ZIP_URL from here instead of hardcoding a kernel URL. The -1.4 revision
+# adds the pixelscan patch (on top of -1.2's patch 020 speech-synthesis fix); assets
 # live on the kernel-149.0.7827.114 release.
 _CHROME_KERNEL_BASE = (
     "https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases/download/"
     "kernel-149.0.7827.114"
 )
 CHROME_INSTALLER_URL = (
-    f"{_CHROME_KERNEL_BASE}/ungoogled-chromium_149.0.7827.114-1.2_installer_x64.exe"
+    f"{_CHROME_KERNEL_BASE}/ungoogled-chromium_149.0.7827.114-1.4_installer_x64.exe"
 )
 CHROME_ENGINE_ZIP_URL = (
-    f"{_CHROME_KERNEL_BASE}/ungoogled-chromium_149.0.7827.114-1.2_windows_x64.zip"
+    f"{_CHROME_KERNEL_BASE}/ungoogled-chromium_149.0.7827.114-1.4_windows_x64.zip"
 )
 # macOS 内核资产（arm64/x64 分开出包，不做 universal binary）。-1.3 revision 标识
 # 021 基线（macOS 首次构建），与 Windows 现有 -1.2 区分，同样复用 _CHROME_KERNEL_BASE。
@@ -136,7 +136,7 @@ ENGINE_METADATA = {
         "default_executable": str(DEFAULT_CHROME_EXECUTABLE),
         "system_executable": str(SYSTEM_CHROME_EXECUTABLE),
         "installer_url": CHROME_INSTALLER_URL,
-        "download_name": "fingerprint-chromium-149-1.2-installer.exe",
+        "download_name": "fingerprint-chromium-149-1.4-installer.exe",
         "engine_dir": "chrome",
         "bundle_dir": str(ENGINES_DIR / "chrome"),
     },
