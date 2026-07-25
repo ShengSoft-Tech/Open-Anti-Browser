@@ -5,10 +5,10 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 02
 current_phase_name: macos
 status: executing
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-07-25T17:31:27.978Z"
-last_activity: 2026-07-24
-last_activity_desc: Phase 02 execution started
+stopped_at: 02-04 Task 1 checkpoint — x64 artifact still missing
+last_updated: "2026-07-25T18:04:06.000Z"
+last_activity: 2026-07-25
+last_activity_desc: 02-04 checkpoint held — x64 artifact still missing; arm64 zip rejected as substitute
 progress:
   total_phases: 6
   completed_phases: 1
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 Phase: 02 (macos) — PARTIAL (3/4 plans complete; 02-04 blocked on sibling repo x64)
 Plan: 4 of 4
 Status: 02-01/02-02/02-03 complete (arm64 kernel published); 02-04 paused — downloads-macos-x64.ini still missing in sibling repo
-Last activity: 2026-07-24 — Phase 02 execution started
+Last activity: 2026-07-25 — 02-04 Task 1 checkpoint held(x64 产物仍缺失,arm64 zip 顶替被拒)
 
 Progress: [█████████░] 88%
 
@@ -94,7 +94,7 @@ None yet.
 ### Blockers/Concerns
 
 - ~~arm64 重构建阻塞~~ 已解决(2026-07-25):兄弟仓库产出 post-D-02 arm64 ditto zip,02-03 已验证并发布到 kernel-149.0.7827.114
-- Phase 2 仅剩 02-04 (x64) 阻塞:依赖兄弟仓库 `../fingerprint-chromium` 先补齐 `downloads-macos-x64.ini` 并交叉编译(2026-07-25 复核仍缺失,仅有 downloads-macos-arm64.ini),该仓库的进度不在本仓库掌控范围内
+- Phase 2 仅剩 02-04 (x64) 阻塞:依赖兄弟仓库 `../fingerprint-chromium` 先补齐 `downloads-macos-x64.ini` 并交叉编译(2026-07-25 二次复核仍缺失:ini 不存在、flags.macos.gn target_cpu 仍为 arm64、out/Default 构建为 arm64、kernel-artifacts/ 仅有 arm64 zip),该仓库的进度不在本仓库掌控范围内。注意:检查点中曾有人提议以 kernel-artifacts 的 arm64 zip 顶替 x64 上传,经 lipo 取证(launcher=arm64)按 A-K02/T-02-05 拒绝——x64 侧必须等真实 x86_64 交叉编译产物
 - Phase 5 (CI 打包发布) 需要 Phase 2 产出的真实内核资产才能端到端验证,不能仅靠本地 mock 测试签名/打包流程
 
 ## Deferred Items
@@ -107,6 +107,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25T17:31:27.970Z
-Stopped at: Completed 02-03-PLAN.md
+Last session: 2026-07-25T18:04:06.000Z
+Stopped at: 02-04 Task 1 checkpoint — awaiting sibling repo x64 artifact
 Resume file: None
