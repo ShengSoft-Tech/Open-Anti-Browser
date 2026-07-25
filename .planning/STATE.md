@@ -5,15 +5,15 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 02
 current_phase_name: macos
 status: executing
-stopped_at: Phase 02 Wave 2 paused at 02-03 Task 1 checkpoint — awaiting sibling repo post-D-02 arm64 rebuild
-last_updated: "2026-07-24T23:50:15.966Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-07-25T17:31:27.978Z"
 last_activity: 2026-07-24
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
   percent: 17
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 02 (macos) — PAUSED (Wave 1 complete 2/4; Wave 2 blocked on sibling repo)
-Plan: 3 of 4
+Plan: 4 of 4
 Status: 02-03 paused at Task 1 human-verify checkpoint (no commits); 02-04 not dispatched
 Last activity: 2026-07-24 — Phase 02 execution started
 
-Progress: [████████░░] 75%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
@@ -65,6 +65,7 @@ Progress: [████████░░] 75%
 | Phase 01 P04 | 12min | 2 tasks | 2 files |
 | Phase 02 P01 | 20min | 2 tasks | 1 files |
 | Phase 02 P02 | 8min | 2 tasks | 2 files |
+| Phase 02 P03 | 35min | 3 tasks | 0 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,7 @@ Recent decisions affecting current work:
 - [Phase ?]: macOS CI test range = full suite (72/72 pass after installer-test file-existence guard fix, no subset needed)
 - [Phase ?]: Upload asset always re-staged to $SCRATCH/$ZIP_NAME (config.py-resolved name) before gh release upload, guaranteeing published asset name matches SSOT constant regardless of local artifact filename
 - [Phase ?]: 02-02: 沿用 _CHROME_KERNEL_BASE f-string 模式回填 macOS arm64/x64 内核 URL 常量(-1.3 revision),不用 platform.machine() 运行时分支
+- [Phase ?]: 02-03: arm64 内核经真实 verify+upload 脚本独立复核后发布到 kernel-149.0.7827.114,post-D-02 归属经人工 cross-repo handoff 确认(LOG(INFO) 无法静态检出)
 
 ### Pending Todos
 
@@ -105,6 +107,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-24T23:50:15.958Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-07-25T17:31:27.970Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
