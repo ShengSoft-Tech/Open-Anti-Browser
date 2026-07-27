@@ -150,18 +150,24 @@
       <el-table-column :label="t('profile.columns.actions')" width="220" fixed="right">
         <template #default="{ row }">
           <div class="action-buttons">
-            <el-button
+            <el-tooltip
               v-if="row.status !== 'running'"
-              type="success"
-              size="small"
-              plain
-              :loading="row.status === 'starting' || store.isProfileStarting(row.id)"
-              :disabled="row.status === 'starting' || store.isProfileStarting(row.id)"
-              @click.stop="handleStart(row)"
+              :disabled="!isProfileStartBlocked(row)"
+              :content="t('platformLimits.startBlockedHint')"
+              placement="top"
             >
-              <el-icon v-if="row.status !== 'starting' && !store.isProfileStarting(row.id)"><VideoPlay /></el-icon>
-              {{ row.status === 'starting' || store.isProfileStarting(row.id) ? t('common.starting') : t('common.start') }}
-            </el-button>
+              <el-button
+                type="success"
+                size="small"
+                plain
+                :loading="row.status === 'starting' || store.isProfileStarting(row.id)"
+                :disabled="row.status === 'starting' || store.isProfileStarting(row.id) || isProfileStartBlocked(row)"
+                @click.stop="handleStart(row)"
+              >
+                <el-icon v-if="row.status !== 'starting' && !store.isProfileStarting(row.id)"><VideoPlay /></el-icon>
+                {{ row.status === 'starting' || store.isProfileStarting(row.id) ? t('common.starting') : t('common.start') }}
+              </el-button>
+            </el-tooltip>
             <el-button
               v-else
               type="warning"
@@ -181,7 +187,7 @@
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="duplicate">
+                  <el-dropdown-item command="duplicate" :disabled="isProfileStartBlocked(row)">
                     <el-icon><CopyDocument /></el-icon>
                     {{ t('common.duplicate') }}
                   </el-dropdown-item>
@@ -309,6 +315,10 @@ function handleSelectAll(checked) {
   selectedIds.value = Array.from(next)
 }
 
+function isProfileStartBlocked(row) {
+  return row.engine === 'firefox' && !firefoxEngineVisible.value
+}
+
 function formatTime(value) {
   if (!value) return ''
   const date = new Date(value)
@@ -319,6 +329,7 @@ function formatTime(value) {
 
 async function handleStart(row) {
   if (row.status === 'starting' || store.isProfileStarting(row.id)) return
+  if (isProfileStartBlocked(row)) return
   try {
     await store.startProfile(row.id)
     ElMessage.success(t('profile.started', { name: row.name }))
@@ -388,6 +399,7 @@ async function handleBatchStart() {
     const queuedIds = store.filteredProfiles
       .filter(item => selectedIds.value.includes(item.id))
       .filter(item => item.status === 'stopped' && !store.isProfileStarting(item.id))
+      .filter(item => !isProfileStartBlocked(item))
       .map(item => item.id)
 
     for (const id of queuedIds) {
