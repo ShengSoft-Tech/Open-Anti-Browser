@@ -4,15 +4,15 @@ milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 3
 current_phase_name: macOS Chrome 启动与能力 API
-status: planning
+status: executing
 stopped_at: Phase 3 context gathered
-last_updated: "2026-07-27T16:25:51.955Z"
+last_updated: "2026-07-27T17:24:47.046Z"
 last_activity: 2026-07-26
 last_activity_desc: Phase 02 complete, transitioned to Phase 3
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 8
+  total_plans: 11
   completed_plans: 8
   percent: 33
 ---
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 
 Phase: 3 — macOS Chrome 启动与能力 API
 Plan: Not started
-Status: Ready to plan
+Status: Ready to execute
 Last activity: 2026-07-26 — Phase 02 complete, transitioned to Phase 3
 
 Progress: [███░░░░░░░] 33%
