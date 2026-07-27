@@ -19,7 +19,7 @@ Requirements for the macOS support milestone. Each maps to roadmap phases.
 - [x] **XPLAT-02**: 后端在 macOS 可正常导入与启动(window_manager 条件导入;窗口排列 API 在 macOS 返回"仅 Windows 支持"错误,Windows 行为字节级不变)
 - [x] **XPLAT-03**: config.py 平台分支生效:冻结态可写根为 `~/Library/Application Support/Open-Anti-Browser/`,Chrome 引擎路径为 `Chromium.app/Contents/MacOS/Chromium`
 - [x] **XPLAT-04**: 纯后端模式(`--backend-only`)在 macOS 可派生、检活与停止(creationflags 平台条件化)
-- [ ] **XPLAT-05**: 后端暴露平台能力信息(如 capabilities 字段/端点),标明当前平台可用引擎与窗口功能
+- [x] **XPLAT-05**: 后端暴露平台能力信息(如 capabilities 字段/端点),标明当前平台可用引擎与窗口功能
 
 ### macOS Chrome 启动 (LAUNCH)
 
@@ -87,7 +87,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LAUNCH-01 | Phase 3 | Pending |
 | LAUNCH-02 | Phase 3 | Pending |
 | LAUNCH-03 | Phase 3 | Pending |
-| XPLAT-05 | Phase 3 | Pending |
+| XPLAT-05 | Phase 3 | Complete |
 | UI-01 | Phase 4 | Pending |
 | UI-02 | Phase 4 | Pending |
 | UI-03 | Phase 4 | Pending |

@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
-current_phase: 3
-current_phase_name: macOS Chrome 启动与能力 API
+current_phase: 03
+current_phase_name: macos-chrome-api
 status: executing
-stopped_at: Phase 3 context gathered
-last_updated: "2026-07-27T17:24:47.046Z"
-last_activity: 2026-07-26
-last_activity_desc: Phase 02 complete, transitioned to Phase 3
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-07-27T17:52:46.868Z"
+last_activity: 2026-07-27
+last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 11
-  completed_plans: 8
+  completed_plans: 9
   percent: 33
 ---
 
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-23)
 
 **Core value:** 一键创建并启动相互隔离、指纹可信的浏览器环境——配置即用,无需用户理解指纹参数细节。
-**Current focus:** Phase 3 — macOS Chrome 启动与能力 API
+**Current focus:** Phase 03 — macos-chrome-api
 
 ## Current Position
 
-Phase: 3 — macOS Chrome 启动与能力 API
-Plan: Not started
+Phase: 03 (macos-chrome-api) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-07-26 — Phase 02 complete, transitioned to Phase 3
+Last activity: 2026-07-27 — Phase 03 execution started
 
-Progress: [███░░░░░░░] 33%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 02 P01 | 20min | 2 tasks | 1 files |
 | Phase 02 P02 | 8min | 2 tasks | 2 files |
 | Phase 02 P03 | 35min | 3 tasks | 0 files |
+| Phase 03 P01 | 15min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,7 @@ Recent decisions affecting current work:
 - [Phase ?]: Upload asset always re-staged to $SCRATCH/$ZIP_NAME (config.py-resolved name) before gh release upload, guaranteeing published asset name matches SSOT constant regardless of local artifact filename
 - [Phase ?]: 02-02: 沿用 _CHROME_KERNEL_BASE f-string 模式回填 macOS arm64/x64 内核 URL 常量(-1.3 revision),不用 platform.machine() 运行时分支
 - [Phase ?]: 02-03: arm64 内核经真实 verify+upload 脚本独立复核后发布到 kernel-149.0.7827.114,post-D-02 归属经人工 cross-repo handoff 确认(LOG(INFO) 无法静态检出)
+- [Phase ?]: 03-01: capabilities 契约锁定 option-a(嵌套形状),available 与 installed/capability_ok 正交,不并入 open-api
 
 ### Pending Todos
 
@@ -108,6 +110,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T16:25:51.945Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-macos-chrome-api/03-CONTEXT.md
+Last session: 2026-07-27T17:52:46.859Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None
