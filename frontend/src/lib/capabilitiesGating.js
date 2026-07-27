@@ -14,3 +14,7 @@ export function visibleEngineOptions(baseOptions, capabilities, currentEngine) {
   }
   return options.filter(option => option.value !== 'firefox' || currentEngine === 'firefox')
 }
+
+export function isEngineSelectorLocked(capabilities, currentEngine) {
+  return currentEngine === 'firefox' && !isFirefoxEngineAvailable(capabilities)
+}

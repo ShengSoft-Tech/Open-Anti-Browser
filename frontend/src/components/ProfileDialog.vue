@@ -27,7 +27,9 @@
                 <el-segmented
                   v-model="form.engine"
                   :options="engineOptions"
+                  :disabled="engineSelectorLocked"
                 />
+                <div v-if="engineSelectorLocked" class="form-tip">{{ t('platformLimits.engineLockedHint') }}</div>
               </el-form-item>
               <el-form-item :label="t('basic.name')">
                 <el-input v-model="form.name" :placeholder="t('basic.namePlaceholder')" maxlength="60" show-word-limit />
@@ -502,7 +504,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { createDefaultProfile, useProfileStore } from '../stores/profile.js'
-import { visibleEngineOptions } from '../lib/capabilitiesGating.js'
+import { visibleEngineOptions, isEngineSelectorLocked } from '../lib/capabilitiesGating.js'
 
 const { t } = useI18n()
 const props = defineProps({
@@ -537,6 +539,10 @@ const baseEngineOptions = [
 
 const engineOptions = computed(() =>
   visibleEngineOptions(baseEngineOptions, store.capabilities, form.value.engine)
+)
+
+const engineSelectorLocked = computed(() =>
+  isEngineSelectorLocked(store.capabilities, form.value.engine)
 )
 
 const proxyTypeOptions = computed(() => [

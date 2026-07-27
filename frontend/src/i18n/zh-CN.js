@@ -335,6 +335,9 @@ export default {
     exported: '导出成功',
     imported: '已导入 {n} 个配置',
   },
+  platformLimits: {
+    engineLockedHint: '该配置使用 Firefox 内核，当前系统不支持切换或启动，仅可在 Windows 上使用',
+  },
   apiAccess: {
     title: '本地 API 调用',
     desc: '外部程序可通过本机地址调用浏览器配置、启动和停止等功能',

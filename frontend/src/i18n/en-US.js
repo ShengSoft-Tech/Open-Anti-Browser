@@ -335,6 +335,9 @@ export default {
     exported: 'Export completed',
     imported: 'Imported {n} profiles',
   },
+  platformLimits: {
+    engineLockedHint: 'This profile uses the Firefox engine, which cannot be switched or launched on the current system — it can only be used on Windows.',
+  },
   apiAccess: {
     title: 'Local API Access',
     desc: 'External tools can control profiles, launch and stop browsers through local endpoints.',
