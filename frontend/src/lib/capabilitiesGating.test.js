@@ -1,6 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { isFirefoxEngineAvailable, visibleEngineOptions, isEngineSelectorLocked } from './capabilitiesGating.js'
+import {
+  isFirefoxEngineAvailable,
+  visibleEngineOptions,
+  isEngineSelectorLocked,
+  getWindowFeatureGate,
+} from './capabilitiesGating.js'
 
 const baseOptions = [
   { label: 'Chrome', value: 'chrome' },
@@ -93,5 +98,60 @@ test('isEngineSelectorLocked is a pure function: repeated calls return equal res
   const second = isEngineSelectorLocked(capabilities, 'firefox')
 
   assert.equal(first, second)
+  assert.deepEqual(capabilities, snapshot)
+})
+
+test('getWindowFeatureGate returns disabled true with the backend reason verbatim when sync is unavailable', () => {
+  const result = getWindowFeatureGate(
+    { window: { sync: { available: false, reason: '窗口同步仅在 Windows 上可用' } } },
+    'sync'
+  )
+  assert.deepEqual(result, { disabled: true, reason: '窗口同步仅在 Windows 上可用' })
+})
+
+test('getWindowFeatureGate returns disabled false and empty reason when arrange is available with a null reason', () => {
+  const result = getWindowFeatureGate({ window: { arrange: { available: true, reason: null } } }, 'arrange')
+  assert.deepEqual(result, { disabled: false, reason: '' })
+})
+
+test('getWindowFeatureGate defaults to not-disabled with empty reason for undefined/null/empty capabilities (no throw)', () => {
+  assert.deepEqual(getWindowFeatureGate(undefined, 'sync'), { disabled: false, reason: '' })
+  assert.deepEqual(getWindowFeatureGate(null, 'sync'), { disabled: false, reason: '' })
+  assert.deepEqual(getWindowFeatureGate({}, 'sync'), { disabled: false, reason: '' })
+})
+
+test('getWindowFeatureGate stays disabled true with empty reason when available is false but reason is missing/empty', () => {
+  assert.deepEqual(getWindowFeatureGate({ window: { sync: { available: false } } }, 'sync'), {
+    disabled: true,
+    reason: '',
+  })
+  assert.deepEqual(getWindowFeatureGate({ window: { sync: { available: false, reason: '' } } }, 'sync'), {
+    disabled: true,
+    reason: '',
+  })
+})
+
+test('getWindowFeatureGate reads sync and arrange independently without cross-fallback', () => {
+  const capabilities = {
+    window: {
+      sync: { available: false, reason: '窗口同步仅在 Windows 上可用' },
+      arrange: { available: true, reason: null },
+    },
+  }
+  assert.deepEqual(getWindowFeatureGate(capabilities, 'sync'), {
+    disabled: true,
+    reason: '窗口同步仅在 Windows 上可用',
+  })
+  assert.deepEqual(getWindowFeatureGate(capabilities, 'arrange'), { disabled: false, reason: '' })
+})
+
+test('getWindowFeatureGate is a pure function: repeated calls return equal results and do not mutate input capabilities', () => {
+  const capabilities = { window: { sync: { available: false, reason: '窗口同步仅在 Windows 上可用' } } }
+  const snapshot = JSON.parse(JSON.stringify(capabilities))
+
+  const first = getWindowFeatureGate(capabilities, 'sync')
+  const second = getWindowFeatureGate(capabilities, 'sync')
+
+  assert.deepEqual(first, second)
   assert.deepEqual(capabilities, snapshot)
 })
