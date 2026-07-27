@@ -502,6 +502,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { createDefaultProfile, useProfileStore } from '../stores/profile.js'
+import { visibleEngineOptions } from '../lib/capabilitiesGating.js'
 
 const { t } = useI18n()
 const props = defineProps({
@@ -529,10 +530,14 @@ const bypassImportRef = ref(null)
 const form = ref(createDefaultProfile())
 let applyingSavedProxy = false
 
-const engineOptions = [
+const baseEngineOptions = [
   { label: 'Chrome', value: 'chrome' },
   { label: 'Firefox', value: 'firefox' },
 ]
+
+const engineOptions = computed(() =>
+  visibleEngineOptions(baseEngineOptions, store.capabilities, form.value.engine)
+)
 
 const proxyTypeOptions = computed(() => [
   { label: t('proxy.noProxy'), value: 'none' },

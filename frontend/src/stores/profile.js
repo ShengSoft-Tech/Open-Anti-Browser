@@ -107,6 +107,7 @@ export const useProfileStore = defineStore('profile', () => {
   const settings = ref(null)
   const engines = ref({})
   const downloads = ref({})
+  const capabilities = ref({})
   const apiInfo = ref(null)
   const synchronizer = ref(null)
   const syncMonitors = ref([])
@@ -185,6 +186,7 @@ export const useProfileStore = defineStore('profile', () => {
       profiles.value = data.profiles
       engines.value = data.engines
       downloads.value = data.downloads || {}
+      capabilities.value = data.capabilities || {}
       await refreshApiInfo()
       await refreshSynchronizer()
       return data
@@ -460,6 +462,7 @@ export const useProfileStore = defineStore('profile', () => {
     settings,
     engines,
     downloads,
+    capabilities,
     apiInfo,
     synchronizer,
     syncMonitors,
