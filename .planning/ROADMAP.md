@@ -86,7 +86,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. 停止单个配置或退出应用能正确终止 macOS 上的 Chrome 进程树,不留残留进程
   4. 请求平台能力接口(如 `GET /api/capabilities`)可获知当前平台可用引擎与窗口功能状态,为前端门控提供依据
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 
 **Wave 1** *(可并行,无文件重叠)*
 
@@ -95,7 +95,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 2** *(depends on Wave 1;含真机主验收)*
 
-- [ ] 03-03-PLAN.md — chrome.py quarantine 防御钩子 + arm64 真机端到端冒烟(启动/代理/扩展/geo/批量/停止无残留 + D-07 实证)[LAUNCH-01/02/03]
+- [x] 03-03-PLAN.md — chrome.py quarantine 防御钩子 + arm64 真机端到端冒烟(启动/代理/扩展/geo/批量/停止无残留 + D-07 实证)[LAUNCH-01/02/03]
 
 ### Phase 4: 前端平台门控
 
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. 后端跨平台基础适配 | 4/4 | Complete    | 2026-07-24 |
 | 2. macOS 内核构建与发布 | 4/4 | Complete    | 2026-07-26 |
-| 3. macOS Chrome 启动与能力 API | 2/3 | In Progress|  |
+| 3. macOS Chrome 启动与能力 API | 3/3 | In Progress|  |
 | 4. 前端平台门控 | 0/TBD | Not started | - |
 | 5. CI 打包发布 | 0/TBD | Not started | - |
 | 6. 发布文档与端到端验证 | 0/TBD | Not started | - |
