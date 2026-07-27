@@ -5,10 +5,10 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 02
 current_phase_name: macos
 status: executing
-stopped_at: 02-04 Task 1 checkpoint — x64 artifact still missing
-last_updated: "2026-07-25T19:15:53.000Z"
-last_activity: 2026-07-25
-last_activity_desc: 02-04 checkpoint held — third recheck confirms x64 artifact still missing; kernel-artifacts/ dir now gone
+stopped_at: 02-04 Task 3 checkpoint — x64 uploaded, awaiting final human confirm
+last_updated: "2026-07-27T04:55:35.000Z"
+last_activity: 2026-07-27
+last_activity_desc: 02-04 x64 kernel verified (arch+Rosetta smoke) and uploaded to kernel-149.0.7827.114; codesign stage made arch-conditional (fix 02b6688); Task 3 human confirm pending
 progress:
   total_phases: 6
   completed_phases: 1
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 
 ## Current Position
 
-Phase: 02 (macos) — PARTIAL (3/4 plans complete; 02-04 blocked on sibling repo x64)
+Phase: 02 (macos) — 02-04 Task 2 done (x64 uploaded), Task 3 human confirm pending
 Plan: 4 of 4
-Status: 02-01/02-02/02-03 complete (arm64 kernel published); 02-04 paused — downloads-macos-x64.ini still missing in sibling repo
-Last activity: 2026-07-25 — 02-04 Task 1 checkpoint held(三次复核 x64 产物仍缺失;kernel-artifacts/ 目录已清空消失)
+Status: 02-01/02-02/02-03 complete (arm64 published);02-04 x64 已上传到 kernel-149.0.7827.114(双架构齐备),仅剩 Task 3 人工确认
+Last activity: 2026-07-27 — 02-04 x64 内核经架构断言 + Rosetta 冒烟把关后上传;codesign 阶段改为按架构分支(fix 02b6688)
 
 Progress: [█████████░] 88%
 
@@ -94,7 +94,8 @@ None yet.
 ### Blockers/Concerns
 
 - ~~arm64 重构建阻塞~~ 已解决(2026-07-25):兄弟仓库产出 post-D-02 arm64 ditto zip,02-03 已验证并发布到 kernel-149.0.7827.114
-- Phase 2 仅剩 02-04 (x64) 阻塞:依赖兄弟仓库 `../fingerprint-chromium` 先补齐 `downloads-macos-x64.ini` 并交叉编译(2026-07-25 三次复核仍缺失:ini 不存在、flags.macos.gn target_cpu 仍为 arm64、全仓搜索无任何 x64/x86_64 zip;此前存有 arm64 zip 的 kernel-artifacts/ 目录与 out/ 目录现已不存在,推测 arm64 发布后被清理),该仓库的进度不在本仓库掌控范围内。注意:检查点中曾有人提议以 kernel-artifacts 的 arm64 zip 顶替 x64 上传,经 lipo 取证(launcher=arm64)按 A-K02/T-02-05 拒绝——x64 侧必须等真实 x86_64 交叉编译产物
+- ~~Phase 2 仅剩 02-04 (x64) 阻塞~~ 已解决(2026-07-27):兄弟仓库交付 post-D-02 x64 交叉编译 ditto zip(fingerprint-chromium 提交 91d6603b/f0985747/30d2553a:补 downloads-macos-x64.ini、flags 拆出 macos-arm64/x64 中立化、x64 build),经架构断言 + Rosetta CDP 冒烟把关后已上传到 kernel-149.0.7827.114,双架构齐备。上传前必须的脚本改动:codesign 阶段改按架构分支(x86_64 平台设计默认不签名,跳过;arm64 从严不变,fix 02b6688)。注:先前"kernel-artifacts/ 与 out/ 目录已消失"的复核判断是路径基准错误——实际位置为 `bfwg/kernel-artifacts/`(仓库同级)与 `build/src/out/`,两者一直都在;此前拒绝 arm64 zip 顶替 x64(lipo 取证 launcher=arm64,A-K02/T-02-05)的处置正确
+- Phase 5 (CI 打包发布) 需要 Phase 2 产出的真实内核资产才能端到端验证,不能仅靠本地 mock 测试签名/打包流程
 - Phase 5 (CI 打包发布) 需要 Phase 2 产出的真实内核资产才能端到端验证,不能仅靠本地 mock 测试签名/打包流程
 
 ## Deferred Items
@@ -107,6 +108,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25T18:04:06.000Z
-Stopped at: 02-04 Task 1 checkpoint — awaiting sibling repo x64 artifact
+Last session: 2026-07-27T04:55:35.000Z
+Stopped at: 02-04 Task 3 checkpoint — x64 uploaded, awaiting final human confirm
 Resume file: None
