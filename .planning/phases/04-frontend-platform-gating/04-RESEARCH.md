@@ -360,14 +360,16 @@ def get_platform_capabilities(self) -> dict[str, Any]:
 
 **If this table is empty:** N/A — see above; both entries are low/medium risk and don't block planning, but A2 in particular should get a quick human sanity-check against a real Mac before the copy is considered final (not before this phase can be planned/executed).
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should `AppSettings.vue`'s existing Firefox kernel-management card be hidden/annotated on macOS too?**
+1. **RESOLVED: Should `AppSettings.vue`'s existing Firefox kernel-management card be hidden/annotated on macOS too?**
+   - **Resolution (plan-phase):** annotate, do not hide — followed by `04-05`, whose objective records the same call for `GroupManager.vue:36`'s per-group Firefox count (hiding would break group arithmetic and contradict D-01's「不删不藏」). Final sign-off deferred to the `04-06` human checkpoint.
    - What we know: SC1 and D-01 scope Firefox-hiding to the create/edit dialog, list filter, and App.vue badges/counts — not this settings card.
    - What's unclear: Whether leaving a fully-functional "download Firefox kernel" control visible on macOS settings is acceptable UX, or should get at least a "仅 Windows 支持" annotation matching the rest of the phase's spirit.
    - Recommendation: Default to leaving it untouched (matches locked decisions literally); planner may add a one-line annotation as low-cost discretion, but should not silently hide it (that would exceed CONTEXT.md's discussed scope without a decision record).
 
-2. **Exact edit-mode behavior for pre-existing Firefox profiles' engine field (Pitfall 3).**
+2. **RESOLVED: Exact edit-mode behavior for pre-existing Firefox profiles' engine field (Pitfall 3).**
+   - **Resolution (plan-phase):** fully disable the engine control and retain the original value — implemented by `04-01` Task 2. Filtering the option out instead would leave `el-segmented` bound to a value absent from its options, and a naive save would silently rewrite `engine` to `chrome`, corrupting migrated Windows profiles.
    - What we know: D-01 requires such profiles stay visible + deletable + start-disabled; editing/duplicating is explicitly left to planner discretion.
    - What's unclear: Whether the engine `el-segmented` should be fully disabled in this case, or keep `'firefox'` conditionally in its options list.
    - Recommendation: Fully disable the engine control when editing a profile whose current engine is unavailable on this platform (simplest, least error-prone; avoids the "unselected/undefined value" render risk entirely).
