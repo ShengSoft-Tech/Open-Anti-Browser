@@ -405,6 +405,11 @@ def get_engines() -> dict:
     return manager.get_engine_statuses()
 
 
+@app.get("/api/capabilities")
+def get_capabilities() -> dict:
+    return manager.get_platform_capabilities()
+
+
 @app.post("/api/engines/{engine}/download")
 def start_engine_download(engine: str) -> dict:
     try:

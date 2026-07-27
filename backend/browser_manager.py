@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import random
+import sys
 import urllib.request
 import secrets
 import shutil
@@ -71,6 +72,7 @@ class BrowserManager:
             "profiles": self.list_profiles(),
             "engines": self.get_engine_statuses(),
             "downloads": self.downloads.get_all(),
+            "capabilities": self.get_platform_capabilities(),
         }
 
     def get_settings(self) -> AppSettings:
@@ -619,6 +621,22 @@ class BrowserManager:
                 "installed": firefox_path.exists(),
                 "capability_ok": firefox_path.exists(),
                 "bundled": True,
+            },
+        }
+
+    def get_platform_capabilities(self) -> dict[str, Any]:
+        is_windows = sys.platform == "win32"
+        arrange_reason = None if is_windows else "窗口排列仅在 Windows 上可用"
+        sync_reason = None if is_windows else "窗口同步仅在 Windows 上可用"
+        return {
+            "platform": sys.platform,
+            "engines": {
+                "chrome": {"available": True},
+                "firefox": {"available": is_windows},
+            },
+            "window": {
+                "arrange": {"available": is_windows, "reason": arrange_reason},
+                "sync": {"available": is_windows, "reason": sync_reason},
             },
         }
 
