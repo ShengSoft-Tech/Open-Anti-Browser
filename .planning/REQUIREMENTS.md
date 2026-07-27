@@ -30,7 +30,7 @@ Requirements for the macOS support milestone. Each maps to roadmap phases.
 ### 前端平台门控 (UI)
 
 - [x] **UI-01**: macOS 上 Firefox 引擎完全隐藏(创建/编辑配置不出现 Firefox 选项)
-- [ ] **UI-02**: 窗口同步/窗口排列控件在 macOS 置灰并带"仅 Windows"提示(不隐藏)
+- [x] **UI-02**: 窗口同步/窗口排列控件在 macOS 置灰并带"仅 Windows"提示(不隐藏)
 - [x] **UI-03**: 应用内提供"macOS 限制说明"(平台差异文案,zh-CN 与 en-US 同步)
 - [x] **UI-04**: macOS 首次运行时应用内展示放行指引(Gatekeeper "仍要打开"步骤 + `xattr -dr com.apple.quarantine` 命令,zh-CN 与 en-US 同步)
 
@@ -89,7 +89,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LAUNCH-03 | Phase 3 | Complete |
 | XPLAT-05 | Phase 3 | Complete |
 | UI-01 | Phase 4 | Complete |
-| UI-02 | Phase 4 | Pending |
+| UI-02 | Phase 4 | Complete |
 | UI-03 | Phase 4 | Complete |
 | UI-04 | Phase 4 | Complete |
 | PKG-01 | Phase 5 | Pending |

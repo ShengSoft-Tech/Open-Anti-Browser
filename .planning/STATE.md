@@ -5,15 +5,15 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 04
 current_phase_name: frontend-platform-gating
 status: executing
-stopped_at: Completed 04-03-PLAN.md
-last_updated: "2026-07-27T22:14:12.407Z"
+stopped_at: Completed 04-04-PLAN.md
+last_updated: "2026-07-27T22:23:11.143Z"
 last_activity: 2026-07-27
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 17
-  completed_plans: 14
+  completed_plans: 15
   percent: 50
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 04 (frontend-platform-gating) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
 Last activity: 2026-07-27 — Phase 04 execution started
 
-Progress: [████████░░] 82%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Progress: [████████░░] 82%
 | Phase 04 P01 | 20min | 3 tasks | 7 files |
 | Phase 04 P02 | 25min | 3 tasks | 5 files |
 | Phase 04 P03 | 15min | 2 tasks | 1 files |
+| Phase 04 P04 | 20min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,8 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 4] 04-02: macosGatekeeperNotice.js 独立 localStorage key (oab:macos-gatekeeper-notice:v1)，shouldShowGatekeeperNotice 用 platform === 'darwin' 正向判定（不是 !== 'win32'），避免 pre-bootstrap 状态误触发弹窗；GATEKEEPER_XATTR_COMMAND 作为模块常量而非 i18n 文案，保证中英命令逐字一致且限定单个 .app bundle
 - [Phase ?]: ProfileList's four gating consumption points (filter dropdown, row tag, start disable/tooltip, batch-start filter) share firefoxEngineVisible computed and isProfileStartBlocked(row) — single D-00 predicate, no independent re-derivation
 - [Phase ?]: Duplicate action disabled for platform-blocked firefox rows (duplicating would recreate the SC1-forbidden case); delete and stop remain fully unconditioned per D-01
+- [Phase ?]: [Phase 4] 04-04: SyncManager.vue 首次引入 useI18n；syncGate/arrangeGate 各自独立读 capabilities.window.sync/arrange，横幅与4个最显眼按钮的 tooltip 直接绑定后端 reason 原文（不经 t()），其余22+按钮只加 :disabled 不加提示；文件其余上千行硬编码中文保持不动（范围守住）
+- [Phase ?]: [Phase 4] 04-04: AppSettings.vue 新增 macOS-only 平台限制说明卡片（platformLimitsVisible = capabilities.platform 存在且非 win32），openGatekeeperGuide() 复用 04-02 的 buildGatekeeperNoticeHtml(t)，保证设置页重看入口与 04-05 首启弹窗文案永不分叉；Firefox 内核卡片保留，仅追加「仅 Windows」标签
 
 ### Pending Todos
 
@@ -124,6 +127,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T22:14:12.398Z
-Stopped at: Completed 04-03-PLAN.md
+Last session: 2026-07-27T22:23:11.134Z
+Stopped at: Completed 04-04-PLAN.md
 Resume file: None
