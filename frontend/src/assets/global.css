@@ -1556,6 +1556,38 @@ html.dark .el-table .el-table__row:hover > td.el-table__cell {
   font-size: 13px;
 }
 
+.gatekeeper-notice-box {
+  max-width: 480px;
+}
+
+.gatekeeper-notice {
+  color: var(--oab-text);
+  line-height: 1.75;
+  font-size: 14px;
+}
+
+.gatekeeper-notice ol {
+  margin: 0 0 10px;
+  padding-left: 18px;
+}
+
+.gatekeeper-notice li {
+  margin-bottom: 6px;
+}
+
+.gatekeeper-notice code {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 6px 10px;
+  border-radius: var(--oab-radius-sm);
+  background: rgba(255, 255, 255, 0.06);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+  user-select: all;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
 /* ─── Input Append Button (iOS Style) ──────────────── */
 
 .el-input-group {

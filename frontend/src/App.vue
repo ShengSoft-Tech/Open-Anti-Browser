@@ -188,6 +188,11 @@ import {
   getOpenSourceWindowTitle as _0x18c4,
 } from './lib/openSourceNotice.js'
 import { isFirefoxEngineAvailable, getWindowFeatureGate } from './lib/capabilitiesGating.js'
+import {
+  shouldShowGatekeeperNotice,
+  markGatekeeperNoticeSeen,
+  buildGatekeeperNoticeHtml,
+} from './lib/macosGatekeeperNotice.js'
 
 const { t } = useI18n()
 const store = useProfileStore()
@@ -301,6 +306,7 @@ onMounted(async () => {
     await store.bootstrap()
     await store.getBackendModeStatus()
     await _0x31ab()
+    await maybeShowGatekeeperNotice()
 
     profileRefreshTimer = window.setInterval(async () => {
       if (document.hidden) return
@@ -509,5 +515,20 @@ async function _0x31ab() {
     customClass: 'first-use-notice-box',
   })
   localStorage.setItem(_0x5c10, '1')
+}
+
+async function maybeShowGatekeeperNotice() {
+  if (!shouldShowGatekeeperNotice(store.capabilities)) {
+    return
+  }
+  await ElMessageBox.alert(buildGatekeeperNoticeHtml(t), t('gatekeeper.title'), {
+    confirmButtonText: t('gatekeeper.confirm'),
+    dangerouslyUseHTMLString: true,
+    closeOnClickModal: false,
+    closeOnPressEscape: false,
+    showClose: false,
+    customClass: 'gatekeeper-notice-box',
+  })
+  markGatekeeperNoticeSeen()
 }
 </script>
