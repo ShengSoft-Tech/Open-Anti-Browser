@@ -14,16 +14,22 @@
       </div>
 
       <nav class="sidebar-nav">
-        <div
+        <el-tooltip
           v-for="item in navItems"
           :key="item.key"
-          class="nav-item"
-          :class="{ active: activeNav === item.key }"
-          @click="setActiveNav(item.key)"
+          :disabled="!isNavDisabled(item.key)"
+          :content="navDisabledReason(item.key)"
+          placement="right"
         >
-          <el-icon><component :is="item.icon" /></el-icon>
-          <span>{{ t(`nav.${item.key}`) }}</span>
-        </div>
+          <div
+            class="nav-item"
+            :class="{ active: activeNav === item.key, disabled: isNavDisabled(item.key) }"
+            @click="setActiveNav(item.key)"
+          >
+            <el-icon><component :is="item.icon" /></el-icon>
+            <span>{{ t(`nav.${item.key}`) }}</span>
+          </div>
+        </el-tooltip>
       </nav>
 
       <div class="sidebar-status">
@@ -68,7 +74,7 @@
               {{ engineStatusText('chrome') }}
             </el-tag>
           </div>
-          <div class="status-row">
+          <div class="status-row" v-if="firefoxEngineVisible">
             <span>Firefox</span>
             <el-tag :type="engineTagType('firefox')" size="small">
               {{ engineStatusText('firefox') }}
@@ -181,6 +187,7 @@ import {
   getOpenSourceSidebarSubtitle as _0x72ad,
   getOpenSourceWindowTitle as _0x18c4,
 } from './lib/openSourceNotice.js'
+import { isFirefoxEngineAvailable, getWindowFeatureGate } from './lib/capabilitiesGating.js'
 
 const { t } = useI18n()
 const store = useProfileStore()
@@ -240,6 +247,7 @@ const currentViewEvents = computed(() => (
       }
     : {}
 ))
+const firefoxEngineVisible = computed(() => isFirefoxEngineAvailable(store.capabilities))
 
 function applyTheme(mode = 'system') {
   const useDark = mode === 'dark' || (mode === 'system' && systemDark.value)
@@ -353,6 +361,21 @@ function setActiveNav(nextNav) {
     return
   }
   activeNav.value = nextNav
+}
+
+function isNavDisabled(key) {
+  if (key === 'syncer') {
+    return getWindowFeatureGate(store.capabilities, 'sync').disabled
+  }
+  return false
+}
+
+function navDisabledReason(key) {
+  if (key === 'syncer') {
+    const gate = getWindowFeatureGate(store.capabilities, 'sync')
+    return gate.reason || t('platformLimits.windowsOnlyFallback')
+  }
+  return ''
 }
 
 function handleSaved() {

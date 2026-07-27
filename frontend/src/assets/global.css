@@ -206,6 +206,16 @@ body {
   box-shadow: 0 0 10px rgba(56, 130, 255, 0.6);
 }
 
+.nav-item.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.nav-item.disabled:hover {
+  background: transparent;
+  color: var(--oab-sidebar-link);
+}
+
 /* ─── Sidebar Status ───────────────────────────────── */
 
 .sidebar-status {
