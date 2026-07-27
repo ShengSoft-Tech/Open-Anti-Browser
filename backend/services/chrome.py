@@ -4,6 +4,7 @@ import json
 import os
 import random
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +32,8 @@ def launch_chrome_profile(
     executable_path = bundled_engine_executable("chrome")
     if not executable_path.exists():
         raise FileNotFoundError(f"Chrome 内核不存在：{executable_path}")
+    if sys.platform == "darwin":
+        _strip_quarantine_if_present(executable_path)
 
     proxy_config = proxy_to_profile_proxy(profile.proxy.model_dump(mode="json"))
     chrome_fp = profile.chrome.fingerprint
@@ -140,6 +143,24 @@ def launch_chrome_profile(
         "geo_profile": geo_profile,
         "seed": seed,
     }
+
+
+def _strip_quarantine_if_present(path: Path) -> None:
+    """macOS 专用、best-effort 剥离内核二进制上的 com.apple.quarantine 标记。
+
+    xattr 目标严格限定为调用方传入的、由 bundled_engine_executable("chrome")
+    解析出的内核路径（后端完全可控，不做通配符/用户输入拼接，T-3-03 EoP 缓解）。
+    剥离失败绝不能阻塞正常启动，因此吞掉所有异常。
+    """
+    try:
+        subprocess.run(
+            ["xattr", "-dr", "com.apple.quarantine", str(path)],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        pass
 
 
 def _split_arg(raw_arg: str) -> tuple[str, str | None]:

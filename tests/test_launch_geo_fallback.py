@@ -37,6 +37,73 @@ class LaunchGeoFallbackTests(unittest.TestCase):
             self.assertEqual(result["geo_profile"]["source"], "fallback")
             self.assertIn("geo failed", result["geo_profile"]["resolve_error"])
 
+    def test_chrome_launch_strips_quarantine_on_darwin(self):
+        with tempfile.TemporaryDirectory() as temp:
+            temp_dir = Path(temp)
+            chrome_exe = temp_dir / "chrome.exe"
+            chrome_exe.write_bytes(b"")
+            process = Mock(pid=1234)
+            profile = BrowserProfile(engine="chrome")
+
+            with (
+                patch("backend.services.chrome.bundled_engine_executable", return_value=chrome_exe),
+                patch("backend.services.chrome.resolve_geo_profile", side_effect=RuntimeError("geo failed")),
+                patch("backend.services.chrome.find_free_port", return_value=9222),
+                patch("backend.services.chrome.subprocess.Popen", return_value=process),
+                patch("backend.services.chrome.subprocess.run") as mock_run,
+                patch("backend.services.chrome.sys.platform", "darwin"),
+            ):
+                result = launch_chrome_profile(profile, _settings(temp_dir), temp_dir / "profile")
+
+            self.assertEqual(result["process"], process)
+            mock_run.assert_called_once()
+            call_args = mock_run.call_args
+            self.assertEqual(
+                call_args.args[0],
+                ["xattr", "-dr", "com.apple.quarantine", str(chrome_exe)],
+            )
+
+    def test_chrome_launch_skips_quarantine_strip_on_non_darwin(self):
+        with tempfile.TemporaryDirectory() as temp:
+            temp_dir = Path(temp)
+            chrome_exe = temp_dir / "chrome.exe"
+            chrome_exe.write_bytes(b"")
+            process = Mock(pid=1234)
+            profile = BrowserProfile(engine="chrome")
+
+            with (
+                patch("backend.services.chrome.bundled_engine_executable", return_value=chrome_exe),
+                patch("backend.services.chrome.resolve_geo_profile", side_effect=RuntimeError("geo failed")),
+                patch("backend.services.chrome.find_free_port", return_value=9222),
+                patch("backend.services.chrome.subprocess.Popen", return_value=process),
+                patch("backend.services.chrome.subprocess.run") as mock_run,
+                patch("backend.services.chrome.sys.platform", "win32"),
+            ):
+                result = launch_chrome_profile(profile, _settings(temp_dir), temp_dir / "profile")
+
+            self.assertEqual(result["process"], process)
+            mock_run.assert_not_called()
+
+    def test_chrome_launch_continues_when_quarantine_strip_raises(self):
+        with tempfile.TemporaryDirectory() as temp:
+            temp_dir = Path(temp)
+            chrome_exe = temp_dir / "chrome.exe"
+            chrome_exe.write_bytes(b"")
+            process = Mock(pid=1234)
+            profile = BrowserProfile(engine="chrome")
+
+            with (
+                patch("backend.services.chrome.bundled_engine_executable", return_value=chrome_exe),
+                patch("backend.services.chrome.resolve_geo_profile", side_effect=RuntimeError("geo failed")),
+                patch("backend.services.chrome.find_free_port", return_value=9222),
+                patch("backend.services.chrome.subprocess.Popen", return_value=process),
+                patch("backend.services.chrome.subprocess.run", side_effect=OSError("xattr missing")),
+                patch("backend.services.chrome.sys.platform", "darwin"),
+            ):
+                result = launch_chrome_profile(profile, _settings(temp_dir), temp_dir / "profile")
+
+            self.assertEqual(result["process"], process)
+
     def test_firefox_launch_continues_when_ip_resolution_fails(self):
         with tempfile.TemporaryDirectory() as temp:
             temp_dir = Path(temp)
