@@ -64,3 +64,50 @@ test('zh-CN and en-US have the same non-zero number of leaf keys', () => {
   assert.ok(zhCount > 0, 'zh-CN.js has zero leaf keys')
   assert.equal(zhCount, enCount, `leaf count mismatch: zh-CN has ${zhCount}, en-US has ${enCount}`)
 })
+
+// Phase 4 (04-frontend-platform-gating) 必备 key 清单：platformLimits 扩充 10 条
+// （engineLockedHint 由 04-01 加过）+ syncer 扩充 2 条 + 新增 gatekeeper 段 11 条，共 24 条。
+// 04-03/04-04/04-05 直接消费这份清单里的 key，不另起新 key。
+const PHASE_04_REQUIRED_KEYS = [
+  'platformLimits.engineLockedHint',
+  'platformLimits.title',
+  'platformLimits.desc',
+  'platformLimits.windowsOnlyTag',
+  'platformLimits.windowsOnlyFallback',
+  'platformLimits.firefoxItem',
+  'platformLimits.windowItem',
+  'platformLimits.gatekeeperItem',
+  'platformLimits.startBlockedHint',
+  'platformLimits.reopenGatekeeper',
+  'platformLimits.kernelWindowsOnly',
+  'syncer.platformBannerTitle',
+  'syncer.platformBannerHint',
+  'gatekeeper.title',
+  'gatekeeper.intro',
+  'gatekeeper.stepsTitle',
+  'gatekeeper.step1',
+  'gatekeeper.step2',
+  'gatekeeper.step3',
+  'gatekeeper.step4',
+  'gatekeeper.commandTitle',
+  'gatekeeper.commandHint',
+  'gatekeeper.settingsHint',
+  'gatekeeper.confirm',
+]
+
+test('Phase 4 required i18n keys exist as non-empty strings in both locales', () => {
+  const zhEntries = flattenEntries(zhCN)
+  const enEntries = flattenEntries(enUS)
+
+  function missingKeys(entries) {
+    return PHASE_04_REQUIRED_KEYS.filter(
+      path => typeof entries[path] !== 'string' || entries[path].trim().length === 0
+    )
+  }
+
+  const missingZh = missingKeys(zhEntries)
+  const missingEn = missingKeys(enEntries)
+
+  assert.deepEqual(missingZh, [], `zh-CN.js missing/empty required keys: ${missingZh.join(', ')}`)
+  assert.deepEqual(missingEn, [], `en-US.js missing/empty required keys: ${missingEn.join(', ')}`)
+})
