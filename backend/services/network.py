@@ -29,6 +29,7 @@ GEO_SECONDARY_TIMEOUT = 6
 PROXY_CONNECT_TIMEOUT = 6
 PROXY_TEST_TARGET_HOST = "1.1.1.1"
 PROXY_TEST_TARGET_PORT = 443
+DEFAULT_TERMINATION_GRACE_PERIOD = 3.0
 DEFAULT_GEO_PROFILE = {
     "ip": None,
     "language": "en-US",
@@ -836,22 +837,28 @@ def slugify(value: str, fallback: str = "profile") -> str:
     return value or fallback
 
 
-def kill_process_tree(pid: int) -> None:
+def kill_process_tree(pid: int, grace_period: float = DEFAULT_TERMINATION_GRACE_PERIOD) -> None:
     try:
         parent = psutil.Process(pid)
     except psutil.Error:
         return
     children = parent.children(recursive=True)
-    for process in reversed(children):
+    procs = children + [parent]
+
+    for process in procs:
+        try:
+            process.terminate()
+        except psutil.Error:
+            continue
+
+    gone, alive = psutil.wait_procs(procs, timeout=grace_period)
+
+    for process in alive:
         try:
             process.kill()
         except psutil.Error:
             continue
-    try:
-        parent.kill()
-    except psutil.Error:
-        pass
-    psutil.wait_procs(children + [parent], timeout=5)
+    psutil.wait_procs(alive, timeout=5)
 
 
 def remove_directory(path: str | Path) -> None:
