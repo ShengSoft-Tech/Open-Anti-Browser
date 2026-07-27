@@ -7,7 +7,7 @@ set -euo pipefail
 # 对拿到的内核产物(zip 或已解压 .app)做:
 #   1. 产物就绪化(全程 ditto,保 Framework 符号链接与 ad-hoc 签名)
 #   2. 双二进制架构校验(launcher stub + Framework 二进制,均须匹配 --arch)
-#   3. ad-hoc 签名存活校验(codesign,轻量 sanity check)
+#   3. ad-hoc 签名存活校验(codesign;仅 arm64——x86_64 平台设计默认不签名,跳过)
 #   4. 本机 CDP 启动冒烟(arm64 原生 / x86_64 走 Rosetta 2)
 # 通过后(非 --dry-run)用 gh release upload --clobber 幂等发布到 kernel-149.0.7827.114。
 #
@@ -113,18 +113,28 @@ for BIN in "$LAUNCHER" "$FRAMEWORK"; do
 done
 
 echo "== 阶段 3/4: ad-hoc 签名存活校验(codesign)=="
-CODESIGN_OUT="$(codesign -dv "$APP" 2>&1)" || { echo "错误: codesign 执行失败: $CODESIGN_OUT" >&2; exit 1; }
-if ! grep -q "adhoc" <<<"$CODESIGN_OUT"; then
-  echo "签名校验失败: 未检出 adhoc 标记" >&2
-  echo "$CODESIGN_OUT" >&2
-  exit 1
+# 签名校验按架构分支:arm64 的 Mach-O 强制签名(ld64.lld 链接时自动打 ad-hoc + linker-signed
+# 标记,flags=0x20002),故此步对 arm64 有效且从严保留原逻辑;x86_64 平台设计上默认不签名
+# (链接器默认 -no_adhoc_codesign),codesign -dv 会返回 "code object is not signed at all",
+# 此步对 x86_64 不适用,跳过——x64 完整性改由阶段 2 双二进制架构断言 + 阶段 4 Rosetta 实际
+# 启动冒烟(比 codesign 更强)兜底。不得用 codesign --force --sign - 补签绕过(手工签只得
+# flags=0x2 adhoc,拿不到 0x20000 linker-signed,反给 385MB 嵌套 bundle 增加破坏风险)。
+if [[ "$ARCH" == "arm64" ]]; then
+  CODESIGN_OUT="$(codesign -dv "$APP" 2>&1)" || { echo "错误: codesign 执行失败: $CODESIGN_OUT" >&2; exit 1; }
+  if ! grep -q "adhoc" <<<"$CODESIGN_OUT"; then
+    echo "签名校验失败: 未检出 adhoc 标记" >&2
+    echo "$CODESIGN_OUT" >&2
+    exit 1
+  fi
+  if ! grep -q "linker-signed" <<<"$CODESIGN_OUT"; then
+    echo "签名校验失败: 未检出 linker-signed 标记" >&2
+    echo "$CODESIGN_OUT" >&2
+    exit 1
+  fi
+  echo "签名校验通过: adhoc, linker-signed 均存活(ditto 往返未破坏签名)"
+else
+  echo "跳过签名校验: x86_64 二进制平台设计上默认不签名(链接器默认 -no_adhoc_codesign),codesign 校验不适用;x64 完整性由阶段 2 架构断言 + 阶段 4 Rosetta 启动冒烟兜底"
 fi
-if ! grep -q "linker-signed" <<<"$CODESIGN_OUT"; then
-  echo "签名校验失败: 未检出 linker-signed 标记" >&2
-  echo "$CODESIGN_OUT" >&2
-  exit 1
-fi
-echo "签名校验通过: adhoc, linker-signed 均存活(ditto 往返未破坏签名)"
 
 echo "== 阶段 4/4: 本机 CDP 启动冒烟(KERNEL-03)=="
 
