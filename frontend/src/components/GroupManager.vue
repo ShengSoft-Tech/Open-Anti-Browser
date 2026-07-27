@@ -31,7 +31,7 @@
           <el-tag type="primary" effect="plain" size="small">{{ row.chrome }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="Firefox" width="100">
+      <el-table-column v-if="firefoxColumnVisible" label="Firefox" width="100">
         <template #default="{ row }">
           <el-tag type="warning" effect="plain" size="small">{{ row.firefox }}</el-tag>
         </template>
@@ -59,13 +59,19 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { FolderOpened } from '@element-plus/icons-vue'
 import { useProfileStore } from '../stores/profile.js'
+import { shouldShowFirefoxColumn } from '../lib/capabilitiesGating.js'
 
 const { t } = useI18n()
 const store = useProfileStore()
+
+const firefoxColumnVisible = computed(() =>
+  shouldShowFirefoxColumn(store.capabilities, store.groupList)
+)
 
 async function startGroup(name) {
   try {

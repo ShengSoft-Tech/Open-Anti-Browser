@@ -5,6 +5,7 @@ import {
   visibleEngineOptions,
   isEngineSelectorLocked,
   getWindowFeatureGate,
+  shouldShowFirefoxColumn,
 } from './capabilitiesGating.js'
 
 const baseOptions = [
@@ -154,4 +155,45 @@ test('getWindowFeatureGate is a pure function: repeated calls return equal resul
 
   assert.deepEqual(first, second)
   assert.deepEqual(capabilities, snapshot)
+})
+
+// UAT A8（04-06 checkpoint 决议）：分组管理的 Firefox 计数列按需显示。
+// 迁移用户看得到（否则「配置数」与「Chrome」对不上，少掉的条目无从解释）；
+// 全新 macOS 用户看不到（一个恒为 0、还挂着用不了的引擎名的列纯属噪音）。
+test('shouldShowFirefoxColumn returns true on platforms where firefox is available (Windows zero-regression)', () => {
+  const caps = { engines: { firefox: { available: true } } }
+  assert.equal(shouldShowFirefoxColumn(caps, []), true)
+  assert.equal(shouldShowFirefoxColumn(caps, [{ firefox: 0 }]), true)
+})
+
+test('shouldShowFirefoxColumn returns true when firefox is unavailable but legacy firefox profiles still exist', () => {
+  const caps = { engines: { firefox: { available: false } } }
+  assert.equal(shouldShowFirefoxColumn(caps, [{ firefox: 0 }, { firefox: 1 }]), true)
+})
+
+test('shouldShowFirefoxColumn returns false when firefox is unavailable and no group holds a firefox profile', () => {
+  const caps = { engines: { firefox: { available: false } } }
+  assert.equal(shouldShowFirefoxColumn(caps, [{ firefox: 0 }, { firefox: 0 }]), false)
+  assert.equal(shouldShowFirefoxColumn(caps, []), false)
+})
+
+test('shouldShowFirefoxColumn defaults to showing the column for undefined/null capabilities (fail-open)', () => {
+  assert.equal(shouldShowFirefoxColumn(undefined, []), true)
+  assert.equal(shouldShowFirefoxColumn(null, [{ firefox: 0 }]), true)
+})
+
+test('shouldShowFirefoxColumn tolerates missing/!undefined group lists and malformed rows without throwing', () => {
+  const caps = { engines: { firefox: { available: false } } }
+  assert.equal(shouldShowFirefoxColumn(caps, undefined), false)
+  assert.equal(shouldShowFirefoxColumn(caps, null), false)
+  assert.equal(shouldShowFirefoxColumn(caps, [{}, { firefox: null }]), false)
+})
+
+test('shouldShowFirefoxColumn is pure — does not mutate the group list', () => {
+  const caps = { engines: { firefox: { available: false } } }
+  const groups = [{ firefox: 1 }]
+  const snapshot = JSON.stringify(groups)
+  shouldShowFirefoxColumn(caps, groups)
+  shouldShowFirefoxColumn(caps, groups)
+  assert.equal(JSON.stringify(groups), snapshot)
 })
