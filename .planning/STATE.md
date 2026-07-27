@@ -5,8 +5,8 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 3
 current_phase_name: macOS Chrome 启动与能力 API
 status: planning
-stopped_at: Phase 02 complete — dual-arch macOS kernels published, KERNEL-01/02/03 closed; Phase 3 ready to plan
-last_updated: "2026-07-27T05:18:46.038Z"
+stopped_at: Phase 3 context gathered
+last_updated: "2026-07-27T16:25:51.955Z"
 last_activity: 2026-07-26
 last_activity_desc: Phase 02 complete, transitioned to Phase 3
 progress:
@@ -108,6 +108,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T05:18:46.038Z
-Stopped at: Phase 02 complete — Phase 3 ready to plan
-Resume file: None
+Last session: 2026-07-27T16:25:51.945Z
+Stopped at: Phase 3 context gathered
+Resume file: .planning/phases/03-macos-chrome-api/03-CONTEXT.md
