@@ -33,7 +33,7 @@
 
 <!-- 里程碑 v0.2:macOS 支持(仅 Chrome 内核) -->
 
-- [ ] macOS 核心功能可用:配置管理、指纹启动、代理、扩展、批量启动(Chrome 引擎)
+- [x] macOS 核心功能可用:配置管理、指纹启动、代理、扩展、批量启动(Chrome 引擎)— Validated in Phase 3(arm64 真机验收:启动/指纹/代理/geo/扩展/批量隔离/停止无残留 全过)
 - [ ] macOS 上窗口排列/窗口同步禁用并明确提示"仅 Windows";Firefox 引擎在 macOS 隐藏
 - [ ] CI 增加 macOS job:PyInstaller .app + 内核打包,产出 arm64 dmg 挂到 release(x64 暂缓,见 Out of Scope)
 - [ ] release 说明包含未签名应用首次打开的放行步骤
@@ -82,7 +82,7 @@
 - 后端跨平台适配(Chrome-only,窗口功能禁用)
 - CI macOS job 产出 arm64 dmg 并挂到 release
 
-**Progress:** Phase 1(后端跨平台基础适配)complete — 后端在 macOS 可安装/导入/启动(含 --backend-only),路径解析到 macOS 约定位置,Windows 零回归(72 unittest 全过),CI 双平台测试 workflow 上线。
+**Progress:** Phase 1–3 complete(50%）。Phase 1 后端跨平台基础适配;Phase 2 macOS arm64/x64 内核构建并发布 kernel release;Phase 3 macOS Chrome 启动链路 + 平台能力 API 打通并经 arm64 真机端到端验收(含 D-07 quarantine/AMFI 修复)。x64 已于 2026-07-27 移出 v0.2(暂缓)。下一步 Phase 4 前端平台门控。
 
 ## Evolution
 
