@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { isFirefoxEngineAvailable, visibleEngineOptions } from './capabilitiesGating.js'
+import { isFirefoxEngineAvailable, visibleEngineOptions, isEngineSelectorLocked } from './capabilitiesGating.js'
 
 const baseOptions = [
   { label: 'Chrome', value: 'chrome' },
@@ -66,4 +66,32 @@ test('visibleEngineOptions is a pure function: repeated calls return equal resul
 test('visibleEngineOptions keeps the firefox option when currentEngine is firefox even if unavailable (no dangling selection)', () => {
   const result = visibleEngineOptions(baseOptions, { engines: { firefox: { available: false } } }, 'firefox')
   assert.deepEqual(result, baseOptions)
+})
+
+test('isEngineSelectorLocked is true when editing an existing firefox profile on a machine without firefox', () => {
+  assert.equal(isEngineSelectorLocked({ engines: { firefox: { available: false } } }, 'firefox'), true)
+})
+
+test('isEngineSelectorLocked is false when current engine is chrome even if firefox is unavailable', () => {
+  assert.equal(isEngineSelectorLocked({ engines: { firefox: { available: false } } }, 'chrome'), false)
+})
+
+test('isEngineSelectorLocked is false when firefox is available', () => {
+  assert.equal(isEngineSelectorLocked({ engines: { firefox: { available: true } } }, 'firefox'), false)
+})
+
+test('isEngineSelectorLocked does not lock on undefined/null capabilities (unknown platform is not locked)', () => {
+  assert.equal(isEngineSelectorLocked(undefined, 'firefox'), false)
+  assert.equal(isEngineSelectorLocked(null, 'firefox'), false)
+})
+
+test('isEngineSelectorLocked is a pure function: repeated calls return equal results and do not mutate input capabilities', () => {
+  const capabilities = { engines: { firefox: { available: false } } }
+  const snapshot = JSON.parse(JSON.stringify(capabilities))
+
+  const first = isEngineSelectorLocked(capabilities, 'firefox')
+  const second = isEngineSelectorLocked(capabilities, 'firefox')
+
+  assert.equal(first, second)
+  assert.deepEqual(capabilities, snapshot)
 })
