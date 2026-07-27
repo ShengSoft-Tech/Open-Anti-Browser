@@ -23,8 +23,8 @@ Requirements for the macOS support milestone. Each maps to roadmap phases.
 
 ### macOS Chrome 启动 (LAUNCH)
 
-- [ ] **LAUNCH-01**: macOS 用户可以启动指纹 Chrome 配置(直接 Popen 嵌套 .app 内的 Chromium 二进制,指纹参数、独立用户数据目录、CDP 调试端口、psutil 会话跟踪全部正常)
-- [ ] **LAUNCH-02**: 代理(含本地代理桥)、扩展安装、按 IP 地理解析、批量启动在 macOS Chrome 上工作
+- [x] **LAUNCH-01**: macOS 用户可以启动指纹 Chrome 配置(直接 Popen 嵌套 .app 内的 Chromium 二进制,指纹参数、独立用户数据目录、CDP 调试端口、psutil 会话跟踪全部正常)
+- [x] **LAUNCH-02**: 代理(含本地代理桥)、扩展安装、按 IP 地理解析、批量启动在 macOS Chrome 上工作
 - [x] **LAUNCH-03**: 停止配置与退出应用能正确终止 macOS 上的 Chrome 进程树,无残留进程
 
 ### 前端平台门控 (UI)
@@ -84,8 +84,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | KERNEL-01 | Phase 2 | Complete |
 | KERNEL-02 | Phase 2 | Complete |
 | KERNEL-03 | Phase 2 | Complete |
-| LAUNCH-01 | Phase 3 | Pending |
-| LAUNCH-02 | Phase 3 | Pending |
+| LAUNCH-01 | Phase 3 | Complete |
+| LAUNCH-02 | Phase 3 | Complete |
 | LAUNCH-03 | Phase 3 | Complete |
 | XPLAT-05 | Phase 3 | Complete |
 | UI-01 | Phase 4 | Pending |
