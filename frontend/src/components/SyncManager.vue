@@ -1,5 +1,18 @@
 <template>
   <div class="sync-page">
+    <el-alert
+      v-if="syncGate.disabled || arrangeGate.disabled"
+      class="platform-banner"
+      type="warning"
+      :closable="false"
+      show-icon
+      :title="t('syncer.platformBannerTitle')"
+    >
+      <p v-if="syncGate.disabled">{{ syncGate.reason || t('platformLimits.windowsOnlyFallback') }}</p>
+      <p v-if="arrangeGate.disabled && arrangeGate.reason !== syncGate.reason">{{ arrangeGate.reason || t('platformLimits.windowsOnlyFallback') }}</p>
+      <p class="platform-banner-hint">{{ t('syncer.platformBannerHint') }}</p>
+    </el-alert>
+
     <section class="page-panel soft sync-hero">
       <div class="sync-hero-main">
         <div>
@@ -9,18 +22,24 @@
         </div>
 
         <div class="hero-action-row">
-          <el-button type="primary" :disabled="selectedRunningIds.length < 2" :loading="submitting" @click="startSync">
-            <el-icon><VideoPlay /></el-icon>
-            启动同步
-          </el-button>
-          <el-button plain :disabled="!session.running || selectedRunningIds.length < 2" :loading="submitting" @click="restartSync">
-            <el-icon><RefreshRight /></el-icon>
-            重启同步
-          </el-button>
-          <el-button plain :disabled="!session.running" :loading="submitting" @click="stopSync">
-            <el-icon><CloseBold /></el-icon>
-            停止同步
-          </el-button>
+          <el-tooltip :disabled="!syncGate.disabled" :content="syncGate.reason || t('platformLimits.windowsOnlyFallback')">
+            <el-button type="primary" :disabled="selectedRunningIds.length < 2 || syncGate.disabled" :loading="submitting" @click="startSync">
+              <el-icon><VideoPlay /></el-icon>
+              启动同步
+            </el-button>
+          </el-tooltip>
+          <el-tooltip :disabled="!syncGate.disabled" :content="syncGate.reason || t('platformLimits.windowsOnlyFallback')">
+            <el-button plain :disabled="!session.running || selectedRunningIds.length < 2 || syncGate.disabled" :loading="submitting" @click="restartSync">
+              <el-icon><RefreshRight /></el-icon>
+              重启同步
+            </el-button>
+          </el-tooltip>
+          <el-tooltip :disabled="!syncGate.disabled" :content="syncGate.reason || t('platformLimits.windowsOnlyFallback')">
+            <el-button plain :disabled="!session.running || syncGate.disabled" :loading="submitting" @click="stopSync">
+              <el-icon><CloseBold /></el-icon>
+              停止同步
+            </el-button>
+          </el-tooltip>
           <el-popover
             v-model:visible="settingsVisible"
             placement="bottom-end"
@@ -142,11 +161,11 @@
               <el-option label="全部分组" value="" />
               <el-option v-for="group in groups" :key="group || '_'" :label="group || '未分组'" :value="group" />
             </el-select>
-            <el-button plain :disabled="!selectedRunningIds.length" @click="showWindows()">
+            <el-button plain :disabled="!selectedRunningIds.length || arrangeGate.disabled" @click="showWindows()">
               <el-icon><FullScreen /></el-icon>
               显示窗口
             </el-button>
-            <el-button plain :disabled="!selectedRunningIds.length" @click="uniformSize">
+            <el-button plain :disabled="!selectedRunningIds.length || arrangeGate.disabled" @click="uniformSize">
               统一大小
             </el-button>
           </div>
@@ -220,7 +239,7 @@
                     </el-button>
                   </el-tooltip>
                   <el-tooltip content="显示窗口">
-                    <el-button circle text class="row-action" @click="showWindows([row.id])">
+                    <el-button circle text class="row-action" :disabled="arrangeGate.disabled" @click="showWindows([row.id])">
                       <el-icon><FullScreen /></el-icon>
                     </el-button>
                   </el-tooltip>
@@ -269,18 +288,18 @@
         </div>
 
         <div class="console-primary-actions">
-          <el-button type="primary" :disabled="selectedRunningIds.length < 2" :loading="submitting" @click="startSync">启动同步</el-button>
-          <el-button plain :disabled="!session.running || selectedRunningIds.length < 2" :loading="submitting" @click="restartSync">重启同步</el-button>
-          <el-button plain :disabled="!session.running" :loading="submitting" @click="stopSync">停止同步</el-button>
+          <el-button type="primary" :disabled="selectedRunningIds.length < 2 || syncGate.disabled" :loading="submitting" @click="startSync">启动同步</el-button>
+          <el-button plain :disabled="!session.running || selectedRunningIds.length < 2 || syncGate.disabled" :loading="submitting" @click="restartSync">重启同步</el-button>
+          <el-button plain :disabled="!session.running || syncGate.disabled" :loading="submitting" @click="stopSync">停止同步</el-button>
         </div>
 
         <template v-if="compactPanel">
           <div class="compact-panel">
             <div class="quick-grid two">
-              <el-button plain :disabled="!selectedRunningIds.length" @click="showWindows()">显示窗口</el-button>
-              <el-button plain :disabled="!selectedRunningIds.length" @click="uniformSize">统一大小</el-button>
-              <el-button plain :disabled="!selectedRunningIds.length" @click="arrangeWindows">一键排列</el-button>
-              <el-button plain :disabled="!selectedRunningIds.length" @click="runTabAction('close_blank')">关闭空白页</el-button>
+              <el-button plain :disabled="!selectedRunningIds.length || arrangeGate.disabled" @click="showWindows()">显示窗口</el-button>
+              <el-button plain :disabled="!selectedRunningIds.length || arrangeGate.disabled" @click="uniformSize">统一大小</el-button>
+              <el-button plain :disabled="!selectedRunningIds.length || arrangeGate.disabled" @click="arrangeWindows">一键排列</el-button>
+              <el-button plain :disabled="!selectedRunningIds.length || syncGate.disabled" @click="runTabAction('close_blank')">关闭空白页</el-button>
             </div>
           </div>
         </template>
@@ -300,8 +319,8 @@
             <section class="console-card">
               <div class="card-title">快速操作</div>
               <div class="quick-grid two">
-                <el-button plain :disabled="!selectedRunningIds.length" @click="showWindows()">显示窗口</el-button>
-                <el-button plain :disabled="!selectedRunningIds.length" @click="uniformSize">统一大小</el-button>
+                <el-button plain :disabled="!selectedRunningIds.length || arrangeGate.disabled" @click="showWindows()">显示窗口</el-button>
+                <el-button plain :disabled="!selectedRunningIds.length || arrangeGate.disabled" @click="uniformSize">统一大小</el-button>
               </div>
             </section>
 
@@ -320,7 +339,9 @@
                   </el-radio-group>
                 </el-form-item>
               </el-form>
-              <el-button class="wide-btn" type="primary" plain :disabled="!selectedRunningIds.length" @click="arrangeWindows">一键排列</el-button>
+              <el-tooltip :disabled="!arrangeGate.disabled" :content="arrangeGate.reason || t('platformLimits.windowsOnlyFallback')">
+                <el-button class="wide-btn" type="primary" plain :disabled="!selectedRunningIds.length || arrangeGate.disabled" @click="arrangeWindows">一键排列</el-button>
+              </el-tooltip>
             </section>
           </div>
 
@@ -328,8 +349,8 @@
             <section class="console-card">
               <div class="card-title">常用输入</div>
               <div class="quick-grid two">
-                <el-button plain :disabled="!selectedRunningIds.length" @click="runTextAction({ action: 'clear' })">清空内容</el-button>
-                <el-button plain :disabled="!selectedRunningIds.length || !sameText.trim()" @click="runTextAction({ action: 'same', text: sameText })">相同内容</el-button>
+                <el-button plain :disabled="!selectedRunningIds.length || syncGate.disabled" @click="runTextAction({ action: 'clear' })">清空内容</el-button>
+                <el-button plain :disabled="!selectedRunningIds.length || !sameText.trim() || syncGate.disabled" @click="runTextAction({ action: 'same', text: sameText })">相同内容</el-button>
               </div>
             </section>
 
@@ -340,14 +361,14 @@
                 <span class="range-sep">至</span>
                 <el-input-number v-model="randomRange.end" :precision="3" :step="0.001" controls-position="right" />
               </div>
-              <el-button class="wide-btn" plain :disabled="!selectedRunningIds.length" @click="runTextAction({ action: 'random', range_start: randomRange.start, range_end: randomRange.end, precision: 3 })">输入随机数字</el-button>
+              <el-button class="wide-btn" plain :disabled="!selectedRunningIds.length || syncGate.disabled" @click="runTextAction({ action: 'random', range_start: randomRange.start, range_end: randomRange.end, precision: 3 })">输入随机数字</el-button>
             </section>
 
             <section class="console-card">
               <div class="card-title">相同文本</div>
               <el-input v-model="sameText" type="textarea" :rows="3" placeholder="请输入要同步输入的内容" />
               <div class="card-actions right">
-                <el-button type="primary" plain :disabled="!selectedRunningIds.length || !sameText.trim()" @click="runTextAction({ action: 'same', text: sameText })">输入</el-button>
+                <el-button type="primary" plain :disabled="!selectedRunningIds.length || !sameText.trim() || syncGate.disabled" @click="runTextAction({ action: 'same', text: sameText })">输入</el-button>
               </div>
             </section>
 
@@ -370,7 +391,7 @@
               </div>
               <el-button class="wide-btn dashed" plain @click="addGroup">添加文本组</el-button>
               <div class="card-actions right">
-                <el-button type="primary" plain :disabled="!selectedRunningIds.length" @click="runTextAction({ action: 'designated', groups: designatedGroups, designated_mode: designatedMode, fixed_text: fixedText })">执行输入</el-button>
+                <el-button type="primary" plain :disabled="!selectedRunningIds.length || syncGate.disabled" @click="runTextAction({ action: 'designated', groups: designatedGroups, designated_mode: designatedMode, fixed_text: fixedText })">执行输入</el-button>
               </div>
             </section>
           </div>
@@ -379,10 +400,10 @@
             <section class="console-card">
               <div class="card-title">标签页整理</div>
               <div class="quick-grid two">
-                <el-button plain :disabled="!selectedRunningIds.length" @click="runTabAction('unify_tabs')">统一标签页</el-button>
-                <el-button plain :disabled="!selectedRunningIds.length" @click="runTabAction('close_others')">关闭其他</el-button>
-                <el-button plain :disabled="!selectedRunningIds.length" @click="runTabAction('close_current')">关闭当前</el-button>
-                <el-button plain :disabled="!selectedRunningIds.length" @click="runTabAction('close_blank')">关闭空白页</el-button>
+                <el-button plain :disabled="!selectedRunningIds.length || syncGate.disabled" @click="runTabAction('unify_tabs')">统一标签页</el-button>
+                <el-button plain :disabled="!selectedRunningIds.length || syncGate.disabled" @click="runTabAction('close_others')">关闭其他</el-button>
+                <el-button plain :disabled="!selectedRunningIds.length || syncGate.disabled" @click="runTabAction('close_current')">关闭当前</el-button>
+                <el-button plain :disabled="!selectedRunningIds.length || syncGate.disabled" @click="runTabAction('close_blank')">关闭空白页</el-button>
               </div>
             </section>
 
@@ -393,7 +414,7 @@
                 <span>首个网址在当前标签页打开</span>
                 <el-switch v-model="firstInCurrentTab" />
               </label>
-              <el-button class="wide-btn" plain :disabled="!selectedRunningIds.length || !parsedUrls.length" @click="openUrls">批量打开</el-button>
+              <el-button class="wide-btn" plain :disabled="!selectedRunningIds.length || !parsedUrls.length || syncGate.disabled" @click="openUrls">批量打开</el-button>
             </section>
           </div>
         </template>
@@ -406,12 +427,15 @@
 
 <script setup>
 import { computed, onActivated, onDeactivated, onUnmounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { CloseBold, FullScreen, Monitor, RefreshRight, Setting, VideoPlay } from '@element-plus/icons-vue'
 import { useProfileStore } from '../stores/profile.js'
+import { getWindowFeatureGate } from '../lib/capabilitiesGating.js'
 import chromeIcon from '../assets/chrome.svg'
 import firefoxIcon from '../assets/firefox.png'
 
+const { t } = useI18n()
 const store = useProfileStore()
 const groupFilter = ref('')
 const selectedIds = ref([])
@@ -493,6 +517,9 @@ const lastEventText = computed(() => {
   const label = labels[event.type] || event.type
   return event.summary ? `${label} · ${event.summary}` : label
 })
+// D-00 单一事实源:同步类与排列类操作各读各的能力字段,互不回退。
+const syncGate = computed(() => getWindowFeatureGate(store.capabilities, 'sync'))
+const arrangeGate = computed(() => getWindowFeatureGate(store.capabilities, 'arrange'))
 
 watch(() => session.value.master_profile_id, value => {
   if (value) masterId.value = value
