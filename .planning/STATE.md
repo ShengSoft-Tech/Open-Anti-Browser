@@ -5,15 +5,15 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 03
 current_phase_name: macos-chrome-api
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-07-27T17:52:46.868Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-07-27T17:55:54.855Z"
 last_activity: 2026-07-27
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 10
   percent: 33
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 03 (macos-chrome-api) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-07-27 — Phase 03 execution started
 
-Progress: [████████░░] 82%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [████████░░] 82%
 | Phase 02 P02 | 8min | 2 tasks | 2 files |
 | Phase 02 P03 | 35min | 3 tasks | 0 files |
 | Phase 03 P01 | 15min | 2 tasks | 3 files |
+| Phase 03 P02 | 15min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,7 @@ Recent decisions affecting current work:
 - [Phase ?]: 02-02: 沿用 _CHROME_KERNEL_BASE f-string 模式回填 macOS arm64/x64 内核 URL 常量(-1.3 revision),不用 platform.machine() 运行时分支
 - [Phase ?]: 02-03: arm64 内核经真实 verify+upload 脚本独立复核后发布到 kernel-149.0.7827.114,post-D-02 归属经人工 cross-repo handoff 确认(LOG(INFO) 无法静态检出)
 - [Phase ?]: 03-01: capabilities 契约锁定 option-a(嵌套形状),available 与 installed/capability_ok 正交,不并入 open-api
+- [Phase ?]: kill_process_tree refactored to unified terminate->wait_procs->kill (D-05/D-06); grace_period keyword-defaulted (DEFAULT_TERMINATION_GRACE_PERIOD=3.0) for zero call-site changes
 
 ### Pending Todos
 
@@ -110,6 +112,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T17:52:46.859Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-07-27T17:55:54.846Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None
