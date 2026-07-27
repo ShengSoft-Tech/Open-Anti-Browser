@@ -87,9 +87,12 @@ coverage:
   - id: D6
     description: "LAUNCH-02 extension visibility"
     requirement: "LAUNCH-02"
-    verification: []
+    verification:
+      - kind: real-machine
+        ref: "MV3 ext imported via /api/extensions/import-folder -> enabled on P3 -> launch cmd carries --load-extension/--disable-extensions-except -> Playwright/CDP: content script injected data-p3-ext=loaded on example.com (via AU proxy). MV3 SW dormant (0 CDP targets, normal)."
+        status: pass
     human_judgment: true
-    rationale: "NOT re-verified this session — user elected to wrap up before installing a test extension. Low risk: extension install is cross-platform code, unchanged this phase. Follow-up: install a real extension and confirm it loads (chrome://extensions / CDP service-worker target)."
+    rationale: "Resolved this session via a minimal MV3 test extension + Playwright content-script confirmation (content-script injection is the active-load proof; MV3 service worker lazy-unloads)."
   - id: D7
     description: "LAUNCH-03 no residue after stop (single + batch), graceful termination"
     requirement: "LAUNCH-03"
@@ -140,7 +143,7 @@ status: complete
 | LAUNCH-02 (proxy) | AU account proxy via LocalHttpProxyBridge | ✅ |
 | LAUNCH-02 (geo match) | Browser egress `115.128.181.113` Sydney AU == app resolved_ip; tz/lang track egress | ✅ |
 | LAUNCH-02 (batch isolation) | 3 concurrent profiles: distinct user_data_dir / port / pid / fingerprint seed | ✅ |
-| LAUNCH-02 (extension) | not re-verified this session (user wrapped up) | ⏳ deferred |
+| LAUNCH-02 (extension) | MV3 ext imported → `--load-extension` in cmd → Playwright/CDP: content script injected `data-p3-ext=loaded` on example.com (via AU proxy) | ✅ |
 | LAUNCH-03 (no residue) | stop single + batch → `pgrep -f Chromium` empty (graceful termination) | ✅ |
 | XPLAT-05 | `/api/capabilities`: engines.firefox.available=false, chrome=true | ✅ |
 
@@ -154,7 +157,7 @@ status: complete
 
 ## Issues Encountered
 - Initial hook was insufficient (binary-only strip) — found and fixed on real hardware; see Deviations.
-- Extension-visibility sub-item of LAUNCH-02 left unverified per user decision to wrap up.
+- Extension-visibility sub-item of LAUNCH-02 was initially deferred, then resolved the same session via a minimal MV3 test extension + Playwright content-script confirmation.
 
 ## User Setup Required
 - macOS kernel is NOT auto-downloaded by the backend; it must be placed at `engines/chrome/Chromium.app` (download the arm64 zip from the `kernel-149.0.7827.114` release and `ditto`-extract). In production this is bundled into the dmg (Phase 5).
