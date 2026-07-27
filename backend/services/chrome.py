@@ -33,7 +33,16 @@ def launch_chrome_profile(
     if not executable_path.exists():
         raise FileNotFoundError(f"Chrome 内核不存在：{executable_path}")
     if sys.platform == "darwin":
-        _strip_quarantine_if_present(executable_path)
+        # 剥离整个内核 .app bundle：framework dylib 与各 Helper 同样带 com.apple.quarantine，
+        # 只剥主二进制不足以避免 AMFI 在加载仍被隔离的 Chromium Framework 时 kill 掉进程
+        # （03-03 arm64 真机实证：只剥主二进制启动仍 exit 137，剥整个 bundle 后 CDP 正常）。
+        # 目标仍严格限定为后端解析出的内核 .app bundle 根（无通配符/用户输入，T-3-03 scoping 不变）。
+        quarantine_target = executable_path
+        for _ancestor in executable_path.parents:
+            if _ancestor.suffix == ".app":
+                quarantine_target = _ancestor
+                break
+        _strip_quarantine_if_present(quarantine_target)
 
     proxy_config = proxy_to_profile_proxy(profile.proxy.model_dump(mode="json"))
     chrome_fp = profile.chrome.fingerprint
@@ -146,10 +155,12 @@ def launch_chrome_profile(
 
 
 def _strip_quarantine_if_present(path: Path) -> None:
-    """macOS 专用、best-effort 剥离内核二进制上的 com.apple.quarantine 标记。
+    """macOS 专用、best-effort 递归剥离内核 .app bundle（或内核路径）上的 com.apple.quarantine 标记。
 
-    xattr 目标严格限定为调用方传入的、由 bundled_engine_executable("chrome")
-    解析出的内核路径（后端完全可控，不做通配符/用户输入拼接，T-3-03 EoP 缓解）。
+    xattr 目标严格限定为调用方传入的、由 bundled_engine_executable("chrome") 解析出的内核
+    路径所在 .app bundle 根（后端完全可控，不做通配符/用户输入拼接，T-3-03 EoP 缓解）。
+    `-dr` 递归剥离整个 bundle，因为 framework dylib/各 Helper 同样带 quarantine，
+    只剥主二进制不足以避免 AMFI 在加载被隔离的 dylib 时 kill 进程（03-03 真机实证）。
     剥离失败绝不能阻塞正常启动，因此吞掉所有异常。
     """
     try:

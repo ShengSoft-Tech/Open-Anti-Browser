@@ -63,6 +63,37 @@ class LaunchGeoFallbackTests(unittest.TestCase):
                 ["xattr", "-dr", "com.apple.quarantine", str(chrome_exe)],
             )
 
+    def test_chrome_launch_strips_quarantine_from_app_bundle_root_on_darwin(self):
+        # 03-03 arm64 真机实证：framework dylib 与各 Helper 同样带 com.apple.quarantine，
+        # 只剥主二进制会让进程在加载仍被隔离的 Chromium Framework 时被 AMFI kill（exit 137）。
+        # 内核在 .app bundle 内时，剥离目标必须是 .app 根（仍精确 scoped 到后端解析路径）。
+        with tempfile.TemporaryDirectory() as temp:
+            temp_dir = Path(temp)
+            app_bundle = temp_dir / "Chromium.app"
+            chrome_exe = app_bundle / "Contents" / "MacOS" / "Chromium"
+            chrome_exe.parent.mkdir(parents=True)
+            chrome_exe.write_bytes(b"")
+            process = Mock(pid=1234)
+            profile = BrowserProfile(engine="chrome")
+
+            with (
+                patch("backend.services.chrome.bundled_engine_executable", return_value=chrome_exe),
+                patch("backend.services.chrome.resolve_geo_profile", side_effect=RuntimeError("geo failed")),
+                patch("backend.services.chrome.find_free_port", return_value=9222),
+                patch("backend.services.chrome.subprocess.Popen", return_value=process),
+                patch("backend.services.chrome.subprocess.run") as mock_run,
+                patch("backend.services.chrome.sys.platform", "darwin"),
+            ):
+                result = launch_chrome_profile(profile, _settings(temp_dir), temp_dir / "profile")
+
+            self.assertEqual(result["process"], process)
+            mock_run.assert_called_once()
+            # 剥离目标是 .app bundle 根（非主二进制），且不含通配符/用户输入
+            self.assertEqual(
+                mock_run.call_args.args[0],
+                ["xattr", "-dr", "com.apple.quarantine", str(app_bundle)],
+            )
+
     def test_chrome_launch_skips_quarantine_strip_on_non_darwin(self):
         with tempfile.TemporaryDirectory() as temp:
             temp_dir = Path(temp)
