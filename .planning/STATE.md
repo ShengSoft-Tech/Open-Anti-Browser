@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
-current_phase: 4
-current_phase_name: 前端平台门控
+current_phase: 04
+current_phase_name: frontend-platform-gating
 status: executing
-stopped_at: Phase 4 context gathered
-last_updated: "2026-07-27T21:43:04.932Z"
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-07-27T22:01:57.984Z"
 last_activity: 2026-07-27
-last_activity_desc: Phase 03 complete, transitioned to Phase 4
+last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 17
-  completed_plans: 11
+  completed_plans: 12
   percent: 50
 ---
 
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-23)
 
 **Core value:** 一键创建并启动相互隔离、指纹可信的浏览器环境——配置即用,无需用户理解指纹参数细节。
-**Current focus:** Phase 03 — macos-chrome-api
+**Current focus:** Phase 04 — frontend-platform-gating
 
 ## Current Position
 
-Phase: 4 — 前端平台门控
-Plan: Not started
+Phase: 04 (frontend-platform-gating) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-07-27 — Phase 03 complete, transitioned to Phase 4
+Last activity: 2026-07-27 — Phase 04 execution started
 
-Progress: [█████████░] 91%
+Progress: [███████░░░] 71%
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: [█████████░] 91%
 | Phase 02 P03 | 35min | 3 tasks | 0 files |
 | Phase 03 P01 | 15min | 2 tasks | 3 files |
 | Phase 03 P02 | 15min | 2 tasks | 2 files |
+| Phase 04 P01 | 20min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,8 @@ Recent decisions affecting current work:
 - [Phase ?]: kill_process_tree refactored to unified terminate->wait_procs->kill (D-05/D-06); grace_period keyword-defaulted (DEFAULT_TERMINATION_GRACE_PERIOD=3.0) for zero call-site changes
 - [Phase 3]: 03-03 D-07 真机实证:新鲜浏览器下载的 ad-hoc arm64 内核带 quarantine 时裸 exec 被 AMFI kill(exit 137,非 Gatekeeper 弹窗),剥离后正常。chrome.py quarantine 剥离钩子是【启动必需】,且必须剥整个 .app bundle(framework dylib/helper 也带 quarantine);原钩子只剥主二进制不足,已修 fbac808
 - [Milestone v0.2]: 2026-07-27 x64(Intel)从 v0.2 移除、暂时先不支持;PROJECT.md(Goal/Out-of-Scope/Key Decisions/里程碑)与 ROADMAP Phase 5 已注记 arm64-only,x64 待后续里程碑
+- [Phase ?]: 04-01: capabilitiesGating.js established as D-00 single source of truth (isFirefoxEngineAvailable/visibleEngineOptions/isEngineSelectorLocked/getWindowFeatureGate); edit-mode retains firefox selection but locks control to reconcile SC1 with D-01 no-data-loss
+- [Phase ?]: 04-01: CLAUDE.md frontend test command corrected to node --test frontend/src/lib/*.test.js (directory form threw MODULE_NOT_FOUND on Node 22)
 
 ### Pending Todos
 
@@ -115,6 +118,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T20:49:37.990Z
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-frontend-platform-gating/04-CONTEXT.md
+Last session: 2026-07-27T22:01:57.974Z
+Stopped at: Completed 04-01-PLAN.md
+Resume file: None
