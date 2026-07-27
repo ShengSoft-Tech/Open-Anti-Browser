@@ -5,15 +5,15 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 04
 current_phase_name: frontend-platform-gating
 status: executing
-stopped_at: Completed 04-04-PLAN.md
-last_updated: "2026-07-27T22:23:11.143Z"
+stopped_at: Completed 04-05-PLAN.md
+last_updated: "2026-07-27T22:30:42.294Z"
 last_activity: 2026-07-27
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 17
-  completed_plans: 15
+  completed_plans: 16
   percent: 50
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 04 (frontend-platform-gating) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-07-27 — Phase 04 execution started
 
-Progress: [█████████░] 88%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -74,6 +74,7 @@ Progress: [█████████░] 88%
 | Phase 04 P02 | 25min | 3 tasks | 5 files |
 | Phase 04 P03 | 15min | 2 tasks | 1 files |
 | Phase 04 P04 | 20min | 2 tasks | 2 files |
+| Phase 04 P05 | 25min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Duplicate action disabled for platform-blocked firefox rows (duplicating would recreate the SC1-forbidden case); delete and stop remain fully unconditioned per D-01
 - [Phase ?]: [Phase 4] 04-04: SyncManager.vue 首次引入 useI18n；syncGate/arrangeGate 各自独立读 capabilities.window.sync/arrange，横幅与4个最显眼按钮的 tooltip 直接绑定后端 reason 原文（不经 t()），其余22+按钮只加 :disabled 不加提示；文件其余上千行硬编码中文保持不动（范围守住）
 - [Phase ?]: [Phase 4] 04-04: AppSettings.vue 新增 macOS-only 平台限制说明卡片（platformLimitsVisible = capabilities.platform 存在且非 win32），openGatekeeperGuide() 复用 04-02 的 buildGatekeeperNoticeHtml(t)，保证设置页重看入口与 04-05 首启弹窗文案永不分叉；Firefox 内核卡片保留，仅追加「仅 Windows」标签
+- [Phase ?]: [Phase 4] 04-05: App.vue 侧栏 firefoxEngineVisible 隐藏 Firefox 状态行,同步器导航项经 el-tooltip + isNavDisabled/navDisabledReason 置灰但点击不拦截(D-02);GroupManager 分组内 Firefox 计数不隐藏(既有数据构成,D-01)
+- [Phase ?]: [Phase 4] 04-05: App.vue onMounted 新增 maybeShowGatekeeperNotice(),严格排在既有开源声明首启提示(_0x31ab)之后、复用同一 try 块;backend/_g.py 的 App.vue SHA-256 在全部编辑定稿后重算写回(31871ec3...),仅改一行,openSourceNotice.js 条目/package.json 钩子零改动
 
 ### Pending Todos
 
@@ -127,6 +130,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T22:23:11.134Z
-Stopped at: Completed 04-04-PLAN.md
+Last session: 2026-07-27T22:30:42.283Z
+Stopped at: Completed 04-05-PLAN.md
 Resume file: None

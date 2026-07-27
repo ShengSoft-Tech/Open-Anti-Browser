@@ -109,7 +109,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. 应用内可查看"macOS 限制说明"内容,zh-CN 与 en-US 文案同步
   4. macOS 首次运行时应用内展示 Gatekeeper 放行指引("仍要打开"步骤 + `xattr -dr com.apple.quarantine` 命令),zh-CN 与 en-US 文案同步
 
-**Plans**: 4/6 plans executed
+**Plans**: 5/6 plans executed
 **UI hint**: yes
 
 **Wave 1**
@@ -127,7 +127,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 04-05-PLAN.md — App.vue 侧栏状态行/导航置灰/首启放行弹窗 + `backend/_g.py` 摘要重算(哈希锁定 landmine)[UI-01/UI-02/UI-04]
+- [x] 04-05-PLAN.md — App.vue 侧栏状态行/导航置灰/首启放行弹窗 + `backend/_g.py` 摘要重算(哈希锁定 landmine)[UI-01/UI-02/UI-04]
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
@@ -173,6 +173,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. 后端跨平台基础适配 | 4/4 | Complete    | 2026-07-24 |
 | 2. macOS 内核构建与发布 | 4/4 | Complete    | 2026-07-26 |
 | 3. macOS Chrome 启动与能力 API | 3/3 | Complete    | 2026-07-27 |
-| 4. 前端平台门控 | 4/6 | In Progress|  |
+| 4. 前端平台门控 | 5/6 | In Progress|  |
 | 5. CI 打包发布 | 0/TBD | Not started | - |
 | 6. 发布文档与端到端验证 | 0/TBD | Not started | - |
