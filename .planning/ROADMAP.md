@@ -14,7 +14,7 @@
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: 后端跨平台基础适配** - pip 安装、导入、启动、路径解析在 macOS 上全部跑通,Windows 行为零回归 (completed 2026-07-24)
-- [ ] **Phase 2: macOS 内核构建与发布** - 本地构建 arm64/x64 两个 fingerprint-chromium 内核并发布为 kernel release 资产
+- [x] **Phase 2: macOS 内核构建与发布** - 本地构建 arm64/x64 两个 fingerprint-chromium 内核并发布为 kernel release 资产 (completed 2026-07-26)
 - [ ] **Phase 3: macOS Chrome 启动与能力 API** - macOS 用户可一键启动指纹 Chrome 配置,后端暴露平台能力供前端门控
 - [ ] **Phase 4: 前端平台门控** - macOS 上 Firefox 隐藏、窗口同步/排列置灰提示、平台说明与放行指引上线
 - [ ] **Phase 5: CI 打包发布** - CI 新增 macOS job,产出签名 dmg(arm64+x64)并与 Windows 安装包挂到同一 Release
@@ -62,7 +62,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 *(边界收窄:讨论 D-03/D-05 已澄清 Chromium 构建/交叉编译/lipo/冒烟归兄弟仓库 `../fingerprint-chromium`;本仓库职责 = 上传前二次把关 + gh 发布 + config.py URL 回填。verifier 以此口径校验。)*
 
-**Plans**: 3/4 plans executed
+**Plans**: 4/4 plans executed
 
 **Wave 1** *(可并行,无文件重叠)*
 
@@ -72,7 +72,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Wave 2** *(depends on Wave 1;人工把关,受兄弟仓库产物阻塞)*
 
 - [x] 02-03-PLAN.md — arm64 内核真实把关并发布到 kernel release(gated on 兄弟仓库 post-D-02 arm64 zip)[KERNEL-01/03]
-- [ ] 02-04-PLAN.md — x64 内核真实把关(含 Rosetta 冒烟)并发布(gated on 兄弟仓库 x64 交叉编译产物)[KERNEL-02/03]
+- [x] 02-04-PLAN.md — x64 内核真实把关(含 Rosetta 冒烟)并发布(gated on 兄弟仓库 x64 交叉编译产物)[KERNEL-02/03]
 
 ### Phase 3: macOS Chrome 启动与能力 API
 
@@ -140,7 +140,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. 后端跨平台基础适配 | 4/4 | Complete    | 2026-07-24 |
-| 2. macOS 内核构建与发布 | 3/4 | In Progress|  |
+| 2. macOS 内核构建与发布 | 4/4 | Complete    | 2026-07-26 |
 | 3. macOS Chrome 启动与能力 API | 0/TBD | Not started | - |
 | 4. 前端平台门控 | 0/TBD | Not started | - |
 | 5. CI 打包发布 | 0/TBD | Not started | - |
