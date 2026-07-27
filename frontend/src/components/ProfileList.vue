@@ -24,7 +24,7 @@
           style="width: 140px"
         >
           <el-option label="Chrome" value="chrome" />
-          <el-option label="Firefox" value="firefox" />
+          <el-option v-if="firefoxEngineVisible" label="Firefox" value="firefox" />
         </el-select>
       </div>
 
@@ -93,11 +93,16 @@
         </template>
       </el-table-column>
 
-      <el-table-column :label="t('profile.columns.engine')" width="110">
+      <el-table-column :label="t('profile.columns.engine')" width="160">
         <template #default="{ row }">
-          <el-tag :type="row.engine === 'chrome' ? 'primary' : 'warning'" effect="plain" size="small">
-            {{ row.engine === 'chrome' ? 'Chrome' : 'Firefox' }}
-          </el-tag>
+          <div class="engine-tag-stack">
+            <el-tag :type="row.engine === 'chrome' ? 'primary' : 'warning'" effect="plain" size="small">
+              {{ row.engine === 'chrome' ? 'Chrome' : 'Firefox' }}
+            </el-tag>
+            <el-tag v-if="row.engine === 'firefox' && !firefoxEngineVisible" type="info" size="small">
+              {{ t('platformLimits.windowsOnlyTag') }}
+            </el-tag>
+          </div>
         </template>
       </el-table-column>
 
@@ -232,12 +237,15 @@ import {
   VideoPause,
 } from '@element-plus/icons-vue'
 import { useProfileStore } from '../stores/profile.js'
+import { isFirefoxEngineAvailable } from '../lib/capabilitiesGating.js'
 import chromeIcon from '../assets/chrome.svg'
 import firefoxIcon from '../assets/firefox.png'
 
 const { t } = useI18n()
 defineEmits(['create', 'edit'])
 const store = useProfileStore()
+
+const firefoxEngineVisible = computed(() => isFirefoxEngineAvailable(store.capabilities))
 
 const pageSize = 10
 const currentPage = ref(1)
@@ -409,5 +417,11 @@ async function handleBatchStart() {
   display: flex;
   justify-content: flex-end;
   padding-top: 16px;
+}
+
+.engine-tag-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 </style>
