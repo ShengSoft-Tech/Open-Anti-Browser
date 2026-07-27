@@ -109,8 +109,29 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. 应用内可查看"macOS 限制说明"内容,zh-CN 与 en-US 文案同步
   4. macOS 首次运行时应用内展示 Gatekeeper 放行指引("仍要打开"步骤 + `xattr -dr com.apple.quarantine` 命令),zh-CN 与 en-US 文案同步
 
-**Plans**: TBD
+**Plans**: 6 plans
 **UI hint**: yes
+
+**Wave 1**
+
+- [ ] 04-01-PLAN.md — tracer:capabilities 事实源接线 + capabilitiesGating 纯函数模块 + ProfileDialog 引擎选择器门控与编辑态锁定 [UI-01]
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 04-02-PLAN.md — i18n parity 自动守护 + 本 phase 全部中英双语文案(23 条)+ Gatekeeper 首启逻辑模块 [UI-03/UI-04]
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 04-03-PLAN.md — ProfileList:筛选下拉隐藏 Firefox、既有配置「仅 Windows」标记、单行/批量启动统一门控 [UI-01]
+- [ ] 04-04-PLAN.md — SyncManager 平台横幅与动作按钮门控 + AppSettings 平台限制说明卡片与指引复看入口 [UI-02/UI-03]
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 04-05-PLAN.md — App.vue 侧栏状态行/导航置灰/首启放行弹窗 + `backend/_g.py` 摘要重算(哈希锁定 landmine)[UI-01/UI-02/UI-04]
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 04-06-PLAN.md — macOS 真机人工验收 checkpoint:既有 Firefox 配置能力矩阵 / Gatekeeper 指引真实性 / 双语可读性 [UI-01..UI-04]
 
 ### Phase 5: CI 打包发布
 
