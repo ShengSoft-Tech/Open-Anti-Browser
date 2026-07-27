@@ -5,15 +5,15 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 04
 current_phase_name: frontend-platform-gating
 status: executing
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-07-27T22:10:12.098Z"
+stopped_at: Completed 04-03-PLAN.md
+last_updated: "2026-07-27T22:14:12.407Z"
 last_activity: 2026-07-27
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 17
-  completed_plans: 13
+  completed_plans: 14
   percent: 50
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 04 (frontend-platform-gating) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-07-27 — Phase 04 execution started
 
-Progress: [████████░░] 76%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: [████████░░] 76%
 | Phase 03 P02 | 15min | 2 tasks | 2 files |
 | Phase 04 P01 | 20min | 3 tasks | 7 files |
 | Phase 04 P02 | 25min | 3 tasks | 5 files |
+| Phase 04 P03 | 15min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,8 @@ Recent decisions affecting current work:
 - [Phase ?]: 04-01: CLAUDE.md frontend test command corrected to node --test frontend/src/lib/*.test.js (directory form threw MODULE_NOT_FOUND on Node 22)
 - [Phase ?]: [Phase 4] 04-02: i18n-parity.test.js 建立递归 key-set 差集守护（顺序无关），24 条 Phase 4 必备 key 集中收敛在同一测试文件的清单里，供 04-03/04-04/04-05 消费
 - [Phase ?]: [Phase 4] 04-02: macosGatekeeperNotice.js 独立 localStorage key (oab:macos-gatekeeper-notice:v1)，shouldShowGatekeeperNotice 用 platform === 'darwin' 正向判定（不是 !== 'win32'），避免 pre-bootstrap 状态误触发弹窗；GATEKEEPER_XATTR_COMMAND 作为模块常量而非 i18n 文案，保证中英命令逐字一致且限定单个 .app bundle
+- [Phase ?]: ProfileList's four gating consumption points (filter dropdown, row tag, start disable/tooltip, batch-start filter) share firefoxEngineVisible computed and isProfileStartBlocked(row) — single D-00 predicate, no independent re-derivation
+- [Phase ?]: Duplicate action disabled for platform-blocked firefox rows (duplicating would recreate the SC1-forbidden case); delete and stop remain fully unconditioned per D-01
 
 ### Pending Todos
 
@@ -121,6 +124,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T22:10:12.088Z
-Stopped at: Completed 04-02-PLAN.md
+Last session: 2026-07-27T22:14:12.398Z
+Stopped at: Completed 04-03-PLAN.md
 Resume file: None
