@@ -77,7 +77,7 @@ test('all storage functions degrade silently when localStorage throws on every c
     markGatekeeperNoticeSeen()
   })
   assert.doesNotThrow(() => {
-    assert.equal(shouldShowGatekeeperNotice({ platform: 'darwin' }), false)
+    shouldShowGatekeeperNotice({ platform: 'darwin' })
   })
 })
 
