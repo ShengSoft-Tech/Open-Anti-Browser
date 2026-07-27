@@ -18,3 +18,11 @@ export function visibleEngineOptions(baseOptions, capabilities, currentEngine) {
 export function isEngineSelectorLocked(capabilities, currentEngine) {
   return currentEngine === 'firefox' && !isFirefoxEngineAvailable(capabilities)
 }
+
+export function getWindowFeatureGate(capabilities, feature) {
+  const featureCapability = capabilities?.window?.[feature]
+  const disabled = featureCapability?.available === false
+  const rawReason = featureCapability?.reason
+  const reason = typeof rawReason === 'string' && rawReason ? rawReason : ''
+  return { disabled, reason }
+}
