@@ -78,7 +78,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
 - v0.2 scope: macOS 仅支持 Chrome 引擎(Firefox 无 macOS 内核)
-- v0.2 scope: 内核打包进 dmg,非首启下载;窗口排列/同步在 macOS 禁用(置灰提示);不做签名/公证,arm64+x64 双内核双 dmg
+- v0.2 scope: 内核打包进 dmg,非首启下载;窗口排列/同步在 macOS 禁用(置灰提示);不做签名/公证;**v0.2 仅 arm64 dmg(x64 2026-07-27 移出里程碑、暂时先不支持;x64 内核资产已备,待后续里程碑再启)**
 - [Phase ?]: D-01: window_manager.py Windows branch moved verbatim into if sys.platform == "win32" block; non-Windows branch exports identically-named/signed stub functions raising RuntimeError — zero browser_manager.py changes needed
 - [Phase ?]: D-09/D-10: requirements.txt uses PEP 508 sys_platform == "win32" markers on pywin32/ruyipage (versions unchanged); no requirements-build.txt split
 - [Phase ?]: config.py 路径解析平台化(D-05/06/07/08):macOS 冻结态可写根锁定 Application Support,Chrome 路径锁定 .app bundle 内二进制,ENGINE_METADATA 保留 firefox 条目,Windows 路径值逐字不变
@@ -91,6 +91,8 @@ Recent decisions affecting current work:
 - [Phase ?]: 02-03: arm64 内核经真实 verify+upload 脚本独立复核后发布到 kernel-149.0.7827.114,post-D-02 归属经人工 cross-repo handoff 确认(LOG(INFO) 无法静态检出)
 - [Phase ?]: 03-01: capabilities 契约锁定 option-a(嵌套形状),available 与 installed/capability_ok 正交,不并入 open-api
 - [Phase ?]: kill_process_tree refactored to unified terminate->wait_procs->kill (D-05/D-06); grace_period keyword-defaulted (DEFAULT_TERMINATION_GRACE_PERIOD=3.0) for zero call-site changes
+- [Phase 3]: 03-03 D-07 真机实证:新鲜浏览器下载的 ad-hoc arm64 内核带 quarantine 时裸 exec 被 AMFI kill(exit 137,非 Gatekeeper 弹窗),剥离后正常。chrome.py quarantine 剥离钩子是【启动必需】,且必须剥整个 .app bundle(framework dylib/helper 也带 quarantine);原钩子只剥主二进制不足,已修 fbac808
+- [Milestone v0.2]: 2026-07-27 x64(Intel)从 v0.2 移除、暂时先不支持;PROJECT.md(Goal/Out-of-Scope/Key Decisions/里程碑)与 ROADMAP Phase 5 已注记 arm64-only,x64 待后续里程碑
 
 ### Pending Todos
 

@@ -35,7 +35,7 @@
 
 - [ ] macOS 核心功能可用:配置管理、指纹启动、代理、扩展、批量启动(Chrome 引擎)
 - [ ] macOS 上窗口排列/窗口同步禁用并明确提示"仅 Windows";Firefox 引擎在 macOS 隐藏
-- [ ] CI 增加 macOS job:PyInstaller .app + 内核打包,产出 arm64/x64 两个 dmg 挂到 release
+- [ ] CI 增加 macOS job:PyInstaller .app + 内核打包,产出 arm64 dmg 挂到 release(x64 暂缓,见 Out of Scope)
 - [ ] release 说明包含未签名应用首次打开的放行步骤
 
 ### Out of Scope
@@ -45,6 +45,7 @@
 - Apple 代码签名与公证 — 需要 Apple Developer 账号($99/年),本里程碑用"右键打开"放行方式替代
 - Linux 支持 — 无用户需求
 - universal binary(单包双架构)— Chromium universal 构建复杂,采用 arm64/x64 分开出包
+- Intel x64(macOS)支持 — 2026-07-27 从 v0.2 移除,暂时先不支持;先交付 arm64,x64 dmg/内核 URL 待后续里程碑再启(x64 内核资产已在 kernel-149.0.7827.114 备好,可随时恢复)
 
 ## Context
 
@@ -60,7 +61,7 @@
 - **依赖**: pywin32 仅 Windows 可装 — requirements.txt 必须用环境标记(sys_platform)
 - **构建**: Chromium 内核只在本地 Mac 构建 — CI 无法承担,构建产物以 release 资产分发
 - **分发**: dmg 不签名 — 首次打开需用户手动放行,文档必须写清步骤
-- **架构**: arm64 与 Intel x64 分开构建、分开出 dmg — 不做 universal binary
+- **架构**: v0.2 仅 arm64 出 dmg(x64 暂缓,2026-07-27 决定)— 不做 universal binary
 
 ## Key Decisions
 
@@ -70,16 +71,16 @@
 | 内核打包进 dmg(非首启下载) | 安装即用、完全离线,与 Windows engines 打包方式一致 | — Pending |
 | 窗口排列/同步在 macOS 禁用 | win32 不可移植;CDP 同步验证成本高,核心功能优先出货 | — Pending |
 | 不做签名/公证 | 无 Apple Developer 账号,放行步骤可接受 | — Pending |
-| arm64 + x64 双内核双 dmg | 覆盖 Intel 老 Mac 用户,不做 universal 降低构建复杂度 | — Pending |
+| ~~arm64 + x64 双内核双 dmg~~ → **v0.2 仅 arm64**(x64 暂缓) | 2026-07-27 决定:x64 从 v0.2 移除、暂不支持,先交付 arm64;x64 内核资产已备(kernel-149.0.7827.114),待后续里程碑再启 | — Revised 2026-07-27 |
 
 ## Current Milestone: v0.2 macOS 支持(仅 Chrome 内核)
 
-**Goal:** 让 Open-Anti-Browser 在 macOS(arm64 + Intel x64)上开箱可用——GitHub release 附带 dmg,安装后自带 mac 版 fingerprint-chromium 内核。
+**Goal:** 让 Open-Anti-Browser 在 macOS(arm64)上开箱可用——GitHub release 附带 dmg,安装后自带 mac 版 fingerprint-chromium 内核。(Intel x64 支持 2026-07-27 移出 v0.2,暂缓)
 
 **Target features:**
-- macOS arm64/x64 双内核构建并上传 kernel release
+- macOS arm64 内核构建并上传 kernel release(x64 内核已备,v0.2 暂不出 dmg)
 - 后端跨平台适配(Chrome-only,窗口功能禁用)
-- CI macOS job 产出两个 dmg 并挂到 release
+- CI macOS job 产出 arm64 dmg 并挂到 release
 
 **Progress:** Phase 1(后端跨平台基础适配)complete — 后端在 macOS 可安装/导入/启动(含 --backend-only),路径解析到 macOS 约定位置,Windows 零回归(72 unittest 全过),CI 双平台测试 workflow 上线。
 

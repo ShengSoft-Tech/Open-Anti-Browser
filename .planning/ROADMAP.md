@@ -114,7 +114,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 ### Phase 5: CI 打包发布
 
-**Goal**: 推送 v* tag 后 CI 自动产出 macOS arm64 与 Intel x64 两个签名 dmg,并与 Windows 安装包一并挂到同一 GitHub Release
+**Goal**: 推送 v* tag 后 CI 自动产出 macOS arm64 签名 dmg,并与 Windows 安装包一并挂到同一 GitHub Release
+> ⚠ **2026-07-27 scope 变更:x64(Intel)从 v0.2 移除、暂时先不支持。** 本 phase 规划/执行时仅做 **arm64**;下述所有 x64 相关标准(matrix x64=macos-15-intel、第二个 dmg、双架构下载文档、x64 原生验证等)一律暂缓,待后续里程碑再启。x64 内核资产已在 kernel-149.0.7827.114 备好,恢复成本低。详见 PROJECT.md Out of Scope / Key Decisions。
 **Depends on**: Phase 1 (跨平台后端代码需已就绪); Phase 2 (需要可下载的内核资产); Phase 3 (Chrome 启动链路需已验证)
 **Requirements**: PKG-01, PKG-02, PKG-03, PKG-04, PKG-05
 **Success Criteria** (what must be TRUE):
