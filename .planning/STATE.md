@@ -5,15 +5,15 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 05
 current_phase_name: ci
 status: executing
-stopped_at: Completed 05-03-PLAN.md
-last_updated: "2026-07-28T20:13:59.598Z"
+stopped_at: Completed 05-04-PLAN.md
+last_updated: "2026-07-28T20:49:32.716Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 05 execution started
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 23
-  completed_plans: 20
+  completed_plans: 21
   percent: 67
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 05 (ci) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 05 execution started
 
-Progress: [█████████░] 87%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -80,6 +80,7 @@ Progress: [█████████░] 87%
 | Phase 05 P01 | 10min | 2 tasks | 3 files |
 | Phase 05 P02 | 15min | 2 tasks | 2 files |
 | Phase 05 P03 | 50min | 2 tasks | 2 files |
+| Phase 05 P04 | 105min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -120,6 +121,8 @@ Recent decisions affecting current work:
 - [Phase ?]: 05-02: Cmd+Q intercepted via QObject event filter on qt_app (parented to avoid GC), delegating to existing force_exit() — no parallel shutdown path (D-07)
 - [Phase ?]: 05-02: quarantine self-strip failure notice worded as expected first-launch phenomenon (QMessageBox.information, not critical) per D-12a; command always resolves to canonical /Applications install path when bundle is None or translocated, verbatim-locked against frontend GATEKEEPER_XATTR_COMMAND
 - [Phase ?]: 05-03: build-macos job proven twice on real workflow_dispatch (30393410452, 30394320282); A2/A3/A4 RESEARCH assumptions resolved with real-machine evidence, LSMinimumSystemVersion measured at 13.0 (not the 12.0 placeholder, carry-forward to 05-04)
+- [Phase ?]: 05-04: check_version_consistency.py placed in scripts/release/ (Phase 2 D-11 precedent), normalize_tag uses removeprefix not lstrip (RESEARCH's own example had the lstrip bug)
+- [Phase ?]: 05-04: A3 final resolution — true LSMinimumSystemVersion floor is 15.0 (Sequoia), set by PySide6/shiboken6's own compiled Python-binding libraries (not the Qt frameworks, which remain 13.0); materially more restrictive than 05-03's carried-forward 13.0 measurement, flagged as a product decision for the milestone owner
 
 ### Pending Todos
 
@@ -141,6 +144,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T20:13:59.589Z
-Stopped at: Completed 05-03-PLAN.md
+Last session: 2026-07-28T20:49:32.705Z
+Stopped at: Completed 05-04-PLAN.md
 Resume file: None
