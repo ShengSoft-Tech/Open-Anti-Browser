@@ -375,19 +375,28 @@ def run_desktop() -> int:
                 self.tray_icon.hide()
             self.server_thread.join(timeout=8)
 
-    class MacQuitEventFilter(QObject):
-        # macOS Cmd+Q 只作为触发源，事件本身不携带任何 shutdown 逻辑
-        # （逻辑全部在模块级的 handle_macos_quit_request 里）。
-        def __init__(self, target_window: "DesktopMainWindow", parent: QObject) -> None:
-            super().__init__(parent)
-            self.target_window = target_window
+    class DesktopApplication(QApplication):
+        # 修复 05-02 引入的崩溃缺陷：不再用 installEventFilter 装在 QApplication
+        # 实例上（那种过滤器会收到线程内*每个* QObject 的事件，逼迫 PySide 为
+        # 每个事件目标构造 Python wrapper；QtQuick 在 makeKeyAndOrderFront: 触发
+        # 的 focus 分发路径上会把事件送到 PySide 包不安全的 QObject，导致空指针
+        # 解引用崩溃)。改为重载 QApplication.event()，只接收送给应用对象自身的
+        # 事件，事件本身仍不携带任何 shutdown 逻辑（逻辑全部在模块级的
+        # handle_macos_quit_request 里，Cmd+Q 仍收敛到既有 force_exit() 路径）。
+        def __init__(self, argv: list[str]) -> None:
+            super().__init__(argv)
+            self.target_window: "DesktopMainWindow | None" = None
 
-        def eventFilter(self, obj, event) -> bool:
-            if event.type() == QEvent.Type.Quit:
-                return handle_macos_quit_request(self.target_window)
-            return False
+        def event(self, e) -> bool:
+            if (
+                e.type() == QEvent.Type.Quit
+                and self.target_window is not None
+                and handle_macos_quit_request(self.target_window)
+            ):
+                return True
+            return super().event(e)
 
-    qt_app = QApplication.instance() or QApplication([])
+    qt_app = QApplication.instance() or DesktopApplication([])
     qt_app.setApplicationDisplayName(APP_TITLE)
     qt_app.setApplicationName(APP_TITLE)
     qt_app.setQuitOnLastWindowClosed(False)
@@ -431,9 +440,9 @@ def run_desktop() -> int:
     directory_picker_bridge = DirectoryPickerBridge(window)
 
     if should_intercept_quit_event():
-        # qt_app 作为 parent，保持强引用避免被 GC 回收。
-        mac_quit_filter = MacQuitEventFilter(window, qt_app)
-        qt_app.installEventFilter(mac_quit_filter)
+        # 只赋值触发目标，不再 installEventFilter；Windows/Linux 上此赋值不会
+        # 执行，target_window 保持 DesktopApplication.__init__ 里的 None 默认值。
+        qt_app.target_window = window
 
     def handle_instance_activation() -> None:
         while instance_server.hasPendingConnections():
