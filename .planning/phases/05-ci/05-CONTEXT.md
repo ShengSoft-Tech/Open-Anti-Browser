@@ -59,8 +59,16 @@
 ### 签名策略、quarantine 与 CI 门禁(PKG-03 / PKG-05)
 
 - **D-12:** **首启时对应用自身 bundle 整体剥离 quarantine**。背景:用户从 dmg 拖到 `/Applications` 后整个 `.app`(**含内部内核**)都带 `com.apple.quarantine`;Phase 3 D-07 已在真机实证——带 quarantine 的 ad-hoc arm64 内核**裸 exec 会被 AMFI 直接 kill(exit 137)**,不是弹 Gatekeeper 对话框,且必须剥**整个 bundle**(framework dylib / helper 也带 quarantine)。方案:应用启动时对自己所在的 `.app` 跑一次 `xattr -dr com.apple.quarantine`,**失败则弹窗把命令原样给用户**让其手动执行。保持「内核就在包里、安装即用」不变(不改成首启复制到可写目录)。 — **Reversibility:** costly — 若权限/路径场景走不通,退路是把内核首启解到 `~/Library/Application Support/Open-Anti-Browser/engines/`,那会改动 `config.py` 的 `ENGINES_DIR` 解析并影响 Phase 1/3 已锁定的路径决策。
+
+- **D-12a(2026-07-28 修订,用户拍板):** **兜底扶正为主路径。** `05-RESEARCH.md` 在本机真实 dmg + Finder 拖拽下实测推翻了 D-12 的前提(见 RESEARCH Pitfall 4 / Assumptions Log A1):App Translocation 的触发条件是「quarantine 属性存在 + 该 quarantine 事件首次被 LaunchServices `open`」,**与 `.app` 是否位于 `/Applications` 无关**;首次启动必落在只读 nullfs 挂载点,应用对自身(含换算出的真实路径)`xattr -dr` 全部返回 `Operation not permitted`。即**能触发自剥离代码的场景恰好就是它注定失败的场景**。修订后的口径:
+  - **实现不变**:内核仍在 `.app` 内,`config.py` 的 `ENGINES_DIR` 解析不动,Phase 1 D-05~D-08 的路径决策不动。
+  - **语义降级**:自剥离逻辑从「主流程承诺」降级为「quarantine 已被提前剥过时的静默跳过优化」。它成功是幸运,不是设计预期。
+  - **文案与验收口径上调**:失败提示弹窗是**预期的首次主路径**,不是异常分支——文案、埋点与 D-15 的验收标准都按这个前提写。
+  - **D-15 必须验明的未决点**(RESEARCH Open Question 1):真人走 系统设置 → 隐私与安全性 →「仍要打开」这条**官方交互路径**后,quarantine 属性是被清除(则第二次启动一切正常、自剥离生效),还是仅在 syspolicy 数据库记一条豁免(则 translocation 持续、用户必须敲命令)。D-15 **不得只验「最终能不能启动」**,必须逐条记录首次双击看到的完整提示序列,以及第二次启动是否仍被 translocate。
+  - **退路仍然存在但不在本 phase 启动**:若 D-15 证明体验不可接受,再把「内核首启复制到 `~/Library/Application Support/Open-Anti-Browser/engines/`」作为**新的一次决策**处理,不由 executor 自行改道。 — **Reversibility:** reversible — 本修订只改语义与文案口径,不改代码架构。
+
   - **researcher/planner 必须查证的两个前提:**
-    1. **App Translocation** —— 从 dmg 里**直接双击运行**时,macOS 会把 `.app` 搬到只读随机路径(`/private/var/folders/.../AppTranslocation/`),此时自剥离必然失败。需确认「先拖到 Applications 再运行」是否足以规避,以及 dmg 背景图/首启提示要不要显式引导这一步。
+    1. ~~**App Translocation**~~ —— **已由 RESEARCH 实测查证并推翻,见 D-12a。**
     2. **写权限** —— admin 用户对 `/Applications` 可写;非 admin 用户或企业受管 Mac 可能不可写,此时剥离失败路径(弹窗给命令)就是唯一兜底,文案必须给出可直接复制的完整命令。
   - **与 Phase 4 UI-04 的关系:** Phase 4 已做了应用内 Gatekeeper 放行指引(`macosGatekeeperNotice.js`,key `oab:macos-gatekeeper-notice:v1`,`GATEKEEPER_XATTR_COMMAND` 为模块常量)。D-12 的失败兜底文案**应复用/对齐该模块**,不另起第三套措辞。
 
