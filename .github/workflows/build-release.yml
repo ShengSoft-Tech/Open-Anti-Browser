@@ -153,12 +153,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # tag push (release) 取 tag 去掉前导 v；workflow_dispatch 手动触发时 ref 是分支名，
-          # 读 frontend/package.json 的 version 字段兜底，保证两个 build job 手动触发时都能正常跑完。
+          # D-08:版本一致性判定落在 scripts/release/check_version_consistency.py
+          # 的纯函数里(有 tests/test_version_consistency.py 单测覆盖),而不是内联在
+          # 这里。tag 触发时三方(tag/package.json/main.py)必须全等；workflow_dispatch
+          # 手动触发时 ref 是分支名，只比对 package.json 与 main.py 两者，不参照分支
+          # 名，保证 D-04 的调试通道不被这道校验堵死。
+          IS_TAG="false"
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            APP_VERSION="${GITHUB_REF_NAME#v}"
-          else
-            APP_VERSION="$(python3 -c "import json; print(json.load(open('frontend/package.json'))['version'])")"
+            IS_TAG="true"
+          fi
+
+          set +e
+          APP_VERSION="$(python3 scripts/release/check_version_consistency.py "$GITHUB_REF_NAME" "$IS_TAG")"
+          CHECK_EXIT=$?
+          set -e
+          if [[ "$CHECK_EXIT" -ne 0 ]]; then
+            echo "错误: 版本一致性校验失败(check_version_consistency.py 退出码 $CHECK_EXIT)" >&2
+            exit "$CHECK_EXIT"
           fi
           if [[ -z "$APP_VERSION" ]]; then
             echo "错误: APP_VERSION 解析为空" >&2
