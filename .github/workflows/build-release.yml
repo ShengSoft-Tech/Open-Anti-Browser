@@ -116,3 +116,345 @@ jobs:
           files: installer_out/Open-Anti-Browser-Setup.exe
           generate_release_notes: true
           name: "Open-Anti-Browser ${{ github.ref_name }}"
+
+  build-macos:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+
+      - name: Install create-dmg
+        shell: bash
+        run: |
+          set -euo pipefail
+          brew install create-dmg
+
+      - name: Resolve version
+        shell: bash
+        run: |
+          set -euo pipefail
+          # tag push (release) 取 tag 去掉前导 v；workflow_dispatch 手动触发时 ref 是分支名，
+          # 读 frontend/package.json 的 version 字段兜底，保证两个 build job 手动触发时都能正常跑完。
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            APP_VERSION="${GITHUB_REF_NAME#v}"
+          else
+            APP_VERSION="$(python3 -c "import json; print(json.load(open('frontend/package.json'))['version'])")"
+          fi
+          if [[ -z "$APP_VERSION" ]]; then
+            echo "错误: APP_VERSION 解析为空" >&2
+            exit 1
+          fi
+          echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
+          echo "Resolved APP_VERSION=$APP_VERSION"
+
+      - name: Prepare browser engine (macOS arm64)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # 内核 URL 单一事实源来自 backend/config.py，同构 windows job :62 的既有约定，
+          # 内核版本不在 yml 里硬编码。
+          CHROME_ZIP_URL="$(python3 -c "from backend.config import CHROME_ENGINE_ZIP_URL_MACOS_ARM64; print(CHROME_ENGINE_ZIP_URL_MACOS_ARM64)")"
+          if [[ -z "$CHROME_ZIP_URL" ]]; then
+            echo "错误: CHROME_ENGINE_ZIP_URL_MACOS_ARM64 从 backend.config 解析为空" >&2
+            exit 1
+          fi
+          echo "Chrome kernel zip (from config.py): $CHROME_ZIP_URL"
+
+          # 原始的、未经任何拷贝的内核保留在 RUNNER_TEMP，供后面的 "Inject Chrome kernel"
+          # 步骤直接 ditto 注入 .app（刻意不在仓库树内解压，避免 PyInstaller 的
+          # --add-data engines 把 400MB 原始档树也打进去）。
+          KERNEL_DIR="$RUNNER_TEMP/kernel"
+          rm -rf "$KERNEL_DIR"
+          mkdir -p "$KERNEL_DIR"
+
+          EXTRACT_DIR="$RUNNER_TEMP/extract_chrome"
+          rm -rf "$EXTRACT_DIR"
+          mkdir -p "$EXTRACT_DIR"
+
+          curl -L --fail -o "$RUNNER_TEMP/chrome.zip" "$CHROME_ZIP_URL" \
+            || { echo "错误: 内核下载失败: $CHROME_ZIP_URL" >&2; exit 1; }
+          # ditto 而非 unzip：保留符号链接与内核既有的 ad-hoc/linker-signed 签名封套。
+          ditto -x -k "$RUNNER_TEMP/chrome.zip" "$EXTRACT_DIR" \
+            || { echo "错误: ditto 解压失败: $RUNNER_TEMP/chrome.zip" >&2; exit 1; }
+
+          APP_SRC="$(find "$EXTRACT_DIR" -maxdepth 2 -name "Chromium.app" -print -quit)"
+          if [[ -z "$APP_SRC" ]]; then
+            echo "错误: 解压后未找到 Chromium.app: $EXTRACT_DIR" >&2
+            exit 1
+          fi
+          ditto "$APP_SRC" "$KERNEL_DIR/Chromium.app" \
+            || { echo "错误: ditto 拷贝内核到 $KERNEL_DIR 失败" >&2; exit 1; }
+
+          # 仓库树内只建占位目录，让 pyinstaller 的 --add-data "engines:engines" 建出
+          # 目录结构与符号链接，不让 pyinstaller 去搬 400MB 的内核（它不保证保留符号链接与签名）。
+          rm -rf engines
+          mkdir -p engines/chrome
+          echo "kernel injected post-build by 'Inject Chrome kernel into .app' step" > engines/chrome/.placeholder
+
+          echo "内核已就绪: $KERNEL_DIR/Chromium.app"
+          ls -la "$KERNEL_DIR/Chromium.app/Contents/MacOS/"
+
+      - name: Build app with PyInstaller (onedir, .app bundle)
+        shell: bash
+        run: >
+          pyinstaller
+          --noconfirm
+          --onedir
+          --windowed
+          --name "Open-Anti-Browser"
+          --icon "assets/app.icns"
+          --osx-bundle-identifier "com.shengsoft.openantibrowser"
+          --add-data "frontend/dist:frontend/dist"
+          --add-data "assets:assets"
+          --add-data "engines:engines"
+          --hidden-import "websockets"
+          --hidden-import "websockets.legacy"
+          --hidden-import "websockets.legacy.client"
+          --collect-submodules "curl_cffi"
+          launch_app.py
+
+      - name: Patch Info.plist
+        shell: bash
+        run: |
+          set -euo pipefail
+          PLIST="dist/Open-Anti-Browser.app/Contents/Info.plist"
+          if [[ ! -f "$PLIST" ]]; then
+            echo "错误: Info.plist 不存在: $PLIST" >&2
+            exit 1
+          fi
+          # plutil -replace 是幂等 upsert：键不存在则插入，存在则覆盖（RESEARCH Pattern 3）。
+          # 必须严格排在后面所有 codesign 调用之前（Pitfall 1：签名后改 plist 会让签名失效）。
+          plutil -replace CFBundleShortVersionString -string "$APP_VERSION" "$PLIST"
+          plutil -replace CFBundleVersion -string "$APP_VERSION" "$PLIST"
+          plutil -replace LSMinimumSystemVersion -string "12.0" "$PLIST"
+
+          echo "=== Info.plist (patched) ==="
+          plutil -p "$PLIST"
+
+      - name: Inject Chrome kernel into .app
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="dist/Open-Anti-Browser.app"
+          ENGINES_LINK="$APP/Contents/Frameworks/engines"
+
+          # config.ENGINES_DIR 在冻结态下解析正确的前提：Contents/Frameworks/engines 必须
+          # 是指向 ../Resources/engines 的符号链接（RESEARCH Pattern 1 实测结论）。
+          if [[ -L "$ENGINES_LINK" ]]; then
+            echo "断言通过: $ENGINES_LINK 是符号链接 -> $(readlink "$ENGINES_LINK")"
+          else
+            echo "::warning::偏离告示 - $ENGINES_LINK 不是符号链接（不满足 RESEARCH Pattern 1 预期），显式补建"
+            mkdir -p "$APP/Contents/Frameworks"
+            rm -rf "$ENGINES_LINK"
+            ln -s "../Resources/engines" "$ENGINES_LINK"
+            echo "已补建符号链接: $ENGINES_LINK -> ../Resources/engines"
+          fi
+
+          DEST="$APP/Contents/Resources/engines/chrome/Chromium.app"
+          rm -rf "$DEST"
+          mkdir -p "$(dirname "$DEST")"
+          # ditto 而非 cp -R：唯一能保留符号链接与既有签名封套的拷贝方式。
+          ditto "$RUNNER_TEMP/kernel/Chromium.app" "$DEST" \
+            || { echo "错误: ditto 注入内核失败" >&2; exit 1; }
+
+          echo "=== 内核目录结构（注入后） ==="
+          ls -la "$APP/Contents/Resources/engines/chrome/"
+
+      - name: Enumerate nested bundles and minimum OS versions (A2/A3 diagnostics)
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="dist/Open-Anti-Browser.app"
+
+          echo "=== 嵌套 bundle 枚举（find 默认不跟随符号链接，不会经 Contents/Frameworks/engines 重复走进内核子树） ==="
+          find "$APP" \( -name "*.app" -o -name "*.framework" \) -print | sort
+
+          echo "=== Qt 相关二进制 LC_BUILD_VERSION / minos 抽样 ==="
+          FRAMEWORKS_DIR="$APP/Contents/Frameworks"
+          for f in "$FRAMEWORKS_DIR"/Qt*.framework "$FRAMEWORKS_DIR"/QtWebEngineProcess.app; do
+            [[ -e "$f" ]] || continue
+            BIN=""
+            if [[ -d "$f" && "$f" == *.framework ]]; then
+              NAME="$(basename "$f" .framework)"
+              BIN="$f/Versions/Current/$NAME"
+            elif [[ -d "$f" && "$f" == *.app ]]; then
+              BIN="$f/Contents/MacOS/$(basename "$f" .app)"
+            fi
+            if [[ -n "$BIN" && -f "$BIN" ]]; then
+              echo "--- $BIN ---"
+              otool -l "$BIN" | grep -A3 LC_BUILD_VERSION || echo "(无 LC_BUILD_VERSION 段)"
+            fi
+          done
+
+      - name: Sign nested bundles and app (layered ad-hoc)
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="dist/Open-Anti-Browser.app"
+          KERNEL_APP="$APP/Contents/Resources/engines/chrome/Chromium.app"
+          FRAMEWORK="$KERNEL_APP/Contents/Frameworks/Chromium Framework.framework"
+
+          # 由内向外逐层 ad-hoc 签名（D-13/Pattern 2）：外层与内层的签名调用都不携带
+          # 递归签名开关（--deep 对嵌套 bundle 是空操作，见 Pitfall 2）。
+
+          echo "=== 1) 签 Chromium 内核的 Helper.app ==="
+          for helper in "$FRAMEWORK/Versions/Current/Helpers"/*.app; do
+            [[ -e "$helper" ]] || continue
+            echo "codesign: $helper"
+            codesign --force --sign - "$helper" \
+              || { echo "错误: codesign 失败: $helper" >&2; exit 1; }
+          done
+
+          echo "=== 2) 签 Chromium Framework/Versions/Current ==="
+          codesign --force --sign - "$FRAMEWORK/Versions/Current" \
+            || { echo "错误: codesign 失败: $FRAMEWORK/Versions/Current" >&2; exit 1; }
+
+          echo "=== 3) 签内嵌 Chromium.app 自身 ==="
+          codesign --force --sign - "$KERNEL_APP" \
+            || { echo "错误: codesign 失败: $KERNEL_APP" >&2; exit 1; }
+
+          echo "=== 4) 枚举 Qt/PySide6 侧嵌套 bundle（排除内核子树），按路径深度倒序逐个签名 ==="
+          NESTED_LIST="$(find "$APP/Contents/Frameworks" \( -name "*.app" -o -name "*.framework" \) -not -path "*/engines/*" -print | awk -F/ '{print NF, $0}' | sort -rn | cut -d' ' -f2-)"
+          while IFS= read -r item; do
+            [[ -z "$item" ]] && continue
+            [[ -e "$item" ]] || continue
+            if [[ -d "$item" && "$item" == *.framework && -e "$item/Versions/Current" ]]; then
+              echo "codesign (framework): $item/Versions/Current"
+              codesign --force --sign - "$item/Versions/Current" \
+                || { echo "错误: codesign 失败: $item/Versions/Current" >&2; exit 1; }
+            else
+              echo "codesign: $item"
+              codesign --force --sign - "$item" \
+                || { echo "错误: codesign 失败: $item" >&2; exit 1; }
+            fi
+          done <<< "$NESTED_LIST"
+
+          echo "=== 5) 签外层 Open-Anti-Browser.app ==="
+          codesign --force --sign - "$APP" \
+            || { echo "错误: codesign 失败: $APP" >&2; exit 1; }
+
+      - name: Verify code signatures (outer + nested kernel)
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="dist/Open-Anti-Browser.app"
+          KERNEL_APP="$APP/Contents/Resources/engines/chrome/Chromium.app"
+
+          # PKG-03 硬门禁：外层与内嵌 Chromium.app 分别验证，缺一不可（Pitfall 2 —
+          # 只验外层会给出假阳性通过；Pitfall 3 — 内核资产重签前本来就过不了这条验证，
+          # 所以本步骤必须排在签名步骤之后）。
+          echo "=== 验证外层 .app ==="
+          codesign --verify --deep --strict "$APP" \
+            || { echo "错误: 外层 .app 签名验证失败" >&2; exit 1; }
+
+          echo "=== 验证内嵌 Chromium.app（单独） ==="
+          codesign --verify --deep --strict "$KERNEL_APP" \
+            || { echo "错误: 内嵌 Chromium.app 签名验证失败" >&2; exit 1; }
+
+          echo "签名门禁通过：外层与内层均验证成功"
+
+      - name: Create dmg
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="dist/Open-Anti-Browser.app"
+          DMG_NAME="Open-Anti-Browser-${APP_VERSION}-arm64.dmg"
+
+          # 幂等清理：重跑时目标 dmg 与可能残留的同名挂载卷都先清掉。
+          rm -f "$DMG_NAME"
+          hdiutil detach "/Volumes/Open-Anti-Browser $APP_VERSION" 2>/dev/null || true
+
+          # 05-01 产出的 @1x/@2x 背景图合成多分辨率 tiff，让 dmg 背景图支持 retina。
+          tiffutil -cathidpicheck assets/dmg-background.png "assets/dmg-background@2x.png" -out "$RUNNER_TEMP/dmg-background.tiff" \
+            || { echo "错误: tiffutil 合成背景图失败" >&2; exit 1; }
+
+          # .app 用 ditto 复制到干净的源目录里作为 create-dmg 的源（避免 create-dmg 直接吃
+          # .app 时的行为歧义，同时 ditto 保签名）。
+          DMG_SRC="$RUNNER_TEMP/dmg-src"
+          rm -rf "$DMG_SRC"
+          mkdir -p "$DMG_SRC"
+          ditto "$APP" "$DMG_SRC/Open-Anti-Browser.app" \
+            || { echo "错误: ditto 拷贝 .app 到 dmg 源目录失败" >&2; exit 1; }
+
+          # 不吞退出码：create-dmg 在 CI 会话类型下的 AppleScript 行为未经真实验证过
+          # （RESEARCH A4），第一次跑要让真实退出码与完整日志暴露出来。
+          create-dmg \
+            --volname "Open-Anti-Browser $APP_VERSION" \
+            --background "$RUNNER_TEMP/dmg-background.tiff" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 128 \
+            --icon "Open-Anti-Browser.app" 150 190 \
+            --app-drop-link 450 190 \
+            --hide-extension "Open-Anti-Browser.app" \
+            --no-internet-enable \
+            "$DMG_NAME" \
+            "$DMG_SRC"
+
+          if [[ ! -f "$DMG_NAME" ]]; then
+            echo "错误: create-dmg 未产出 $DMG_NAME" >&2
+            exit 1
+          fi
+          echo "create-dmg 成功产出: $DMG_NAME"
+
+      - name: Verify dmg contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          DMG_NAME="Open-Anti-Browser-${APP_VERSION}-arm64.dmg"
+          MOUNT_POINT="$RUNNER_TEMP/dmg-mount"
+          rm -rf "$MOUNT_POINT"
+          mkdir -p "$MOUNT_POINT"
+
+          hdiutil attach -nobrowse -readonly -mountpoint "$MOUNT_POINT" "$DMG_NAME" \
+            || { echo "错误: hdiutil attach 失败: $DMG_NAME" >&2; exit 1; }
+
+          FAIL=0
+          [[ -d "$MOUNT_POINT/Open-Anti-Browser.app" ]] \
+            || { echo "错误: 挂载点内缺少 Open-Anti-Browser.app" >&2; FAIL=1; }
+          [[ -e "$MOUNT_POINT/Applications" ]] \
+            || { echo "错误: 挂载点内缺少 Applications 别名" >&2; FAIL=1; }
+          [[ -d "$MOUNT_POINT/.background" ]] \
+            || { echo "错误: 挂载点内缺少 .background 目录" >&2; FAIL=1; }
+
+          if [[ "$FAIL" -eq 0 ]]; then
+            # dmg 打包之后签名依然通过双层验证（D-11/PKG-04）。
+            codesign --verify --deep --strict "$MOUNT_POINT/Open-Anti-Browser.app" \
+              || { echo "错误: dmg 内外层签名验证失败" >&2; FAIL=1; }
+            codesign --verify --deep --strict "$MOUNT_POINT/Open-Anti-Browser.app/Contents/Resources/engines/chrome/Chromium.app" \
+              || { echo "错误: dmg 内内核签名验证失败" >&2; FAIL=1; }
+          fi
+
+          hdiutil detach "$MOUNT_POINT" || true
+
+          if [[ "$FAIL" -ne 0 ]]; then
+            exit 1
+          fi
+          echo "dmg 内容验证通过"
+
+      - name: Upload macOS dmg artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Open-Anti-Browser-macos-dmg
+          path: Open-Anti-Browser-*-arm64.dmg
+          if-no-files-found: error
