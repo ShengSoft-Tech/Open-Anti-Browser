@@ -394,6 +394,135 @@ jobs:
 
           echo "签名门禁通过：外层与内层均验证成功"
 
+      - name: Assert bundle contents (arch / frontend-dist / min-os)
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="dist/Open-Anti-Browser.app"
+
+          echo "=== 架构断言(arm64) ==="
+          assert_arm64() {
+            local bin="$1"
+            local label="$2"
+            if [[ ! -f "$bin" ]]; then
+              echo "错误: $label 不存在: $bin" >&2
+              exit 1
+            fi
+            local archs
+            archs="$(lipo -archs "$bin")"
+            echo "$label lipo -archs: $archs"
+            if [[ "$archs" != *arm64* ]]; then
+              echo "错误: $label 不含 arm64 架构(实际: $archs)" >&2
+              exit 1
+            fi
+            local file_out
+            file_out="$(file "$bin")"
+            echo "$label file: $file_out"
+            if [[ "$file_out" != *arm64* ]]; then
+              echo "错误: $label 的 file 输出未确认 arm64(实际: $file_out)" >&2
+              exit 1
+            fi
+          }
+          assert_arm64 "$APP/Contents/MacOS/Open-Anti-Browser" "主二进制"
+          assert_arm64 "$APP/Contents/Resources/engines/chrome/Chromium.app/Contents/MacOS/Chromium" "内核二进制"
+          echo "断言通过: 主二进制与内核二进制均为 arm64"
+
+          echo "=== frontend/dist 进包断言(PKG-05,backend/_g.py 在 dist 缺失时会静默跳过,靠这道结构断言独立抓) ==="
+          DIST_DIR="$APP/Contents/Resources/frontend/dist"
+          if [[ ! -d "$DIST_DIR" ]]; then
+            echo "错误: $DIST_DIR 不是目录(frontend/dist 未进包)" >&2
+            exit 1
+          fi
+          if [[ ! -f "$APP/Contents/Resources/frontend/dist/index.html" ]]; then
+            echo "错误: $APP/Contents/Resources/frontend/dist/index.html 不存在" >&2
+            exit 1
+          fi
+          DIST_FILE_COUNT="$(find "$DIST_DIR" -type f | wc -l | tr -d ' ')"
+          if [[ "$DIST_FILE_COUNT" -eq 0 ]]; then
+            echo "错误: $DIST_DIR 内递归文件数为 0" >&2
+            exit 1
+          fi
+          echo "断言通过: $DIST_DIR 存在, index.html 存在, 递归文件数=$DIST_FILE_COUNT"
+
+          FRONTEND_LINK="$APP/Contents/Frameworks/frontend"
+          if [[ ! -L "$FRONTEND_LINK" ]]; then
+            echo "错误: $FRONTEND_LINK 不是符号链接" >&2
+            exit 1
+          fi
+          FRONTEND_LINK_TARGET="$(readlink "$FRONTEND_LINK")"
+          if [[ "$FRONTEND_LINK_TARGET" != "../Resources/frontend" ]]; then
+            echo "错误: $FRONTEND_LINK 符号链接目标不是 ../Resources/frontend(实际: $FRONTEND_LINK_TARGET)" >&2
+            exit 1
+          fi
+          echo "断言通过: $FRONTEND_LINK -> $FRONTEND_LINK_TARGET"
+
+          echo "=== 最低系统版本断言(核销 RESEARCH 假设 A3) ==="
+          PLIST_MINOS="$(plutil -extract LSMinimumSystemVersion raw "$APP/Contents/Info.plist")"
+          echo "Info.plist LSMinimumSystemVersion: $PLIST_MINOS"
+
+          MINOS_LIST="$RUNNER_TEMP/minos-list.txt"
+          : > "$MINOS_LIST"
+          # find 默认不跟随符号链接(05-03 已确认的口径),排除内核子树；对每个常规
+          # 文件用 file 判定是否 Mach-O，是的话用 otool -l 抽 LC_BUILD_VERSION 的 minos。
+          while IFS= read -r -d '' bin; do
+            if file "$bin" 2>/dev/null | grep -q "Mach-O"; then
+              m="$(otool -l "$bin" 2>/dev/null | awk '/LC_BUILD_VERSION/{f=1;next} f&&/minos/{print $2; exit}')"
+              [[ -n "$m" ]] && echo "$m" >> "$MINOS_LIST"
+            fi
+          done < <(find "$APP/Contents/Frameworks" -type f -not -path "*/engines/*" -print0)
+
+          if [[ ! -s "$MINOS_LIST" ]]; then
+            echo "错误: 未在 Contents/Frameworks 下找到任何带 LC_BUILD_VERSION 的 Mach-O 文件" >&2
+            exit 1
+          fi
+
+          MINOS_SUP="$(sort -V "$MINOS_LIST" | tail -1)"
+          echo "Mach-O LC_BUILD_VERSION minos 上确界: $MINOS_SUP"
+
+          COMPARE_TOP="$(printf '%s\n%s\n' "$MINOS_SUP" "$PLIST_MINOS" | sort -V | tail -1)"
+          if [[ "$COMPARE_TOP" != "$PLIST_MINOS" ]]; then
+            echo "错误: Info.plist LSMinimumSystemVersion($PLIST_MINOS) 低于 Mach-O 实测上确界($MINOS_SUP)，请把 'Patch Info.plist' 步骤里的取值调到至少 $MINOS_SUP" >&2
+            exit 1
+          fi
+          echo "断言通过: LSMinimumSystemVersion($PLIST_MINOS) >= Mach-O 实测上确界($MINOS_SUP)"
+
+      - name: Smoke test (--backend-only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_BIN="dist/Open-Anti-Browser.app/Contents/MacOS/Open-Anti-Browser"
+          SMOKE_PORT=18123
+          SMOKE_LOG="$RUNNER_TEMP/smoke-test.log"
+
+          # --backend-only 而非完整 GUI：绕开 QtWebEngine/GPU 在无人值守 runner 上的
+          # 不确定性，但仍覆盖 D-14 想抓的失败模式——launch_app.main 开头先跑
+          # backend/_g.py 的运行时完整性校验(_0x2f("runtime"))，再分派到
+          # run_backend_only，模块加载失败/依赖缺失/校验拒启都会在这条路径上原形毕露。
+          "$APP_BIN" --backend-only --port "$SMOKE_PORT" > "$SMOKE_LOG" 2>&1 &
+          SMOKE_PID=$!
+
+          PASSED=0
+          for i in $(seq 1 30); do
+            if curl -sf "http://127.0.0.1:${SMOKE_PORT}/api/bootstrap" >/dev/null 2>&1; then
+              echo "冒烟通过: /api/bootstrap 响应正常(第 ${i} 次轮询)"
+              PASSED=1
+              break
+            fi
+            sleep 1
+          done
+
+          if [[ "$PASSED" -eq 1 ]]; then
+            kill "$SMOKE_PID" 2>/dev/null || true
+            wait "$SMOKE_PID" 2>/dev/null || true
+            exit 0
+          fi
+
+          echo "错误: 30s 内未获得 /api/bootstrap 响应" >&2
+          echo "=== 子进程 stdout/stderr ===" >&2
+          cat "$SMOKE_LOG" >&2 || true
+          kill "$SMOKE_PID" 2>/dev/null || true
+          exit 1
+
       - name: Create dmg
         shell: bash
         run: |
