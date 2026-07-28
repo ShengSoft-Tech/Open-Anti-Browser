@@ -64,7 +64,7 @@
   - **实现不变**:内核仍在 `.app` 内,`config.py` 的 `ENGINES_DIR` 解析不动,Phase 1 D-05~D-08 的路径决策不动。
   - **语义降级**:自剥离逻辑从「主流程承诺」降级为「quarantine 已被提前剥过时的静默跳过优化」。它成功是幸运,不是设计预期。
   - **文案与验收口径上调**:失败提示弹窗是**预期的首次主路径**,不是异常分支——文案、埋点与 D-15 的验收标准都按这个前提写。
-  - **D-15 必须验明的未决点**(RESEARCH Open Question 1):真人走 系统设置 → 隐私与安全性 →「仍要打开」这条**官方交互路径**后,quarantine 属性是被清除(则第二次启动一切正常、自剥离生效),还是仅在 syspolicy 数据库记一条豁免(则 translocation 持续、用户必须敲命令)。D-15 **不得只验「最终能不能启动」**,必须逐条记录首次双击看到的完整提示序列,以及第二次启动是否仍被 translocate。
+  - **交给真机 checkpoint 验明的未决点**(RESEARCH Open Question 1):真人走 系统设置 → 隐私与安全性 →「仍要打开」这条**官方交互路径**后,quarantine 属性是被清除(则第二次启动一切正常、自剥离生效),还是仅在 syspolicy 数据库记一条豁免(则 translocation 持续、用户必须敲命令)。该验证归属 D-15,且**不得只验「最终能不能启动」**——必须逐条记录首次双击看到的完整提示序列,以及第二次启动是否仍被 translocate。
   - **退路仍然存在但不在本 phase 启动**:若 D-15 证明体验不可接受,再把「内核首启复制到 `~/Library/Application Support/Open-Anti-Browser/engines/`」作为**新的一次决策**处理,不由 executor 自行改道。 — **Reversibility:** reversible — 本修订只改语义与文案口径,不改代码架构。
 
   - **researcher/planner 必须查证的两个前提:**

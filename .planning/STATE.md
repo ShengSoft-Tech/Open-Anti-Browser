@@ -4,15 +4,15 @@ milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 5
 current_phase_name: CI 打包发布
-status: planning
+status: executing
 stopped_at: Phase 5 context gathered
-last_updated: "2026-07-28T07:08:24.136Z"
+last_updated: "2026-07-28T17:25:13.963Z"
 last_activity: 2026-07-27
 last_activity_desc: Phase 04 complete, transitioned to Phase 5
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 17
+  total_plans: 23
   completed_plans: 17
   percent: 67
 ---
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 
 Phase: 5 — CI 打包发布
 Plan: Not started
-Status: Ready to plan
+Status: Ready to execute
 Last activity: 2026-07-27 — Phase 04 complete, transitioned to Phase 5
 
 Progress: [██████████] 100%
