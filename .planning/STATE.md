@@ -5,8 +5,8 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 5
 current_phase_name: CI 打包发布
 status: planning
-stopped_at: Completed 04-06-PLAN.md (macOS 真机 UAT checkpoint)
-last_updated: "2026-07-28T02:10:31.739Z"
+stopped_at: Phase 5 context gathered
+last_updated: "2026-07-28T07:08:24.136Z"
 last_activity: 2026-07-27
 last_activity_desc: Phase 04 complete, transitioned to Phase 5
 progress:
@@ -134,6 +134,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T01:52:10.271Z
-Stopped at: Completed 04-06-PLAN.md (macOS 真机 UAT checkpoint)
-Resume file: None
+Last session: 2026-07-28T07:08:24.122Z
+Stopped at: Phase 5 context gathered
+Resume file: .planning/phases/05-ci/05-CONTEXT.md
