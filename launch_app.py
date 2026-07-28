@@ -60,6 +60,20 @@ def resolve_window_icon_path() -> Path | None:
     return None
 
 
+def should_intercept_quit_event() -> bool:
+    # 唯一的平台判定入口：macOS 上 Cmd+Q 会走 closeEvent 的托盘分支被 event.ignore() 吞掉
+    # （D-07），需要单独接一条路径收敛到既有的窗口退出方法。Windows/Linux 不拦截，
+    # closeEvent 逐字不变。
+    return sys.platform == "darwin"
+
+
+def handle_macos_quit_request(window) -> bool:
+    # 只换触发源，不平行发明第二套 shutdown 逻辑：退出仍然走既有的窗口退出方法
+    # （-> closeEvent 的 shutdown 分支 -> event.accept() -> quit()）。
+    window.force_exit()
+    return True
+
+
 def build_server(port: int) -> tuple[Server, threading.Thread]:
     config = Config(
         app=app,
@@ -130,7 +144,7 @@ def run_backend_only(port: int | None = None) -> int:
 
 def run_desktop() -> int:
     _configure_desktop_webview_env()
-    from PySide6.QtCore import QObject, Qt, QTimer, QUrl, Signal, Slot
+    from PySide6.QtCore import QEvent, QObject, Qt, QTimer, QUrl, Signal, Slot
     from PySide6.QtGui import QAction, QCloseEvent, QIcon
     from PySide6.QtNetwork import QLocalServer, QLocalSocket
     from PySide6.QtWebEngineCore import QWebEnginePage, QWebEngineProfile, QWebEngineSettings
@@ -292,6 +306,18 @@ def run_desktop() -> int:
                 self.tray_icon.hide()
             self.server_thread.join(timeout=8)
 
+    class MacQuitEventFilter(QObject):
+        # macOS Cmd+Q 只作为触发源，事件本身不携带任何 shutdown 逻辑
+        # （逻辑全部在模块级的 handle_macos_quit_request 里）。
+        def __init__(self, target_window: "DesktopMainWindow", parent: QObject) -> None:
+            super().__init__(parent)
+            self.target_window = target_window
+
+        def eventFilter(self, obj, event) -> bool:
+            if event.type() == QEvent.Type.Quit:
+                return handle_macos_quit_request(self.target_window)
+            return False
+
     qt_app = QApplication.instance() or QApplication([])
     qt_app.setApplicationDisplayName(APP_TITLE)
     qt_app.setApplicationName(APP_TITLE)
@@ -329,6 +355,11 @@ def run_desktop() -> int:
 
     window = DesktopMainWindow(f"http://127.0.0.1:{port}?shell=desktop", server, thread)
     directory_picker_bridge = DirectoryPickerBridge(window)
+
+    if should_intercept_quit_event():
+        # qt_app 作为 parent，保持强引用避免被 GC 回收。
+        mac_quit_filter = MacQuitEventFilter(window, qt_app)
+        qt_app.installEventFilter(mac_quit_filter)
 
     def handle_instance_activation() -> None:
         while instance_server.hasPendingConnections():
