@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
-current_phase: 5
-current_phase_name: CI 打包发布
+current_phase: 05
+current_phase_name: ci
 status: executing
-stopped_at: Phase 5 context gathered
-last_updated: "2026-07-28T17:25:13.963Z"
-last_activity: 2026-07-27
-last_activity_desc: Phase 04 complete, transitioned to Phase 5
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-07-28T17:32:27.158Z"
+last_activity: 2026-07-28
+last_activity_desc: Phase 05 execution started
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 23
-  completed_plans: 17
+  completed_plans: 18
   percent: 67
 ---
 
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-23)
 
 **Core value:** 一键创建并启动相互隔离、指纹可信的浏览器环境——配置即用,无需用户理解指纹参数细节。
-**Current focus:** Phase 04 — frontend-platform-gating
+**Current focus:** Phase 05 — ci
 
 ## Current Position
 
-Phase: 5 — CI 打包发布
-Plan: Not started
+Phase: 05 (ci) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-07-27 — Phase 04 complete, transitioned to Phase 5
+Last activity: 2026-07-28 — Phase 05 execution started
 
-Progress: [██████████] 100%
+Progress: [████████░░] 78%
 
 ## Performance Metrics
 
@@ -77,6 +77,7 @@ Progress: [██████████] 100%
 | Phase 04 P04 | 20min | 2 tasks | 2 files |
 | Phase 04 P05 | 25min | 3 tasks | 3 files |
 | Phase 04 P06 | 35min | 1 tasks | 3 files |
+| Phase 05 P01 | 10min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,7 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 4] 04-05: App.vue onMounted 新增 maybeShowGatekeeperNotice(),严格排在既有开源声明首启提示(_0x31ab)之后、复用同一 try 块;backend/_g.py 的 App.vue SHA-256 在全部编辑定稿后重算写回(31871ec3...),仅改一行,openSourceNotice.js 条目/package.json 钩子零改动
 - [Phase ?]: [Phase 4] 04-06: A8 用户拍板推翻 04-05 原建议——GroupManager Firefox 计数列由无条件保留改为按需显示(新增 shouldShowFirefoxColumn 纯函数,D-00 合规),commit 3e32105
 - [Phase ?]: [Phase 4] 04-06: RESEARCH 假设 A2(Gatekeeper 放行指引措辞)已在 macOS 15.7(Sequoia, build 24G222)真机逐字核对通过,与系统实际菜单/按钮一致
+- [Phase ?]: 05-01: assets/app.icns (D-06) 与 assets/dmg-background.png+@2x (D-10) 已入仓;icon_512x512@2x 档位实测为真 512x512(非 1024)并记录;背景图放行文案逐字核对不含全局停用 Gatekeeper 指令;PKG-02/PKG-04 因与 05-02/05-03/05-04/05-06 共享未全部标记完成(requirements.ready-ids 确认阻塞)
 
 ### Pending Todos
 
@@ -134,6 +136,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T07:08:24.122Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-ci/05-CONTEXT.md
+Last session: 2026-07-28T17:32:27.148Z
+Stopped at: Completed 05-01-PLAN.md
+Resume file: None
