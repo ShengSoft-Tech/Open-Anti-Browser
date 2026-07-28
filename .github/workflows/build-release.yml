@@ -528,6 +528,93 @@ jobs:
           kill "$SMOKE_PID" 2>/dev/null || true
           exit 1
 
+      - name: GUI launch smoke test (real Cocoa event loop — 05-06 crash regression gate)
+        shell: bash
+        run: |
+          set -uo pipefail
+          # 不用 -e：本步骤要手动汇总多个失败信号后再统一报告，中途单条命令非零
+          # 不能直接中止脚本。
+          #
+          # 05-06 真机 checkpoint 抓到的崩溃是 launch_app.py 在 QApplication 实例上
+          # installEventFilter(...) 导致的 SIGSEGV，栈顶在 -[NSWindow
+          # makeKeyAndOrderFront:] 触发的 QtQuick focus 分发路径上（PySide::typeName
+          # 读到空的 vtable/d_ptr 槽位）。这条路径必须走真实的 cocoa 平台插件——
+          # QT_QPA_PLATFORM=offscreen 会绕开 -[NSWindow makeKeyAndOrderFront:] 这条
+          # Cocoa 调用链，测不出这个 bug，所以本步骤刻意不设置该变量，让它使用
+          # macos-15 runner 自带的真实图形会话。这条假设（GitHub 的 macOS hosted
+          # runner 有完整登录态 GUI session、可以真的创建/显示/聚焦窗口）是本次
+          # gap-fix 用真实 workflow_dispatch 跑验证的对象，结论记在
+          # 05-02-GAP-FIX-SUMMARY.md。
+          APP="dist/Open-Anti-Browser.app"
+          APP_BIN="$APP/Contents/MacOS/Open-Anti-Browser"
+          DWELL_SECONDS=18
+          GUI_LOG="$RUNNER_TEMP/gui-smoke.log"
+          CRASH_DIR="$HOME/Library/Logs/DiagnosticReports"
+
+          echo "=== 记录测试开始前已存在的崩溃报告(避免历史 report 被误判为本次新增) ==="
+          mkdir -p "$CRASH_DIR"
+          BEFORE_CRASHES="$RUNNER_TEMP/crashes-before.txt"
+          ls "$CRASH_DIR" 2>/dev/null | grep -i "Open-Anti-Browser" > "$BEFORE_CRASHES" || true
+          echo "已有 $(wc -l < "$BEFORE_CRASHES" | tr -d ' ') 份历史崩溃报告"
+
+          echo "=== 启动真实 GUI 进程(非 --backend-only，完整走到 window.show()/activateWindow()) ==="
+          "$APP_BIN" > "$GUI_LOG" 2>&1 &
+          APP_PID=$!
+          echo "已启动 PID=$APP_PID，持续观察 ${DWELL_SECONDS}s"
+
+          SURVIVED=1
+          CRASH_SECOND=""
+          for i in $(seq 1 "$DWELL_SECONDS"); do
+            if ! kill -0 "$APP_PID" 2>/dev/null; then
+              echo "错误: 进程在第 ${i}s 时已退出(期望存活满 ${DWELL_SECONDS}s)" >&2
+              SURVIVED=0
+              CRASH_SECOND="$i"
+              break
+            fi
+            sleep 1
+          done
+
+          if [[ "$SURVIVED" -eq 1 ]]; then
+            echo "存活满 ${DWELL_SECONDS}s，未观察到进程提前退出，主动终止(SIGTERM，非崩溃信号)"
+            kill -TERM "$APP_PID" 2>/dev/null || true
+            sleep 3
+          fi
+          wait "$APP_PID" 2>/dev/null
+          EXIT_CODE=$?
+          echo "进程最终退出码: $EXIT_CODE"
+
+          echo "=== 子进程 stdout/stderr ==="
+          cat "$GUI_LOG" 2>&1 || true
+
+          echo "=== 比对崩溃报告目录，找出本次运行新增的报告 ==="
+          AFTER_CRASHES="$RUNNER_TEMP/crashes-after.txt"
+          ls "$CRASH_DIR" 2>/dev/null | grep -i "Open-Anti-Browser" > "$AFTER_CRASHES" || true
+          NEW_CRASHES="$(comm -13 <(sort "$BEFORE_CRASHES") <(sort "$AFTER_CRASHES"))"
+
+          FAIL=0
+          if [[ "$SURVIVED" -ne 1 ]]; then
+            echo "错误: GUI 进程未能存活满 ${DWELL_SECONDS}s(第 ${CRASH_SECOND}s 时已消失)" >&2
+            FAIL=1
+          fi
+          if [[ -n "$NEW_CRASHES" ]]; then
+            echo "错误: 检测到本次运行新增的崩溃报告:" >&2
+            echo "$NEW_CRASHES" >&2
+            while IFS= read -r report; do
+              [[ -z "$report" ]] && continue
+              echo "--- $CRASH_DIR/$report (前 120 行，含崩溃线程栈) ---" >&2
+              head -120 "$CRASH_DIR/$report" >&2 || true
+            done <<< "$NEW_CRASHES"
+            FAIL=1
+          fi
+
+          if [[ "$FAIL" -ne 0 ]]; then
+            echo "错误: GUI 冒烟测试失败 —— 这正是 05-06 real-machine checkpoint 抓到的" \
+                 "「双击后 ~2s 内 SIGSEGV」崩溃路径。若该修复被回退或类似的" \
+                 "installEventFilter 反模式被重新引入，本步骤会在这里拦下。" >&2
+            exit 1
+          fi
+          echo "GUI 冒烟测试通过: 进程在真实 cocoa 事件循环下存活 ${DWELL_SECONDS}s，期间无新增崩溃报告"
+
       - name: Create dmg
         shell: bash
         run: |
