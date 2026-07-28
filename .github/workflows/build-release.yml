@@ -290,9 +290,19 @@ jobs:
           find "$APP" \( -name "*.app" -o -name "*.framework" \) -print | sort
 
           echo "=== Qt 相关二进制 LC_BUILD_VERSION / minos 抽样 ==="
-          FRAMEWORKS_DIR="$APP/Contents/Frameworks"
-          for f in "$FRAMEWORKS_DIR"/Qt*.framework "$FRAMEWORKS_DIR"/QtWebEngineProcess.app; do
-            [[ -e "$f" ]] || continue
+          # PySide6 6.9+ 把全部 Qt*.framework 与 QtWebEngineProcess.app 收纳在
+          # Contents/Frameworks/PySide6/Qt/lib/ 下，并非直接在 Contents/Frameworks/
+          # 顶层（首次真实运行已实测确认，见 05-03-SUMMARY.md A2 记录）；用 find 递归
+          # 定位，抽样 QtCore/QtWidgets/QtWebEngineCore 三个代表性 framework 加上
+          # QtWebEngineProcess.app 本身。
+          QT_SAMPLE=(
+            "$(find "$APP/Contents/Frameworks" -name "QtCore.framework" -print -quit)"
+            "$(find "$APP/Contents/Frameworks" -name "QtWidgets.framework" -print -quit)"
+            "$(find "$APP/Contents/Frameworks" -name "QtWebEngineCore.framework" -print -quit)"
+            "$(find "$APP/Contents/Frameworks" -name "QtWebEngineProcess.app" -print -quit)"
+          )
+          for f in "${QT_SAMPLE[@]}"; do
+            [[ -n "$f" && -e "$f" ]] || continue
             BIN=""
             if [[ -d "$f" && "$f" == *.framework ]]; then
               NAME="$(basename "$f" .framework)"
