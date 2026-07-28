@@ -37,8 +37,8 @@ Requirements for the macOS support milestone. Each maps to roadmap phases.
 ### CI 打包发布 (PKG)
 
 - [ ] **PKG-01**: 推送 v* tag 触发 CI macOS job(matrix:arm64=macos-15,x64=macos-15-intel),与现有 Windows job 并行
-- [ ] **PKG-02**: PyInstaller 产出真正的 .app bundle(BUNDLE + Info.plist + .icns:菜单栏/Dock 显示正确应用名与图标,Cmd+Q 正常退出)
-- [ ] **PKG-03**: 内核经 ditto 注入 .app 后整体 ad-hoc 重签,CI 内 `codesign --verify --deep --strict` 作为硬门禁
+- [x] **PKG-02**: PyInstaller 产出真正的 .app bundle(BUNDLE + Info.plist + .icns:菜单栏/Dock 显示正确应用名与图标,Cmd+Q 正常退出)
+- [x] **PKG-03**: 内核经 ditto 注入 .app 后整体 ad-hoc 重签,CI 内 `codesign --verify --deep --strict` 作为硬门禁
 - [ ] **PKG-04**: dmg 含 .app + Applications 别名 + 自定义拖拽安装背景图,文件名含版本与架构(如 `Open-Anti-Browser-0.2.0-arm64.dmg`)
 - [ ] **PKG-05**: 两个 dmg 与 Windows 安装包挂到同一 GitHub Release;backend/_g.py 完整性校验在 macOS 构建与启动中保持有效
 
@@ -93,8 +93,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-03 | Phase 4 | Complete |
 | UI-04 | Phase 4 | Complete |
 | PKG-01 | Phase 5 | Pending |
-| PKG-02 | Phase 5 | Pending |
-| PKG-03 | Phase 5 | Pending |
+| PKG-02 | Phase 5 | Complete |
+| PKG-03 | Phase 5 | Complete |
 | PKG-04 | Phase 5 | Pending |
 | PKG-05 | Phase 5 | Pending |
 | DOCS-01 | Phase 6 | Pending |

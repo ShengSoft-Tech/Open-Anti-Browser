@@ -147,12 +147,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. 两个 dmg(含 `.app` + Applications 别名 + 拖拽安装背景图)以版本+架构命名(如 `Open-Anti-Browser-0.2.0-arm64.dmg`)并与 Windows 安装包一起出现在同一 GitHub Release
   5. `backend/_g.py` 开源声明完整性校验在 macOS 构建与启动过程中保持有效,不因打包流程被破坏
 
-**Plans**: 1/6 plans executed
+**Plans**: 2/6 plans executed
 
 **Wave 1** *(可并行,无文件重叠)*
 
 - [x] 05-01-PLAN.md — 资产入仓:`assets/app.icns` + dmg 拖拽背景图(含 @2x)[PKG-02/PKG-04]
-- [ ] 05-02-PLAN.md — `launch_app.py` macOS 运行时:Cmd+Q 汇入 force_exit + 首启 quarantine 自剥离与 D-12a 兜底提示 + 单测 [PKG-02/PKG-03]
+- [x] 05-02-PLAN.md — `launch_app.py` macOS 运行时:Cmd+Q 汇入 force_exit + 首启 quarantine 自剥离与 D-12a 兜底提示 + 单测 [PKG-02/PKG-03]
 
 **Wave 2** *(depends on 05-01)*
 
@@ -195,5 +195,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 2. macOS 内核构建与发布 | 4/4 | Complete    | 2026-07-26 |
 | 3. macOS Chrome 启动与能力 API | 3/3 | Complete    | 2026-07-27 |
 | 4. 前端平台门控 | 6/6 | Complete    | 2026-07-27 |
-| 5. CI 打包发布 | 1/6 | In Progress|  |
+| 5. CI 打包发布 | 2/6 | In Progress|  |
 | 6. 发布文档与端到端验证 | 0/TBD | Not started | - |
