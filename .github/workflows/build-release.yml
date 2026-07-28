@@ -531,9 +531,13 @@ jobs:
       - name: GUI launch smoke test (real Cocoa event loop — 05-06 crash regression gate)
         shell: bash
         run: |
-          set -uo pipefail
-          # 不用 -e：本步骤要手动汇总多个失败信号后再统一报告，中途单条命令非零
-          # 不能直接中止脚本。
+          # 显式 set +e：GitHub Actions 的 shell: bash 默认用 `bash -e -o pipefail`
+          # 调用整段 run 脚本（这条继承的 -e 不会被脚本内的 `set -uo pipefail` 关掉，
+          # 必须显式 +e 才能覆盖）。本步骤要手动汇总多个失败信号（进程是否提前退出 /
+          # 是否有新增崩溃报告）后再统一报告，任何一条子命令非零都不能让脚本提前中止
+          # ——首轮验证跑就实测到这个坑：wait 捕获到 segfault 的 139 退出码后，若 -e
+          # 仍然生效，脚本会在打印自定义诊断信息之前就被直接中止退出。
+          set +e -uo pipefail
           #
           # 05-06 真机 checkpoint 抓到的崩溃是 launch_app.py 在 QApplication 实例上
           # installEventFilter(...) 导致的 SIGSEGV，栈顶在 -[NSWindow
