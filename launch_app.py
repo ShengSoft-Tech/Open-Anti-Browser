@@ -5,6 +5,7 @@ import atexit
 import hashlib
 import os
 import socket
+import subprocess
 import sys
 import threading
 import time
@@ -20,6 +21,11 @@ from backend.ui_bridge import register_directory_picker_callback, register_exit_
 
 
 APP_TITLE = "Open-Anti-Browser · 开源指纹浏览器"
+
+# macOS quarantine 兜底提示的命令目标：与 frontend/src/lib/macosGatekeeperNotice.js
+# 的 GATEKEEPER_XATTR_COMMAND 逐字对齐（Phase 5 D-12/D-12a），不得另起第三套措辞。
+QUARANTINE_ATTRIBUTE = "com.apple.quarantine"
+CANONICAL_INSTALL_BUNDLE = "/Applications/Open-Anti-Browser.app"
 
 
 def find_available_port(preferred: int = 8000, span: int = 20) -> int:
@@ -72,6 +78,69 @@ def handle_macos_quit_request(window) -> bool:
     # （-> closeEvent 的 shutdown 分支 -> event.accept() -> quit()）。
     window.force_exit()
     return True
+
+
+def is_macos_frozen_runtime() -> bool:
+    return sys.platform == "darwin" and bool(getattr(sys, "frozen", False))
+
+
+def resolve_app_bundle_root(executable: str | None = None) -> Path | None:
+    target = Path(executable or sys.executable).resolve()
+    for parent in target.parents:
+        if parent.suffix == ".app":
+            return parent
+    return None
+
+
+def is_translocated_path(path) -> bool:
+    # App Translocation 触发时 sys.executable 落在只读的
+    # /private/var/folders/.../AppTranslocation/<uuid>/d/... 挂载点下（RESEARCH Pitfall 4）。
+    # 按「Don't Hand-Roll」结论用子串判定，不调用任何私有 API。
+    return "/AppTranslocation/" in str(path)
+
+
+def strip_quarantine_from_bundle(bundle: Path) -> tuple[bool, str]:
+    # 必须递归作用于整个 bundle：Phase 3 D-07 已实证只剥主二进制不够，framework
+    # dylib 与 helper 也带 quarantine。参数为列表形式传入，不经 shell，无注入面。
+    result = subprocess.run(
+        ["xattr", "-dr", QUARANTINE_ATTRIBUTE, str(bundle)],
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0, (result.stderr or "").strip()
+
+
+def quarantine_command_target(bundle) -> str:
+    # translocate 之后 sys.executable 指向只读随机路径，敲了也没用——命令必须
+    # 换算成规范安装位置，与前端 GATEKEEPER_XATTR_COMMAND 保持逐字一致。
+    if bundle is None or is_translocated_path(bundle):
+        return CANONICAL_INSTALL_BUNDLE
+    return str(bundle)
+
+
+def build_quarantine_failure_message(bundle) -> str:
+    target = quarantine_command_target(bundle)
+    command = f"xattr -dr {QUARANTINE_ATTRIBUTE} {target}"
+    return (
+        "首次打开 Open-Anti-Browser 时出现这个提示是正常现象，不代表应用损坏或出错。\n\n"
+        "macOS 会给刚安装的应用加上一次性的隔离标记，需要手动清除一次才能正常启动内置的浏览器内核。"
+        "请打开“终端”（Terminal），完整复制粘贴以下命令并回车：\n\n"
+        f"{command}\n\n"
+        "若你把应用安装在了别的位置，请把命令末尾的路径换成实际安装位置。"
+    )
+
+
+def maybe_strip_quarantine() -> str | None:
+    # 三重前置守卫：非 darwin / 非冻结态 / 推导不出 bundle 根，任一成立都不触碰 subprocess。
+    if not is_macos_frozen_runtime():
+        return None
+    bundle = resolve_app_bundle_root()
+    if bundle is None:
+        return None
+    succeeded, _stderr = strip_quarantine_from_bundle(bundle)
+    if succeeded:
+        return None
+    return build_quarantine_failure_message(bundle)
 
 
 def build_server(port: int) -> tuple[Server, threading.Thread]:
@@ -344,6 +413,11 @@ def run_desktop() -> int:
         if not instance_server.listen(instance_server_name):
             QMessageBox.critical(None, APP_TITLE, "程序实例检测失败，请先关闭已有程序后重试")
             return 1
+
+    quarantine_failure_message = maybe_strip_quarantine()
+    if quarantine_failure_message:
+        # D-12a：这是首次打开时的预期主路径，不是异常，用 information 而非 critical。
+        QMessageBox.information(None, APP_TITLE, quarantine_failure_message)
 
     try:
         port = find_available_port(8000, 20)
