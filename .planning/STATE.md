@@ -5,8 +5,8 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 05
 current_phase_name: ci
 status: executing
-stopped_at: Completed 05-05-PLAN.md
-last_updated: "2026-07-28T22:01:16.389Z"
+stopped_at: Completed 05-02 gap-fix (macOS crash fix + regression gates); 05-06 real-machine checkpoint unblocked, fresh dmg in ~/Downloads
+last_updated: "2026-07-28T23:58:52.365Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 05 execution started
 progress:
@@ -125,6 +125,7 @@ Recent decisions affecting current work:
 - [Phase ?]: 05-04: check_version_consistency.py placed in scripts/release/ (Phase 2 D-11 precedent), normalize_tag uses removeprefix not lstrip (RESEARCH's own example had the lstrip bug)
 - [Phase ?]: 05-04: A3 final resolution — true LSMinimumSystemVersion floor is 15.0 (Sequoia), set by PySide6/shiboken6's own compiled Python-binding libraries (not the Qt frameworks, which remain 13.0); materially more restrictive than 05-03's carried-forward 13.0 measurement, flagged as a product decision for the milestone owner
 - [Phase ?]: 05-05: release job consolidates Windows+macOS publish into a single softprops/action-gh-release call (needs: [build, build-macos], tag-gated); Windows build job's inline Create GitHub Release step removed with zero regression, proven on real workflow_dispatch run 30402103536 (release=skipped as designed, no new Release created)
+- [Phase ?]: [Phase 5] 05-02 gap-fix: launch_app.py 的 installEventFilter(qt_app) 反模式在真机导致 ~2s 内必现 SIGSEGV（05-06 checkpoint 抓到）；改为 QApplication 子类重载 event()。新增 AST 结构守卫测试 + build-macos 真 cocoa GUI 冒烟门禁（QT_QPA_PLATFORM 刻意不设为 offscreen），经 4 次真实 workflow_dispatch 验证：buggy 代码 2/2 次真实 segfault 被拦下，fix 后 1/1 次 18s 全程存活通过。修复过的干净 dmg 已放入 ~/Downloads，供用户重跑 05-06 真机 checkpoint。
 
 ### Pending Todos
 
@@ -146,6 +147,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T22:01:16.379Z
-Stopped at: Completed 05-05-PLAN.md
+Last session: 2026-07-28T23:58:52.355Z
+Stopped at: Completed 05-02 gap-fix (macOS crash fix + regression gates); 05-06 real-machine checkpoint unblocked, fresh dmg in ~/Downloads
 Resume file: None
