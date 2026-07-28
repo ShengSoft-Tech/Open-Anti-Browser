@@ -1,19 +1,16 @@
 ---
-status: testing
+status: resolved
 phase: 04-frontend-platform-gating
 source: [04-VERIFICATION.md]
 started: 2026-07-28T02:10:00Z
-updated: 2026-07-28T02:10:00Z
+updated: 2026-07-28T02:20:00Z
 ---
 
 ## Current Test
 
-number: 1
-name: ProfileList 在 capabilities 迟到加载时的响应式切换
-expected: |
-  capabilities 解析完成前后，引擎筛选下拉与列表行内标记无缝过渡到门控后的最终状态；
-  用户不会看到一闪而过的错误状态（例如筛选下拉短暂出现 Firefox 后又消失）。
-awaiting: user response
+number: —
+name: 全部完成
+awaiting: none — 3/3 通过，无待办
 
 ## Tests
 
@@ -27,7 +24,8 @@ how_to_test: |
   2. Throttling 选 "Slow 3G"（或自定义 2000ms 延迟）
   3. Cmd+Shift+R 硬刷新，全程盯住配置列表页
   4. 观察引擎筛选下拉与行内标记
-result: [pending]
+result: PASS — Slow 3G 节流硬刷新下无闪烁，引擎筛选下拉与行内标记直接呈现门控后的最终状态，未观察到 Firefox 选项一闪而过。
+tested_on: macOS 15.7 (24G222)，2026-07-28
 
 ### 2. AppSettings 卡片内 xattr 命令的逐字渲染
 
@@ -38,7 +36,8 @@ how_to_test: |
   1. 进入 设置 → 平台限制说明 卡片
   2. 找到终端命令那一行，逐字比对
   3. 尝试选中并复制，粘贴到文本编辑器确认内容完整
-result: [pending]
+result: PASS — 设置卡片内命令逐字完整，未见 HTML 转义或引号美化，可完整选中复制。Vue 双花括号插值路径与首启弹窗路径均已各自确认。
+tested_on: macOS 15.7 (24G222)，2026-07-28
 
 ### 3. 侧栏导航与 SyncManager 按钮在 capabilities 迟到加载时的禁用态切换
 
@@ -49,15 +48,18 @@ how_to_test: |
   1. 保持 Slow 3G 节流
   2. Cmd+Shift+R 硬刷新，盯住侧栏「同步器」项
   3. 刷新后进入同步器视图，观察其中的同步/排列按钮禁用态
-result: [pending]
+result: PASS — 侧栏「同步器」项与视图内同步/排列按钮的禁用态正常，未出现短暂可点击又变灰的闪烁。确认 isNavDisabled/navDisabledReason 作为普通函数在模板中直接调用没有丢失响应性。
+tested_on: macOS 15.7 (24G222)，2026-07-28
 
 ## Summary
 
 total: 3
-passed: 0
+passed: 3
 issues: 0
-pending: 3
+pending: 0
 skipped: 0
 blocked: 0
 
 ## Gaps
+
+None — 3 项 backstop 真值全部通过人工确认，无遗留缺口。

@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: 后端跨平台基础适配** - pip 安装、导入、启动、路径解析在 macOS 上全部跑通,Windows 行为零回归 (completed 2026-07-24)
 - [x] **Phase 2: macOS 内核构建与发布** - 本地构建 arm64/x64 两个 fingerprint-chromium 内核并发布为 kernel release 资产 (completed 2026-07-26)
 - [x] **Phase 3: macOS Chrome 启动与能力 API** - macOS 用户可一键启动指纹 Chrome 配置,后端暴露平台能力供前端门控 (completed 2026-07-27)
-- [ ] **Phase 4: 前端平台门控** - macOS 上 Firefox 隐藏、窗口同步/排列置灰提示、平台说明与放行指引上线
+- [x] **Phase 4: 前端平台门控** - macOS 上 Firefox 隐藏、窗口同步/排列置灰提示、平台说明与放行指引上线 (completed 2026-07-27)
 - [ ] **Phase 5: CI 打包发布** - CI 新增 macOS job,产出签名 dmg(arm64+x64)并与 Windows 安装包挂到同一 Release
 - [ ] **Phase 6: 发布文档与端到端验证** - Release notes 放行说明齐全,真机端到端验证通过
 
@@ -173,6 +173,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. 后端跨平台基础适配 | 4/4 | Complete    | 2026-07-24 |
 | 2. macOS 内核构建与发布 | 4/4 | Complete    | 2026-07-26 |
 | 3. macOS Chrome 启动与能力 API | 3/3 | Complete    | 2026-07-27 |
-| 4. 前端平台门控 | 6/6 | In Progress|  |
+| 4. 前端平台门控 | 6/6 | Complete    | 2026-07-27 |
 | 5. CI 打包发布 | 0/TBD | Not started | - |
 | 6. 发布文档与端到端验证 | 0/TBD | Not started | - |

@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
-current_phase: 04
-current_phase_name: frontend-platform-gating
-status: verifying
+current_phase: 5
+current_phase_name: CI 打包发布
+status: planning
 stopped_at: Completed 04-06-PLAN.md (macOS 真机 UAT checkpoint)
-last_updated: "2026-07-28T01:52:10.280Z"
+last_updated: "2026-07-28T02:10:31.739Z"
 last_activity: 2026-07-27
-last_activity_desc: Phase 04 execution started
+last_activity_desc: Phase 04 complete, transitioned to Phase 5
 progress:
   total_phases: 6
   completed_phases: 4
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 
 ## Current Position
 
-Phase: 04 (frontend-platform-gating) — EXECUTING
-Plan: 6 of 6
-Status: Phase complete — ready for verification
-Last activity: 2026-07-27 — Phase 04 execution started
+Phase: 5 — CI 打包发布
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-07-27 — Phase 04 complete, transitioned to Phase 5
 
 Progress: [██████████] 100%
 
@@ -39,7 +39,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 11
+- Total plans completed: 17
 - Average duration: — min
 - Total execution time: 0 hours
 
@@ -50,6 +50,7 @@ Progress: [██████████] 100%
 | 01 | 4 | - | - |
 | 02 | 4 | - | - |
 | 03 | 3 | - | - |
+| 04 | 6 | - | - |
 
 **Recent Trend:**
 

@@ -1,10 +1,11 @@
 ---
 phase: 04-frontend-platform-gating
 verified: 2026-07-28T02:04:52Z
-status: human_needed
-score: 4/4 roadmap success criteria verified; 3 backstop (reactivity) truths present-and-wired but not behaviorally exercised
-behavior_unverified: 3
+status: passed
+score: 4/4 roadmap success criteria verified; 3 backstop truths closed by human UAT on macOS 15.7 (see 04-UAT.md)
+behavior_unverified: 0
 overrides_applied: 0
+human_verification_resolved: 3/3 PASS — macOS 15.7 (24G222), 2026-07-28, recorded in 04-UAT.md
 human_verification:
   - test: "在 macOS 上人为让 /api/bootstrap 延迟返回(例如用浏览器 devtools 节流网络或临时给 backend 加 sleep),观察 ProfileList.vue 的引擎筛选下拉与行内「仅 Windows」标记在 capabilities 从 undefined 变为已加载的那一刻是否正确地从「Firefox 可见」切换为「Firefox 门控后的结果」,不残留首帧状态。"
     expected: "capabilities 解析完成前后,引擎筛选下拉与列表标记应无缝过渡到门控后的最终状态,用户不会看到一闪而过的错误状态（例如筛选下拉短暂含 Firefox 后又消失）。"
