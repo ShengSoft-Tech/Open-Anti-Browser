@@ -5,15 +5,15 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 05
 current_phase_name: ci
 status: executing
-stopped_at: Completed 05-04-PLAN.md
-last_updated: "2026-07-28T20:49:32.716Z"
+stopped_at: Completed 05-05-PLAN.md
+last_updated: "2026-07-28T22:01:16.389Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 05 execution started
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 23
-  completed_plans: 21
+  completed_plans: 22
   percent: 67
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 05 (ci) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 05 execution started
 
-Progress: [█████████░] 91%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
@@ -81,6 +81,7 @@ Progress: [█████████░] 91%
 | Phase 05 P02 | 15min | 2 tasks | 2 files |
 | Phase 05 P03 | 50min | 2 tasks | 2 files |
 | Phase 05 P04 | 105min | 3 tasks | 3 files |
+| Phase 05 P05 | 15min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -123,6 +124,7 @@ Recent decisions affecting current work:
 - [Phase ?]: 05-03: build-macos job proven twice on real workflow_dispatch (30393410452, 30394320282); A2/A3/A4 RESEARCH assumptions resolved with real-machine evidence, LSMinimumSystemVersion measured at 13.0 (not the 12.0 placeholder, carry-forward to 05-04)
 - [Phase ?]: 05-04: check_version_consistency.py placed in scripts/release/ (Phase 2 D-11 precedent), normalize_tag uses removeprefix not lstrip (RESEARCH's own example had the lstrip bug)
 - [Phase ?]: 05-04: A3 final resolution — true LSMinimumSystemVersion floor is 15.0 (Sequoia), set by PySide6/shiboken6's own compiled Python-binding libraries (not the Qt frameworks, which remain 13.0); materially more restrictive than 05-03's carried-forward 13.0 measurement, flagged as a product decision for the milestone owner
+- [Phase ?]: 05-05: release job consolidates Windows+macOS publish into a single softprops/action-gh-release call (needs: [build, build-macos], tag-gated); Windows build job's inline Create GitHub Release step removed with zero regression, proven on real workflow_dispatch run 30402103536 (release=skipped as designed, no new Release created)
 
 ### Pending Todos
 
@@ -144,6 +146,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T20:49:32.705Z
-Stopped at: Completed 05-04-PLAN.md
+Last session: 2026-07-28T22:01:16.379Z
+Stopped at: Completed 05-05-PLAN.md
 Resume file: None
