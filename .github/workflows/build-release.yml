@@ -109,14 +109,6 @@ jobs:
           path: installer_out/Open-Anti-Browser-Setup.exe
           if-no-files-found: error
 
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: installer_out/Open-Anti-Browser-Setup.exe
-          generate_release_notes: true
-          name: "Open-Anti-Browser ${{ github.ref_name }}"
-
   build-macos:
     runs-on: macos-15
 
@@ -621,3 +613,40 @@ jobs:
           name: Open-Anti-Browser-macos-dmg
           path: Open-Anti-Browser-*-arm64.dmg
           if-no-files-found: error
+
+  release:
+    needs: [build, build-macos]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: 'Open-Anti-Browser-*'
+          path: release-assets
+          merge-multiple: true
+
+      - name: List and verify release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== release-assets 目录清单 ==="
+          ls -la release-assets
+
+          if [[ ! -f "release-assets/Open-Anti-Browser-Setup.exe" ]]; then
+            echo "错误: release-assets 内缺少 Open-Anti-Browser-Setup.exe" >&2
+            exit 1
+          fi
+          if ! compgen -G "release-assets/Open-Anti-Browser-*-arm64.dmg" > /dev/null; then
+            echo "错误: release-assets 内缺少 Open-Anti-Browser-*-arm64.dmg" >&2
+            exit 1
+          fi
+          echo "断言通过: Windows 安装包与 macOS arm64 dmg 均已就位"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true
+          name: "Open-Anti-Browser ${{ github.ref_name }}"
