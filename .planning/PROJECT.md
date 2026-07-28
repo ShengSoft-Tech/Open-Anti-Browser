@@ -82,7 +82,7 @@
 - 后端跨平台适配(Chrome-only,窗口功能禁用)
 - CI macOS job 产出 arm64 dmg 并挂到 release
 
-**Progress:** Phase 1–3 complete(50%）。Phase 1 后端跨平台基础适配;Phase 2 macOS arm64/x64 内核构建并发布 kernel release;Phase 3 macOS Chrome 启动链路 + 平台能力 API 打通并经 arm64 真机端到端验收(含 D-07 quarantine/AMFI 修复)。x64 已于 2026-07-27 移出 v0.2(暂缓)。下一步 Phase 4 前端平台门控。
+**Progress:** Phase 1–4 complete(67%）。Phase 1 后端跨平台基础适配;Phase 2 macOS arm64/x64 内核构建并发布 kernel release;Phase 3 macOS Chrome 启动链路 + 平台能力 API 打通并经 arm64 真机端到端验收(含 D-07 quarantine/AMFI 修复);Phase 4 前端平台门控上线并经 macOS 15.7 真机 UAT 验收(UI-01~UI-04 全部核销)。x64 已于 2026-07-27 移出 v0.2(暂缓)。下一步 Phase 5 CI 打包发布。
 
 ## Evolution
 
