@@ -147,7 +147,28 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. 两个 dmg(含 `.app` + Applications 别名 + 拖拽安装背景图)以版本+架构命名(如 `Open-Anti-Browser-0.2.0-arm64.dmg`)并与 Windows 安装包一起出现在同一 GitHub Release
   5. `backend/_g.py` 开源声明完整性校验在 macOS 构建与启动过程中保持有效,不因打包流程被破坏
 
-**Plans**: TBD
+**Plans**: 6 plans
+
+**Wave 1** *(可并行,无文件重叠)*
+
+- [ ] 05-01-PLAN.md — 资产入仓:`assets/app.icns` + dmg 拖拽背景图(含 @2x)[PKG-02/PKG-04]
+- [ ] 05-02-PLAN.md — `launch_app.py` macOS 运行时:Cmd+Q 汇入 force_exit + 首启 quarantine 自剥离与 D-12a 兜底提示 + 单测 [PKG-02/PKG-03]
+
+**Wave 2** *(depends on 05-01)*
+
+- [ ] 05-03-PLAN.md — tracer:`build-macos` job 端到端(内核 → .app → plist → 注入 → 逐层签名 → 内外双验 → dmg → artifact)+ 首次真实 workflow_dispatch [PKG-01/02/03/04]
+
+**Wave 3** *(depends on 05-03;同文件顺序化)*
+
+- [ ] 05-04-PLAN.md — CI 硬门禁:三方版本一致性脚本 + arm64/frontend-dist/最低系统版本断言 + `--backend-only` 冒烟 [PKG-02/PKG-05]
+
+**Wave 4** *(depends on 05-04;同文件顺序化)*
+
+- [ ] 05-05-PLAN.md — `release` 汇合 job 统一建 Release + Windows 发布步骤移出 build job(D-02 costly,含回归验证)[PKG-01/PKG-05]
+
+**Wave 5** *(depends on 05-02 + 05-05;人工验收)*
+
+- [ ] 05-06-PLAN.md — macOS arm64 真机安装 checkpoint:首启提示序列 / quarantine 实测 / Cmd+Q / 图标观感 / Chrome 配置启动 [PKG-02/03/04]
 
 ### Phase 6: 发布文档与端到端验证
 
