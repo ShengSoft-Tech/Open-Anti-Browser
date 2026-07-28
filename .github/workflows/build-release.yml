@@ -257,12 +257,13 @@ jobs:
           # 必须严格排在后面所有 codesign 调用之前（Pitfall 1：签名后改 plist 会让签名失效）。
           plutil -replace CFBundleShortVersionString -string "$APP_VERSION" "$PLIST"
           plutil -replace CFBundleVersion -string "$APP_VERSION" "$PLIST"
-          # RESEARCH 假设 A3 的 12.0(Monterey)占位值已被 05-03 真实 CI 跑的 otool -l
-          # 实测推翻：QtCore/QtWidgets/QtWebEngineCore/QtWebEngineProcess 的
-          # LC_BUILD_VERSION minos 均为 13.0(Ventura,见 05-03-SUMMARY.md「A3」)，
-          # 此处直接采用实测值定稿，避免上面新增的最低系统版本硬断言必然失败、
-          # 白白浪费一次 10-20 分钟的真机 CI 跑。
-          plutil -replace LSMinimumSystemVersion -string "13.0" "$PLIST"
+          # RESEARCH 假设 A3 的历史演进:12.0(Monterey)占位值先被 05-03 的 4-binary
+          # 抽样(仅 QtCore/QtWidgets/QtWebEngineCore/QtWebEngineProcess)实测推翻为
+          # 13.0；05-04 首次真机跑通后面新增的架构/dist/最低系统版本硬断言步骤，对
+          # Contents/Frameworks 下**全部** Mach-O 二进制做完整枚举(而非抽样)后，
+          # 发现 15.0(Sequoia)才是真正的上确界(具体二进制见该步骤 CI 日志的完整
+          # minos 抽样输出)。此处采用完整枚举的实测值定稿。
+          plutil -replace LSMinimumSystemVersion -string "15.0" "$PLIST"
 
           echo "=== Info.plist (patched) ==="
           plutil -p "$PLIST"
@@ -468,11 +469,13 @@ jobs:
           MINOS_LIST="$RUNNER_TEMP/minos-list.txt"
           : > "$MINOS_LIST"
           # find 默认不跟随符号链接(05-03 已确认的口径),排除内核子树；对每个常规
-          # 文件用 file 判定是否 Mach-O，是的话用 otool -l 抽 LC_BUILD_VERSION 的 minos。
+          # 文件用 file 判定是否 Mach-O，是的话用 otool -l 抽 LC_BUILD_VERSION 的
+          # minos。每行记录 "<minos>\t<path>"，便于定位是哪个具体二进制把上确界
+          # 拉高的(sort -V 只按第一列 tab 前的版本号排序)。
           while IFS= read -r -d '' bin; do
             if file "$bin" 2>/dev/null | grep -q "Mach-O"; then
               m="$(otool -l "$bin" 2>/dev/null | awk '/LC_BUILD_VERSION/{f=1;next} f&&/minos/{print $2; exit}')"
-              [[ -n "$m" ]] && echo "$m" >> "$MINOS_LIST"
+              [[ -n "$m" ]] && printf '%s\t%s\n' "$m" "$bin" >> "$MINOS_LIST"
             fi
           done < <(find "$APP/Contents/Frameworks" -type f -not -path "*/engines/*" -print0)
 
@@ -481,12 +484,17 @@ jobs:
             exit 1
           fi
 
-          MINOS_SUP="$(sort -V "$MINOS_LIST" | tail -1)"
-          echo "Mach-O LC_BUILD_VERSION minos 上确界: $MINOS_SUP"
+          echo "=== 全部 Mach-O minos 抽样(按版本号排序,便于核对上确界来源) ==="
+          sort -t "$(printf '\t')" -k1,1V "$MINOS_LIST"
+
+          MINOS_SUP_LINE="$(sort -t "$(printf '\t')" -k1,1V "$MINOS_LIST" | tail -1)"
+          MINOS_SUP="$(printf '%s' "$MINOS_SUP_LINE" | cut -f1)"
+          MINOS_SUP_PATH="$(printf '%s' "$MINOS_SUP_LINE" | cut -f2)"
+          echo "Mach-O LC_BUILD_VERSION minos 上确界: $MINOS_SUP (来自: $MINOS_SUP_PATH)"
 
           COMPARE_TOP="$(printf '%s\n%s\n' "$MINOS_SUP" "$PLIST_MINOS" | sort -V | tail -1)"
           if [[ "$COMPARE_TOP" != "$PLIST_MINOS" ]]; then
-            echo "错误: Info.plist LSMinimumSystemVersion($PLIST_MINOS) 低于 Mach-O 实测上确界($MINOS_SUP)，请把 'Patch Info.plist' 步骤里的取值调到至少 $MINOS_SUP" >&2
+            echo "错误: Info.plist LSMinimumSystemVersion($PLIST_MINOS) 低于 Mach-O 实测上确界($MINOS_SUP,来自 $MINOS_SUP_PATH),请把 'Patch Info.plist' 步骤里的取值调到至少 $MINOS_SUP" >&2
             exit 1
           fi
           echo "断言通过: LSMinimumSystemVersion($PLIST_MINOS) >= Mach-O 实测上确界($MINOS_SUP)"
