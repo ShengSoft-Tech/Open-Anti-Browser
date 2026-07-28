@@ -257,7 +257,12 @@ jobs:
           # 必须严格排在后面所有 codesign 调用之前（Pitfall 1：签名后改 plist 会让签名失效）。
           plutil -replace CFBundleShortVersionString -string "$APP_VERSION" "$PLIST"
           plutil -replace CFBundleVersion -string "$APP_VERSION" "$PLIST"
-          plutil -replace LSMinimumSystemVersion -string "12.0" "$PLIST"
+          # RESEARCH 假设 A3 的 12.0(Monterey)占位值已被 05-03 真实 CI 跑的 otool -l
+          # 实测推翻：QtCore/QtWidgets/QtWebEngineCore/QtWebEngineProcess 的
+          # LC_BUILD_VERSION minos 均为 13.0(Ventura,见 05-03-SUMMARY.md「A3」)，
+          # 此处直接采用实测值定稿，避免上面新增的最低系统版本硬断言必然失败、
+          # 白白浪费一次 10-20 分钟的真机 CI 跑。
+          plutil -replace LSMinimumSystemVersion -string "13.0" "$PLIST"
 
           echo "=== Info.plist (patched) ==="
           plutil -p "$PLIST"
