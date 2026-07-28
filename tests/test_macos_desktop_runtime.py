@@ -1,3 +1,4 @@
+import ast
 import re
 import sys
 import unittest
@@ -9,6 +10,7 @@ import launch_app
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 GATEKEEPER_NOTICE_JS = REPO_ROOT / "frontend" / "src" / "lib" / "macosGatekeeperNotice.js"
+LAUNCH_APP_SOURCE = REPO_ROOT / "launch_app.py"
 
 
 class MacQuitInterceptionTests(unittest.TestCase):
@@ -202,6 +204,69 @@ class MaybeStripQuarantineTests(unittest.TestCase):
             result = launch_app.maybe_strip_quarantine()
         self.assertIsNotNone(result)
         self.assertIn("xattr -dr com.apple.quarantine", result)
+
+
+class QApplicationEventFilterGuardTests(unittest.TestCase):
+    """回归防护：05-06 真机 checkpoint 发现 05-02 引入的 `qt_app.installEventFilter(...)`
+    会 100% 复现地在 ~2s 内 SIGSEGV（EXC_BAD_ACCESS，栈顶 PySide::typeName）——装在
+    QApplication/QCoreApplication 实例上的 event filter 会收到线程内*每个* QObject
+    的事件，逼迫 PySide 为每个事件目标构造 Python wrapper；QtQuick 在
+    -[NSWindow makeKeyAndOrderFront:] 触发的 focus 分发路径上会把事件送到 PySide
+    包不安全的 QObject，读到空的 vtable/d_ptr 槽位后崩溃。修复是重载
+    QApplication.event()（只接收送给应用对象自身的事件）。这里用 AST 静态扫描把
+    这个反模式钉死，防止它以任何形式（哪怕换了变量名/换了 filter 类名）静默回归。
+    """
+
+    def _parse_launch_app(self) -> ast.Module:
+        source = LAUNCH_APP_SOURCE.read_text(encoding="utf-8")
+        return ast.parse(source, filename=str(LAUNCH_APP_SOURCE))
+
+    def test_no_install_event_filter_call_anywhere_in_launch_app(self) -> None:
+        tree = self._parse_launch_app()
+        offending_lines = [
+            node.lineno
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "installEventFilter"
+        ]
+        self.assertEqual(
+            offending_lines,
+            [],
+            "launch_app.py 不得再调用 installEventFilter（行号: "
+            f"{offending_lines}）—— 该反模式在 macOS 上会导致 SIGSEGV，详见 05-06 "
+            "真机 checkpoint 崩溃报告；修复方式是重载 QApplication.event()，而不是"
+            "在 QApplication/QCoreApplication 实例上装 app-wide event filter。",
+        )
+
+    def test_desktop_application_subclass_overrides_event_not_install_filter(self) -> None:
+        tree = self._parse_launch_app()
+        app_classes = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ClassDef)
+            and any(
+                isinstance(base, ast.Name) and base.id == "QApplication"
+                for base in node.bases
+            )
+        ]
+        self.assertTrue(
+            app_classes,
+            "未找到继承 QApplication 的子类 —— Cmd+Q 拦截应通过重载 event() 实现"
+            "（而不是 installEventFilter）",
+        )
+        method_names = {
+            item.name
+            for cls in app_classes
+            for item in cls.body
+            if isinstance(item, ast.FunctionDef)
+        }
+        self.assertIn(
+            "event",
+            method_names,
+            "继承 QApplication 的子类必须重载 event() 来处理 QEvent.Type.Quit（D-07 的"
+            "触发源，逻辑仍全部委托给模块级 handle_macos_quit_request）",
+        )
 
 
 if __name__ == "__main__":
