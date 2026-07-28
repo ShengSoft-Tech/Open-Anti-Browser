@@ -560,7 +560,7 @@ jobs:
           echo "=== 启动真实 GUI 进程(非 --backend-only，完整走到 window.show()/activateWindow()) ==="
           "$APP_BIN" > "$GUI_LOG" 2>&1 &
           APP_PID=$!
-          echo "已启动 PID=$APP_PID，持续观察 ${DWELL_SECONDS}s"
+          echo "已启动 PID=$APP_PID (持续观察 ${DWELL_SECONDS}s)"
 
           SURVIVED=1
           CRASH_SECOND=""
