@@ -5,15 +5,15 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 05
 current_phase_name: ci
 status: executing
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-07-28T17:39:41.606Z"
+stopped_at: Completed 05-03-PLAN.md
+last_updated: "2026-07-28T20:13:59.598Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 05 execution started
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 23
-  completed_plans: 19
+  completed_plans: 20
   percent: 67
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 05 (ci) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 05 execution started
 
-Progress: [████████░░] 83%
+Progress: [█████████░] 87%
 
 ## Performance Metrics
 
@@ -79,6 +79,7 @@ Progress: [████████░░] 83%
 | Phase 04 P06 | 35min | 1 tasks | 3 files |
 | Phase 05 P01 | 10min | 2 tasks | 3 files |
 | Phase 05 P02 | 15min | 2 tasks | 2 files |
+| Phase 05 P03 | 50min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,7 @@ Recent decisions affecting current work:
 - [Phase ?]: 05-01: assets/app.icns (D-06) 与 assets/dmg-background.png+@2x (D-10) 已入仓;icon_512x512@2x 档位实测为真 512x512(非 1024)并记录;背景图放行文案逐字核对不含全局停用 Gatekeeper 指令;PKG-02/PKG-04 因与 05-02/05-03/05-04/05-06 共享未全部标记完成(requirements.ready-ids 确认阻塞)
 - [Phase ?]: 05-02: Cmd+Q intercepted via QObject event filter on qt_app (parented to avoid GC), delegating to existing force_exit() — no parallel shutdown path (D-07)
 - [Phase ?]: 05-02: quarantine self-strip failure notice worded as expected first-launch phenomenon (QMessageBox.information, not critical) per D-12a; command always resolves to canonical /Applications install path when bundle is None or translocated, verbatim-locked against frontend GATEKEEPER_XATTR_COMMAND
+- [Phase ?]: 05-03: build-macos job proven twice on real workflow_dispatch (30393410452, 30394320282); A2/A3/A4 RESEARCH assumptions resolved with real-machine evidence, LSMinimumSystemVersion measured at 13.0 (not the 12.0 placeholder, carry-forward to 05-04)
 
 ### Pending Todos
 
@@ -139,6 +141,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T17:39:41.596Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-07-28T20:13:59.589Z
+Stopped at: Completed 05-03-PLAN.md
 Resume file: None
