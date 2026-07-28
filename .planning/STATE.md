@@ -4,17 +4,17 @@ milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 04
 current_phase_name: frontend-platform-gating
-status: executing
-stopped_at: Completed 04-05-PLAN.md
-last_updated: "2026-07-27T22:30:42.294Z"
+status: verifying
+stopped_at: Completed 04-06-PLAN.md (macOS 真机 UAT checkpoint)
+last_updated: "2026-07-28T01:52:10.280Z"
 last_activity: 2026-07-27
 last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 17
-  completed_plans: 16
-  percent: 50
+  completed_plans: 17
+  percent: 67
 ---
 
 # Project State
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 
 Phase: 04 (frontend-platform-gating) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-07-27 — Phase 04 execution started
 
-Progress: [█████████░] 94%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -75,6 +75,7 @@ Progress: [█████████░] 94%
 | Phase 04 P03 | 15min | 2 tasks | 1 files |
 | Phase 04 P04 | 20min | 2 tasks | 2 files |
 | Phase 04 P05 | 25min | 3 tasks | 3 files |
+| Phase 04 P06 | 35min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -109,6 +110,8 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 4] 04-04: AppSettings.vue 新增 macOS-only 平台限制说明卡片（platformLimitsVisible = capabilities.platform 存在且非 win32），openGatekeeperGuide() 复用 04-02 的 buildGatekeeperNoticeHtml(t)，保证设置页重看入口与 04-05 首启弹窗文案永不分叉；Firefox 内核卡片保留，仅追加「仅 Windows」标签
 - [Phase ?]: [Phase 4] 04-05: App.vue 侧栏 firefoxEngineVisible 隐藏 Firefox 状态行,同步器导航项经 el-tooltip + isNavDisabled/navDisabledReason 置灰但点击不拦截(D-02);GroupManager 分组内 Firefox 计数不隐藏(既有数据构成,D-01)
 - [Phase ?]: [Phase 4] 04-05: App.vue onMounted 新增 maybeShowGatekeeperNotice(),严格排在既有开源声明首启提示(_0x31ab)之后、复用同一 try 块;backend/_g.py 的 App.vue SHA-256 在全部编辑定稿后重算写回(31871ec3...),仅改一行,openSourceNotice.js 条目/package.json 钩子零改动
+- [Phase ?]: [Phase 4] 04-06: A8 用户拍板推翻 04-05 原建议——GroupManager Firefox 计数列由无条件保留改为按需显示(新增 shouldShowFirefoxColumn 纯函数,D-00 合规),commit 3e32105
+- [Phase ?]: [Phase 4] 04-06: RESEARCH 假设 A2(Gatekeeper 放行指引措辞)已在 macOS 15.7(Sequoia, build 24G222)真机逐字核对通过,与系统实际菜单/按钮一致
 
 ### Pending Todos
 
@@ -130,6 +133,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T22:30:42.283Z
-Stopped at: Completed 04-05-PLAN.md
+Last session: 2026-07-28T01:52:10.271Z
+Stopped at: Completed 04-06-PLAN.md (macOS 真机 UAT checkpoint)
 Resume file: None
