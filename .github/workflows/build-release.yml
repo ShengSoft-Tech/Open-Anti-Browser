@@ -590,6 +590,12 @@ jobs:
           echo "=== 子进程 stdout/stderr ==="
           cat "$GUI_LOG" 2>&1 || true
 
+          # macOS 的 ReportCrash 守护进程把 .ips 写盘不是和进程死亡同步发生的——首轮
+          # 验证跑(run 30408617294)实测到 segfault 后立即比对崩溃报告目录会是空的
+          # (ReportCrash 还没写完)。这是本步骤 FAIL 判定的次要信号，主判定是下面的
+          # SURVIVED 标志 + wait 拿到的信号退出码，已经在多次真实 CI 跑里验证足够
+          # 可靠；这个 sleep 只是让 NEW_CRASHES 这个辅助信号也尽量抓到完整证据。
+          sleep 3
           echo "=== 比对崩溃报告目录，找出本次运行新增的报告 ==="
           AFTER_CRASHES="$RUNNER_TEMP/crashes-after.txt"
           ls "$CRASH_DIR" 2>/dev/null | grep -i "Open-Anti-Browser" > "$AFTER_CRASHES" || true
