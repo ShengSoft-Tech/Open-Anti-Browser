@@ -528,30 +528,44 @@ jobs:
           kill "$SMOKE_PID" 2>/dev/null || true
           exit 1
 
-      - name: GUI launch smoke test (real Cocoa event loop — 05-06 crash regression gate)
+      - name: GUI launch smoke test (real Cocoa event loop — crash + Cmd+Q exit regression gate)
         shell: bash
         run: |
           # 显式 set +e：GitHub Actions 的 shell: bash 默认用 `bash -e -o pipefail`
           # 调用整段 run 脚本（这条继承的 -e 不会被脚本内的 `set -uo pipefail` 关掉，
           # 必须显式 +e 才能覆盖）。本步骤要手动汇总多个失败信号（进程是否提前退出 /
-          # 是否有新增崩溃报告）后再统一报告，任何一条子命令非零都不能让脚本提前中止
-          # ——首轮验证跑就实测到这个坑：wait 捕获到 segfault 的 139 退出码后，若 -e
-          # 仍然生效，脚本会在打印自定义诊断信息之前就被直接中止退出。
+          # 是否有新增崩溃报告 / Quit 请求后是否真的退出）后再统一报告，任何一条子
+          # 命令非零都不能让脚本提前中止——首轮验证跑就实测到这个坑：wait 捕获到
+          # segfault 的 139 退出码后，若 -e 仍然生效，脚本会在打印自定义诊断信息之
+          # 前就被直接中止退出。
           set +e -uo pipefail
           #
-          # 05-06 真机 checkpoint 抓到的崩溃是 launch_app.py 在 QApplication 实例上
-          # installEventFilter(...) 导致的 SIGSEGV，栈顶在 -[NSWindow
-          # makeKeyAndOrderFront:] 触发的 QtQuick focus 分发路径上（PySide::typeName
-          # 读到空的 vtable/d_ptr 槽位）。这条路径必须走真实的 cocoa 平台插件——
-          # QT_QPA_PLATFORM=offscreen 会绕开 -[NSWindow makeKeyAndOrderFront:] 这条
-          # Cocoa 调用链，测不出这个 bug，所以本步骤刻意不设置该变量，让它使用
-          # macos-15 runner 自带的真实图形会话。这条假设（GitHub 的 macOS hosted
-          # runner 有完整登录态 GUI session、可以真的创建/显示/聚焦窗口）是本次
-          # gap-fix 用真实 workflow_dispatch 跑验证的对象，结论记在
-          # 05-02-GAP-FIX-SUMMARY.md。
+          # 本步骤覆盖两类不同的 05-06 real-machine checkpoint 缺陷，缺一不可：
+          #
+          # 维度一（05-02 gap-fix #1，已由本步骤覆盖）：launch_app.py 在 QApplication
+          # 实例上 installEventFilter(...) 导致的 SIGSEGV，栈顶在 -[NSWindow
+          # makeKeyAndOrderFront:] 触发的 QtQuick focus 分发路径上。判定信号：进程在
+          # DWELL_SECONDS 存活窗口内是否提前消失 / 是否有新增崩溃报告。
+          #
+          # 维度二（05-02 gap-fix #2，本次新增）：DesktopApplication.event() 把
+          # handle_macos_quit_request(...) 的返回值当 `return True` 的早退门禁，
+          # super().event(e) 永远跑不到，QCoreApplication::event() 对 QEvent.Quit
+          # 的默认处理（真正让事件循环退出的那一步）被跳过。表现为进程"存活得太
+          # 好"——上面维度一的存活判定在这个缺陷下反而会 PASS（进程确实没有在
+          # DWELL 窗口内异常退出，因为它压根不会退出）。必须在存活确认之后再补一步
+          # ：真的发一个会产生 QEvent::Quit 的 Quit 请求，然后断言进程在有界超时内
+          # 消失。用 `kill -TERM` 无法覆盖这个维度——POSIX 信号不会被 Qt 翻译成
+          # QEvent::Quit，测不出这个缺陷类；必须是应用层的 Quit 请求，与用户按
+          # Cmd+Q 走同一条 Apple Event 路径。
+          #
+          # 两个维度都必须走真实的 cocoa 平台插件——QT_QPA_PLATFORM=offscreen 会绕
+          # 开 -[NSWindow makeKeyAndOrderFront:] 与 Cocoa 的 applicationShouldTerminate:
+          # 终止协议，两个缺陷都测不出，所以本步骤刻意不设置该变量。
           APP="dist/Open-Anti-Browser.app"
           APP_BIN="$APP/Contents/MacOS/Open-Anti-Browser"
+          APP_DISPLAY_NAME="Open-Anti-Browser"
           DWELL_SECONDS=18
+          QUIT_TIMEOUT_SECONDS=12
           GUI_LOG="$RUNNER_TEMP/gui-smoke.log"
           CRASH_DIR="$HOME/Library/Logs/DiagnosticReports"
 
@@ -578,11 +592,53 @@ jobs:
             sleep 1
           done
 
+          FAIL=0
+          QUIT_EXITED=""
+
           if [[ "$SURVIVED" -eq 1 ]]; then
-            echo "存活满 ${DWELL_SECONDS}s，未观察到进程提前退出，主动终止(SIGTERM，非崩溃信号)"
-            kill -TERM "$APP_PID" 2>/dev/null || true
-            sleep 3
+            echo "存活满 ${DWELL_SECONDS}s，未观察到进程提前退出(未崩溃)"
+            echo "=== 维度二：发送真实 Quit 请求(与 Cmd+Q 同一条 Apple Event 路径) ==="
+            # tell application "..." to quit 发送标准 kAEQuitApplication Apple
+            # Event，Cocoa 默认处理会转发给 -[NSApplication terminate:]，与用户按
+            # Cmd+Q 或从菜单选 Quit 完全同一条路径——本机已实测确认(对本机已安装的
+            # 缺陷版 .app 用同一条命令)：即使 osascript 自身因等待回复超时而报错退
+            # 出(User canceled/-128 一类)，事件依然已经送达并触发了应用的 Quit 处
+            # 理(CPU 从 ~1% 跳到 ~60%、端口 8000 被释放，与真机 Cmd+Q 症状完全一致)
+            # ——因此下面刻意不以 osascript 自身的退出码作为判定依据，只把它当诊断
+            # 日志，真正的判定信号是"进程是否在有界超时内消失"。
+            osascript -e "tell application \"${APP_DISPLAY_NAME}\" to quit" \
+              > "$RUNNER_TEMP/osascript-quit.log" 2>&1
+            OSASCRIPT_EXIT=$?
+            echo "osascript 退出码(仅供诊断,不作为判定依据): $OSASCRIPT_EXIT"
+            cat "$RUNNER_TEMP/osascript-quit.log" 2>&1 || true
+
+            QUIT_EXITED=0
+            QUIT_ELAPSED=""
+            for i in $(seq 1 "$QUIT_TIMEOUT_SECONDS"); do
+              if ! kill -0 "$APP_PID" 2>/dev/null; then
+                QUIT_EXITED=1
+                QUIT_ELAPSED="$i"
+                break
+              fi
+              sleep 1
+            done
+
+            if [[ "$QUIT_EXITED" -eq 1 ]]; then
+              echo "进程在收到 Quit 请求后第 ${QUIT_ELAPSED}s 内退出"
+            else
+              echo "错误: 进程在收到 Quit 请求后 ${QUIT_TIMEOUT_SECONDS}s 内仍未退出" \
+                   "—— 这正是 05-06 二次 real-machine checkpoint 抓到的 Cmd+Q 无限循环" \
+                   "缺陷(DesktopApplication.event() 吞掉 QEvent.Quit 后从未转交给" \
+                   "super().event(e)，事件循环永远不退出，进程停在约 60% CPU 不退出" \
+                   "而不是崩溃)" >&2
+              echo "=== 存活确认(kill -0)与 CPU/内存占用抽样，作为诊断证据 ===" >&2
+              ps -p "$APP_PID" -o pid,pcpu,pmem,etime,command 2>&1 >&2 || true
+              FAIL=1
+              echo "=== 强制清理挂起进程，防止残留影响 runner 后续步骤 ===" >&2
+              kill -9 "$APP_PID" 2>/dev/null || true
+            fi
           fi
+
           wait "$APP_PID" 2>/dev/null
           EXIT_CODE=$?
           echo "进程最终退出码: $EXIT_CODE"
@@ -593,15 +649,14 @@ jobs:
           # macOS 的 ReportCrash 守护进程把 .ips 写盘不是和进程死亡同步发生的——首轮
           # 验证跑(run 30408617294)实测到 segfault 后立即比对崩溃报告目录会是空的
           # (ReportCrash 还没写完)。这是本步骤 FAIL 判定的次要信号，主判定是下面的
-          # SURVIVED 标志 + wait 拿到的信号退出码，已经在多次真实 CI 跑里验证足够
-          # 可靠；这个 sleep 只是让 NEW_CRASHES 这个辅助信号也尽量抓到完整证据。
+          # SURVIVED 标志 + QUIT_EXITED 标志，已经在多次真实 CI 跑里验证足够可靠；
+          # 这个 sleep 只是让 NEW_CRASHES 这个辅助信号也尽量抓到完整证据。
           sleep 3
           echo "=== 比对崩溃报告目录，找出本次运行新增的报告 ==="
           AFTER_CRASHES="$RUNNER_TEMP/crashes-after.txt"
           ls "$CRASH_DIR" 2>/dev/null | grep -i "Open-Anti-Browser" > "$AFTER_CRASHES" || true
           NEW_CRASHES="$(comm -13 <(sort "$BEFORE_CRASHES") <(sort "$AFTER_CRASHES"))"
 
-          FAIL=0
           if [[ "$SURVIVED" -ne 1 ]]; then
             echo "错误: GUI 进程未能存活满 ${DWELL_SECONDS}s(第 ${CRASH_SECOND}s 时已消失)" >&2
             FAIL=1
@@ -617,13 +672,29 @@ jobs:
             FAIL=1
           fi
 
+          echo "=== 残留进程断言(Quit 之后不应再有 Open-Anti-Browser 相关进程) ==="
+          RESIDUAL="$(pgrep -f "$APP_BIN" 2>/dev/null || true)"
+          if [[ -n "$RESIDUAL" ]]; then
+            echo "错误: 检测到残留进程:" >&2
+            while IFS= read -r pid; do
+              [[ -z "$pid" ]] && continue
+              ps -p "$pid" -o pid,ppid,pcpu,etime,command 2>&1 >&2 || true
+            done <<< "$RESIDUAL"
+            FAIL=1
+          else
+            echo "断言通过: 未检测到残留进程"
+          fi
+
           if [[ "$FAIL" -ne 0 ]]; then
-            echo "错误: GUI 冒烟测试失败 —— 这正是 05-06 real-machine checkpoint 抓到的" \
-                 "「双击后 ~2s 内 SIGSEGV」崩溃路径。若该修复被回退或类似的" \
-                 "installEventFilter 反模式被重新引入，本步骤会在这里拦下。" >&2
+            echo "错误: GUI 冒烟测试失败 —— 覆盖 05-06 real-machine checkpoint 抓到的两类" \
+                 "缺陷: (1)「双击后 ~2s 内 SIGSEGV」崩溃路径 (2)「Cmd+Q 后无限循环不" \
+                 "退出」路径。若任一缺陷的修复被回退或类似反模式被重新引入，本步骤" \
+                 "会在这里拦下。" >&2
             exit 1
           fi
-          echo "GUI 冒烟测试通过: 进程在真实 cocoa 事件循环下存活 ${DWELL_SECONDS}s，期间无新增崩溃报告"
+          echo "GUI 冒烟测试通过: 进程在真实 cocoa 事件循环下存活 ${DWELL_SECONDS}s" \
+               "且期间无新增崩溃报告，随后收到 Quit 请求(与 Cmd+Q 同路径)后" \
+               "${QUIT_ELAPSED}s 内干净退出，无残留进程"
 
       - name: Create dmg
         shell: bash
