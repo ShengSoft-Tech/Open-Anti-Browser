@@ -343,6 +343,12 @@ def run_desktop() -> int:
             self.activateWindow()
 
         def force_exit(self) -> None:
+            # 幂等：shutdown() 落定后 (_closing=True) 任何重入的 force_exit() 调用直接
+            # no-op，不再 showNormal()/close() 第二遍——否则 macOS 上 Quit 事件的重入
+            # (见 DesktopApplication.event() 的类注释) 会在关闭过程中把已经在收敛关闭
+            # 的窗口重新弹出来。
+            if self._closing:
+                return
             self._force_exit = True
             self.showNormal()
             self.close()
@@ -383,17 +389,33 @@ def run_desktop() -> int:
         # 解引用崩溃)。改为重载 QApplication.event()，只接收送给应用对象自身的
         # 事件，事件本身仍不携带任何 shutdown 逻辑（逻辑全部在模块级的
         # handle_macos_quit_request 里，Cmd+Q 仍收敛到既有 force_exit() 路径）。
+        #
+        # 05-06 真机 checkpoint 二次发现的缺陷（05-02 gap-fix 之二）：上一版这里在
+        # handle_macos_quit_request(...) 返回 True 时直接 `return True`，
+        # super().event(e) 永远不会跑到——而 QCoreApplication::event() 对
+        # QEvent::Quit 的默认处理正是「真正让事件循环退出」的那一步。结果 Cmd+Q
+        # 按下后：我们的 event() 吞掉 Quit → force_exit() → closeEvent 做完真正的
+        # shutdown() → 用 QTimer.singleShot(0, quit) 异步再调一次 quit()；但 quit()
+        # 在 macOS 上若不是在「正在处理的这个 Quit 事件」的同步调用栈内触发，会让
+        # Cocoa 的终止协议重新起播、再 post 一个新的 QEvent::Quit——被我们的
+        # event() 再次吞掉，无限循环，进程停在约 60% CPU 不退出（sample 实测
+        # 100% 采样落在 sendPostedEvents）。
+        #
+        # 修复：event() 里的 shutdown 副作用与「是否退出循环」解耦——先做
+        # handle_macos_quit_request() 的副作用（仍是唯一的 shutdown 触发点，仍收敛
+        # 到既有 force_exit() 路径，不发明第二套 shutdown 逻辑)，然后**始终**把
+        # 事件转交给 super().event(e)，让 Qt 自己的默认 Quit 处理（同步调用
+        # quit()）在它期望的、与当前正在应答的终止请求同一调用栈内运行，从而真正
+        # 让事件循环退出。force_exit() 本身加了 `_closing` 幂等短路（见其定义），
+        # 所以即便 Quit 事件因异步 singleShot 重入到这里第二次，也不会重新
+        # showNormal() 弹出正在关闭的窗口，也不会重复跑 shutdown() 里的关服/关口。
         def __init__(self, argv: list[str]) -> None:
             super().__init__(argv)
             self.target_window: "DesktopMainWindow | None" = None
 
         def event(self, e) -> bool:
-            if (
-                e.type() == QEvent.Type.Quit
-                and self.target_window is not None
-                and handle_macos_quit_request(self.target_window)
-            ):
-                return True
+            if e.type() == QEvent.Type.Quit and self.target_window is not None:
+                handle_macos_quit_request(self.target_window)
             return super().event(e)
 
     qt_app = QApplication.instance() or DesktopApplication([])
