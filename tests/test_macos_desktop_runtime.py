@@ -269,5 +269,117 @@ class QApplicationEventFilterGuardTests(unittest.TestCase):
         )
 
 
+class MacQuitEventLoopConvergenceTests(unittest.TestCase):
+    """05-06 真机 checkpoint 二次发现：`event()` 把 `handle_macos_quit_request(...)`
+    的返回值当 `if ...: return True` 的早退门禁，导致 `super().event(e)` 永远跑不到
+    ——而 `QCoreApplication::event()` 对 `QEvent.Type.Quit` 的默认处理（同步调用
+    `quit()`）正是真正让事件循环退出的那一步。跳过它之后：Cmd+Q 按下 → 我们的
+    `event()` 吞掉 Quit → `force_exit()` → `closeEvent` 做完真正的 `shutdown()` →
+    用 `QTimer.singleShot(0, quit)` 异步再调一次 `quit()`；但这次调用不在「正在
+    处理的这个 Quit 事件」的同步调用栈内，在 macOS 上会让 Cocoa 的终止协议重新
+    起播、再 post 一个新的 `QEvent.Quit`——又被我们的 `event()` 吞掉，无限循环，
+    进程停在约 60% CPU 不退出（`sample` 实测 100% 采样落在 `sendPostedEvents`）。
+
+    这里用 AST 静态扫描钉死两点，防止它以任何形式静默回归：
+    (1) `DesktopApplication.event()` 必须无条件把事件转交给 `super().event(e)`，
+        不能用 `if ...: return True` 的模式把它短路掉；
+    (2) `DesktopMainWindow.force_exit()` 必须以 `_closing` 幂等短路开头，防止
+        Quit 事件重入时对正在关闭的窗口重新 `showNormal()`。
+    """
+
+    def _parse_launch_app(self) -> ast.Module:
+        source = LAUNCH_APP_SOURCE.read_text(encoding="utf-8")
+        return ast.parse(source, filename=str(LAUNCH_APP_SOURCE))
+
+    def _find_method(self, tree: ast.Module, class_name: str, method_name: str) -> ast.FunctionDef | None:
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef) and node.name == class_name:
+                for item in node.body:
+                    if isinstance(item, ast.FunctionDef) and item.name == method_name:
+                        return item
+        return None
+
+    def test_event_always_forwards_to_super_event_unconditionally(self) -> None:
+        tree = self._parse_launch_app()
+        event_method = self._find_method(tree, "DesktopApplication", "event")
+        self.assertIsNotNone(event_method, "未找到 DesktopApplication.event()")
+
+        # 全函数（含任意嵌套的 if/for/... 语句块）范围内的 return 必须恰好一条。
+        # 注意：不能只数 event_method.body 的顶层语句——旧版缺陷的 `if ...: return
+        # True` 分支和收尾的 `return super().event(e)` 在顶层各自只贡献一个节点
+        # （`If` 和 `Return`），顶层计数会误判为「只有 1 条 return」而放过缺陷；
+        # 必须用 ast.walk 递归进 If 的分支体，才能数到旧版真正的 2 条 return。
+        all_returns = [n for n in ast.walk(event_method) if isinstance(n, ast.Return)]
+        self.assertEqual(
+            len(all_returns),
+            1,
+            "event() 全函数范围内必须恰好一条 return 语句——不得再用 `if ...: return "
+            "True` 的早退模式短路 super().event(e)（那正是 05-06 二次发现的无限"
+            "循环成因：QCoreApplication::event() 对 QEvent.Quit 的默认处理被跳过，"
+            "quit() 从未在正确的调用栈内同步执行，事件循环永远不退出）",
+        )
+        (only_return,) = all_returns
+        call = only_return.value
+        self.assertIsInstance(call, ast.Call, "event() 的唯一 return 必须是一次方法调用")
+        assert isinstance(call, ast.Call)
+        self.assertIsInstance(call.func, ast.Attribute)
+        assert isinstance(call.func, ast.Attribute)
+        self.assertEqual(
+            call.func.attr,
+            "event",
+            "event() 必须以 `return super().event(e)` 收尾，把事件交给 Qt 默认处理"
+            "（QCoreApplication::event() 对 QEvent.Quit 的默认处理才是真正让事件"
+            "循环退出的那一步）",
+        )
+        self.assertIsInstance(call.func.value, ast.Call)
+        assert isinstance(call.func.value, ast.Call)
+        self.assertIsInstance(call.func.value.func, ast.Name)
+        assert isinstance(call.func.value.func, ast.Name)
+        self.assertEqual(
+            call.func.value.func.id,
+            "super",
+            "event() 必须通过 super() 转发，不得绕过基类默认 Quit 处理",
+        )
+
+        # handle_macos_quit_request(...) 的返回值不得被用来 gate 一个 if（即不能
+        # 出现在任何 ast.If 的 test 表达式里）——那正是旧版 `return True` 早退模式。
+        for node in ast.walk(event_method):
+            if isinstance(node, ast.If):
+                for call_node in ast.walk(node.test):
+                    if (
+                        isinstance(call_node, ast.Call)
+                        and isinstance(call_node.func, ast.Name)
+                        and call_node.func.id == "handle_macos_quit_request"
+                    ):
+                        self.fail(
+                            "handle_macos_quit_request(...) 的返回值不得被用作 if "
+                            "条件去门禁一个 return——这正是旧版 `return True` 早退"
+                            "模式，会让 super().event(e) 永远跑不到，导致 Cmd+Q 无限循环"
+                        )
+
+    def test_force_exit_guards_reentrancy_with_closing_flag(self) -> None:
+        tree = self._parse_launch_app()
+        force_exit_method = self._find_method(tree, "DesktopMainWindow", "force_exit")
+        self.assertIsNotNone(force_exit_method, "未找到 DesktopMainWindow.force_exit()")
+        assert force_exit_method is not None
+
+        first_stmt = force_exit_method.body[0]
+        self.assertIsInstance(
+            first_stmt,
+            ast.If,
+            "force_exit() 第一条语句必须是 `if self._closing: return` 幂等短路——"
+            "否则 macOS 上 Quit 事件重入时会对正在关闭的窗口重新 showNormal()",
+        )
+        assert isinstance(first_stmt, ast.If)
+        test_expr = first_stmt.test
+        self.assertIsInstance(test_expr, ast.Attribute)
+        assert isinstance(test_expr, ast.Attribute)
+        self.assertEqual(test_expr.attr, "_closing")
+        self.assertTrue(
+            any(isinstance(s, ast.Return) for s in first_stmt.body),
+            "`if self._closing:` 分支必须 return，短路掉后续的 showNormal()/close()",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
