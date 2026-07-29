@@ -5,8 +5,8 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 05
 current_phase_name: ci
 status: executing
-stopped_at: Completed 05-02 gap-fix (macOS crash fix + regression gates); 05-06 real-machine checkpoint unblocked, fresh dmg in ~/Downloads
-last_updated: "2026-07-28T23:58:52.365Z"
+stopped_at: Completed 05-02 gap-fix #2 (Cmd+Q infinite quit loop fix + extended CI exit gate); 05-06 real-machine checkpoint unblocked again, fresh dmg from workflow_dispatch run 30418547844
+last_updated: "2026-07-29T03:15:00.000Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 05 execution started
 progress:
@@ -126,6 +126,7 @@ Recent decisions affecting current work:
 - [Phase ?]: 05-04: A3 final resolution — true LSMinimumSystemVersion floor is 15.0 (Sequoia), set by PySide6/shiboken6's own compiled Python-binding libraries (not the Qt frameworks, which remain 13.0); materially more restrictive than 05-03's carried-forward 13.0 measurement, flagged as a product decision for the milestone owner
 - [Phase ?]: 05-05: release job consolidates Windows+macOS publish into a single softprops/action-gh-release call (needs: [build, build-macos], tag-gated); Windows build job's inline Create GitHub Release step removed with zero regression, proven on real workflow_dispatch run 30402103536 (release=skipped as designed, no new Release created)
 - [Phase ?]: [Phase 5] 05-02 gap-fix: launch_app.py 的 installEventFilter(qt_app) 反模式在真机导致 ~2s 内必现 SIGSEGV（05-06 checkpoint 抓到）；改为 QApplication 子类重载 event()。新增 AST 结构守卫测试 + build-macos 真 cocoa GUI 冒烟门禁（QT_QPA_PLATFORM 刻意不设为 offscreen），经 4 次真实 workflow_dispatch 验证：buggy 代码 2/2 次真实 segfault 被拦下，fix 后 1/1 次 18s 全程存活通过。修复过的干净 dmg 已放入 ~/Downloads，供用户重跑 05-06 真机 checkpoint。
+- [Phase ?]: [Phase 5] 05-02 gap-fix #2(05-06 二次真机 checkpoint 抓到)：DesktopApplication.event() 把 handle_macos_quit_request(...) 的返回值当 `return True` 早退门禁，super().event(e) 永远跑不到——QCoreApplication::event() 对 QEvent.Quit 的默认处理(真正让事件循环退出的那一步)被跳过，Cmd+Q 后进程停在约 60% CPU 无限循环不退出(非崩溃)。此缺陷并非第一次 gap-fix 引入的回归——原 installEventFilter 实现有完全相同的逻辑缺陷，D-07 的 Cmd+Q 功能从未在任何已发布形态下真正工作过，此前的启动崩溃只是掩盖了它。修复：event() 无条件转发给 super().event(e)；force_exit() 新增 `_closing` 幂等短路防止 Quit 事件重入时重新 showNormal()。新增 AST 结构守卫测试(MacQuitEventLoopConvergenceTests，用全函数 ast.walk 而非仅顶层语句计数，否则对这个具体缺陷是空判定)。build-macos GUI 冒烟门禁新增第二维度：18s 存活确认后再用 `osascript ... to quit`(与 Cmd+Q 同一条 Apple Event 路径，非 POSIX 信号)发真实 Quit 请求，断言进程在 12s 有界超时内退出且无残留进程；经真实 workflow_dispatch 验证：buggy 分支(30418065169)进程存活 18s 但 Quit 后 113.7% CPU 卡死不退出被正确拦下，fix 后(30418547844)Quit 后 2s 内 exit code 0 干净退出。修复过的干净 dmg 见 workflow_dispatch run 30418547844 的 artifact，供用户重跑 05-06 真机 checkpoint 的 C 组三种退出路径。
 
 ### Pending Todos
 
@@ -147,6 +148,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T23:58:52.355Z
-Stopped at: Completed 05-02 gap-fix (macOS crash fix + regression gates); 05-06 real-machine checkpoint unblocked, fresh dmg in ~/Downloads
+Last session: 2026-07-29T03:15:00.000Z
+Stopped at: Completed 05-02 gap-fix #2 (Cmd+Q infinite quit loop fix + extended CI exit gate); 05-06 real-machine checkpoint unblocked again, fresh dmg from workflow_dispatch run 30418547844
 Resume file: None
