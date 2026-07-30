@@ -5,16 +5,16 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 05
 current_phase_name: ci
 status: executing
-stopped_at: Completed 05-02 gap-fix #2 (Cmd+Q infinite quit loop fix + extended CI exit gate); 05-06 real-machine checkpoint unblocked again, fresh dmg from workflow_dispatch run 30418547844
-last_updated: "2026-07-29T03:15:00.000Z"
+stopped_at: Phase 6 context gathered
+last_updated: "2026-07-30T23:37:40.415Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 05 execution started
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 23
-  completed_plans: 22
-  percent: 67
+  completed_plans: 23
+  percent: 83
 ---
 
 # Project State
@@ -148,6 +148,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-29T03:15:00.000Z
-Stopped at: Completed 05-02 gap-fix #2 (Cmd+Q infinite quit loop fix + extended CI exit gate); 05-06 real-machine checkpoint unblocked again, fresh dmg from workflow_dispatch run 30418547844
-Resume file: None
+Last session: 2026-07-30T23:37:40.394Z
+Stopped at: Phase 6 context gathered
+Resume file: .planning/phases/06-release-docs/06-CONTEXT.md
