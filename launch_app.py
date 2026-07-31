@@ -73,6 +73,18 @@ def should_intercept_quit_event() -> bool:
     return sys.platform == "darwin"
 
 
+def should_close_to_tray() -> bool:
+    # 与 should_intercept_quit_event() 同源的平台判定，方向相反：macOS 上
+    # QSystemTrayIcon.isSystemTrayAvailable() 返回 true（图标落在菜单栏右上角，不是
+    # Dock），于是 closeEvent 的托盘分支会 hide() 掉窗口；但我们没有接
+    # applicationShouldHandleReopen: 的等价路径，Qt 默认也不会 show() 一个被显式
+    # hide() 的窗口——点 Dock 图标毫无反应，用户只剩「右键 Dock → 退出」这一条路，
+    # 而菜单栏图标在有刘海的机器上极易被忽略。因此 macOS 上点关闭按钮直接收敛到与
+    # Cmd+Q 相同的退出路径（closeEvent 的 shutdown 分支）。
+    # Windows/Linux 的「最小化到托盘」行为逐字不变。
+    return sys.platform != "darwin"
+
+
 def handle_macos_quit_request(window) -> bool:
     # 只换触发源，不平行发明第二套 shutdown 逻辑：退出仍然走既有的窗口退出方法
     # （-> closeEvent 的 shutdown 分支 -> event.accept() -> quit()）。
@@ -354,7 +366,7 @@ def run_desktop() -> int:
             self.close()
 
         def closeEvent(self, event: QCloseEvent) -> None:
-            if not self._force_exit and self.tray_icon is not None:
+            if not self._force_exit and self.tray_icon is not None and should_close_to_tray():
                 self.hide()
                 if not self._tray_notified:
                     self.tray_icon.showMessage(

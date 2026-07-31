@@ -35,6 +35,50 @@ class MacQuitInterceptionTests(unittest.TestCase):
         self.assertTrue(result)
 
 
+class MacCloseToTrayTests(unittest.TestCase):
+    """macOS 上点关闭按钮不得挂在后台：菜单栏图标易被忽略，且窗口 hide() 后 Dock
+    图标点击无法唤回，用户会被困住。macOS 关闭直接走与 Cmd+Q 相同的退出路径；
+    Windows/Linux 的最小化到托盘行为不变。"""
+
+    def test_should_close_to_tray_false_on_darwin(self) -> None:
+        with patch.object(sys, "platform", "darwin"):
+            self.assertFalse(launch_app.should_close_to_tray())
+
+    def test_should_close_to_tray_true_on_win32(self) -> None:
+        with patch.object(sys, "platform", "win32"):
+            self.assertTrue(launch_app.should_close_to_tray())
+
+    def test_should_close_to_tray_true_on_linux(self) -> None:
+        with patch.object(sys, "platform", "linux"):
+            self.assertTrue(launch_app.should_close_to_tray())
+
+    def test_close_event_tray_branch_is_gated_on_should_close_to_tray(self) -> None:
+        """结构断言：closeEvent 的托盘分支必须同时受 should_close_to_tray() 约束。
+        直接跑 closeEvent 需要真实 QApplication，非 GUI 环境下不可行，因此在 AST 上
+        断言这个 gate 没有被后续改动摘掉（沿用本文件既有的源码级断言先例）。"""
+        source = Path(launch_app.__file__).read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        close_events = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.FunctionDef) and node.name == "closeEvent"
+        ]
+        self.assertEqual(len(close_events), 1, "预期 launch_app.py 内只有一个 closeEvent 定义")
+        guard = close_events[0].body[0]
+        self.assertIsInstance(guard, ast.If, "closeEvent 的第一条语句应为托盘分支的 if")
+        called = {
+            n.func.id
+            for n in ast.walk(guard.test)
+            if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+        }
+        self.assertIn(
+            "should_close_to_tray",
+            called,
+            "closeEvent 的托盘分支必须调用 should_close_to_tray() —— 否则 macOS 上点 X "
+            "会重新挂在后台且无法从 Dock 唤回",
+        )
+
+
 class BundleRootResolutionTests(unittest.TestCase):
     """D-12: 从可执行文件路径推导 .app bundle 根目录。"""
 
