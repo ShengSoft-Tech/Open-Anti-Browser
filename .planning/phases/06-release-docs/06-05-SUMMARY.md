@@ -2,7 +2,7 @@
 phase: 06-release-docs
 plan: 05
 subsystem: release-infra
-tags: [github-actions, release, softprops-action-gh-release, gatekeeper, uat, documentation]
+tags: [github-actions, release, softprops-action-gh-release, gatekeeper, uat, documentation, uat-clean-account]
 
 # Dependency graph
 requires:
@@ -12,10 +12,12 @@ requires:
     provides: "release job structure (needs: [build, build-macos], tag-gated, single softprops/action-gh-release call) — this plan is the first time it has ever run against a real tag"
 provides:
   - "Real v0.2.0 tag pushed and its release job observed executing (success, not skipped) for the first time ever"
-  - "Discovery and fix of a real defect: the release job had no actions/checkout step, so body_path: .github/RELEASE_NOTES_TEMPLATE.md pointed at a file that did not exist on the runner — softprops/action-gh-release silently dropped it instead of failing, and the first v0.2.0 Release was published with ONLY the auto-generated changelog line, none of the hand-written documentation"
+  - "Discovery and fix of a real defect: the release job had no actions/checkout step, so body_path: .github/RELEASE_NOTES_TEMPLATE.md pointed at a file that did not exist on the runner — softprops/action-gh-release silently dropped it instead of failing"
   - "Fixed release job (checkout step added, commit 524aeb1) for future tag pushes; current v0.2.0 Release body manually corrected via gh release edit so the live page carries the intended documentation"
   - "05-ci Phase 5's pending real-tag-push UAT item closed as pass"
-affects: [06-05 Task 3 (clean-account human verification, not yet executed)]
+  - "Clean-account walkthrough approved by the developer, with D-13's clean-account requirement explicitly waived (existing-account run instead) and three named residual gaps carried forward rather than hidden inside the pass"
+  - "A separate runtime defect (macOS close-button hides to menu bar and never returns) surfaced during the walkthrough, fixed on main (a886dc7), and routed to a new Phase 7 (UI-05) rather than folded into this plan's scope"
+affects: []
 
 # Tech tracking
 tech-stack:
@@ -30,13 +32,21 @@ key-files:
     - backend/main.py
     - .github/workflows/build-release.yml
     - .planning/phases/05-ci/05-UAT.md
+    - .planning/ROADMAP.md
+    - .planning/phases/06-release-docs/06-CONTEXT.md
+    - .planning/phases/06-release-docs/06-VALIDATION.md
+    - .planning/REQUIREMENTS.md
+    - .planning/STATE.md
 
 key-decisions:
   - "Task 1 checkpoint:decision resolved by the developer before this execution began: option-a (push a real v0.2.0 tag and verify against the published Release), not option-b (workflow_dispatch artifact). Only the option-a branch of Task 2 was executed; the option-b branch was never touched."
-  - "The missing-checkout bug was fixed in the workflow (Rule 1 — auto-fix bug found during task execution) WITHOUT pushing a second tag, per the plan's explicit one-way-door instruction. The fix is committed to main and will first be exercised by CI on the next real tag push — it is not yet proven by an actual automated run."
-  - "The already-published v0.2.0 Release's body was hand-corrected via `gh release edit --notes-file` (template content + the previously-fetched auto-changelog line, in that order) rather than left broken, because Task 3's clean-account verifier needs a usable Release page to read as 'shipped documentation' — an empty/near-empty Release page would make Task 3 unexecutable as specified."
+  - "The missing-checkout bug was fixed in the workflow (Rule 1 — auto-fix bug found during task execution) WITHOUT pushing a second tag, per the plan's explicit one-way-door instruction. The fix is committed to main and was NOT exercised by any real automated run in this plan — that is a residual risk, carried to Phase 7."
+  - "The already-published v0.2.0 Release's body was hand-corrected via `gh release edit --notes-file` (template content + the previously-fetched auto-changelog line, in that order) rather than left broken, because Task 3's clean-account verifier needed a usable Release page to read as 'shipped documentation' — an empty/near-empty Release page would have made Task 3 unexecutable as specified."
+  - "D-13's clean-account requirement was waived by explicit developer decision (2026-07-31, commit 1f63b37): the walkthrough ran in the developer's existing account instead of a freshly created one. Consequence accepted and recorded: the System Settings fallback path's UI state is driven by a per-user Gatekeeper denial breadcrumb this account already carries (05-06-SUMMARY.md:189), so it was scored as not verified rather than passed."
+  - "The B1 first-launch dialog's verbatim title/button wording — a byproduct CONTEXT.md's Deferred Ideas hoped this phase's real install would capture — was NOT captured during this run. Recorded as still-open and carried forward rather than fabricated."
+  - "A runtime defect surfaced by the walkthrough (macOS close button hides to menu bar, Dock icon does not restore it) was fixed directly (a886dc7) but its verification, and the still-unproven release-pipeline fix (524aeb1) and RESEARCH assumption A2, were routed to a new Phase 7 rather than re-opening this plan or Phase 6's scope."
 
-requirements-completed: []  # DOCS-01/DOCS-02 remain unresolved per plan's flagged_assumptions — Task 3 (not yet run) is what would close them
+requirements-completed: [DOCS-01, DOCS-02]
 
 coverage:
   - id: D1
@@ -66,7 +76,7 @@ coverage:
         ref: "gh release view v0.2.0 --json body before fix == only '**Full Changelog**: ...' line; after gh release edit, body opens with the template's 系统要求 section and ends with the same changelog line"
         status: pass
     human_judgment: true
-    rationale: "Whether the manually-reconstructed body faithfully represents what the FIXED workflow will actually produce on the next real tag push is not itself verified by an automated CI run — a human/maintainer judgment call to accept the hand-assembled body as an interim substitute is implicit here."
+    rationale: "Whether the manually-reconstructed body faithfully represents what the FIXED workflow will actually produce on the next real tag push is not itself verified by an automated CI run — that verification belongs to Phase 7's real v0.2.1 tag push, not this plan."
   - id: D4
     description: "05-ci Phase 5's pending real-tag-push UAT test 1 updated from [pending] to [pass] with run id, job conclusions, and Release URL"
     requirement: null
@@ -75,24 +85,58 @@ coverage:
         ref: ".planning/phases/05-ci/05-UAT.md test 1 result: [pass], evidence section names run 30656303074 and https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases/tag/v0.2.0"
         status: pass
     human_judgment: false
+  - id: D5
+    description: "Clean-account (D-13/D-15) end-to-end walkthrough performed against the real v0.2.0 dmg, with the clean-account requirement explicitly waived by the developer and the walkthrough run in the existing, Phase-5-contaminated account instead"
+    requirement: [DOCS-01, DOCS-02]
+    verification:
+      - kind: human
+        ref: "Developer resume-signal: 'approved' — primary 放行 path ('再双击一次'), prerequisite self-check, install, and create-and-start-a-Chrome-profile all fully exercised with zero unfixed documentation gaps found on the paths that were exercised"
+        status: pass
+    human_judgment: true
+    rationale: "This is D-15's own scoring rule: a human executing shipped instructions is the only instrument that can judge sufficiency. The developer's approval covers the exercised paths only — see the three named qualifiers below, which are NOT folded into this pass."
+  - id: D6
+    description: "System Settings fallback path ('系统设置 → 隐私与安全性 → 仍要打开') NOT exercised — recorded as not verified, not as passed, because this account's Gatekeeper denial breadcrumb (written by Phase 5's 05-06 testing) makes its UI state unrepresentative of a genuinely new user"
+    requirement: [DOCS-01]
+    verification:
+      - kind: other
+        ref: "05-06-SUMMARY.md:189 records this account's syspolicyd 'Adding Gatekeeper denial breadcrumb (open)' entry from 2026-07-28, predating this walkthrough"
+        status: fail
+    human_judgment: true
+    rationale: "Recorded as an explicit residual risk, not smoothed into D5's pass. Re-verification requires a genuinely clean system user account."
+  - id: D7
+    description: "B1 first-launch dialog verbatim title/button wording — a deferred capture goal from CONTEXT.md's Deferred Ideas — was NOT captured during this walkthrough"
+    requirement: null
+    verification:
+      - kind: other
+        ref: "No dialog title or button text was supplied by the developer's resume-signal; none is fabricated here"
+        status: fail
+    human_judgment: false
+  - id: D8
+    description: "Out-of-scope runtime defect (macOS close button hides to menu bar, does not restore from Dock) surfaced during the walkthrough, fixed on main, and routed to a new Phase 7 as requirement UI-05 rather than treated as part of this plan"
+    requirement: null
+    verification:
+      - kind: other
+        ref: "Fix commit a886dc7 on main; Phase 7 added to ROADMAP.md/REQUIREMENTS.md/STATE.md via commits 8f2ba5a, 6b2629f; published v0.2.0 dmg (tag points at 95850b0) predates a886dc7 and does NOT contain the fix, which is why the defect reproduced during the walkthrough"
+        status: pass
+    human_judgment: false
 
 # Metrics
-duration: 35min
+duration: 50min
 completed: 2026-07-31
-status: in-progress
+status: complete
 ---
 
-# Phase 6 Plan 5: Real v0.2.0 Tag Push, Release Body Defect Found and Fixed, UAT Closed (Tasks 1-2) Summary
+# Phase 6 Plan 5: Real v0.2.0 Tag Push, Release Body Defect Found and Fixed, Clean-Account Walkthrough Approved (With Narrowed Scope) Summary
 
-**Pushed the milestone's real `v0.2.0` tag per the developer's explicit option-a decision; this exposed a genuine, previously-unexercisable defect — the `release` job had no `actions/checkout` step, so its `body_path` reference to the hand-written release-notes template silently resolved to nothing and the first-published Release contained only the auto-generated changelog. Fixed the workflow and hand-corrected the live Release, then closed Phase 5's year-old pending UAT item. Task 3 (clean-account human verification) has not been executed — this plan stops at that checkpoint.**
+**Pushed the milestone's real `v0.2.0` tag per the developer's explicit option-a decision, which exposed and fixed a genuine release-pipeline defect (the `release` job silently dropped its hand-written Release body because it had no `actions/checkout` step); then ran the D-13/D-15 clean-account documentation walkthrough with the clean-account requirement explicitly waived by the developer, who approved the run as covering the primary path, prerequisite self-check, install, and Chrome-profile creation with zero unfixed documentation gaps — while the System Settings fallback path stays unverified, the first-launch dialog wording stays uncaptured, and the release-job fix itself stays unproven by a real automated run. A separate runtime defect surfaced during the walkthrough (macOS close button doesn't quit the app) was fixed and routed to a new Phase 7 rather than folded into this plan.**
 
 ## Performance
 
-- **Duration:** ~35 min
+- **Duration:** ~50 min total (Tasks 1-2: ~35 min; Task 3 + finalization: ~15 min)
 - **Started:** 2026-07-31T18:32:33Z
-- **Completed (Tasks 1-2 only):** 2026-07-31T19:10Z (approx)
-- **Tasks:** 2 of 3 completed (Task 3 is a `checkpoint:human-verify` requiring a real macOS machine and a new user account — not executable by this agent)
-- **Files modified:** 4
+- **Completed:** 2026-07-31 (all three tasks)
+- **Tasks:** 3 of 3 completed
+- **Files modified:** 9 (4 in Tasks 1-2; 5 more in Task 3 finalization: ROADMAP.md, 06-CONTEXT.md, 06-VALIDATION.md, REQUIREMENTS.md, STATE.md)
 
 ## Task 1: Decision (already resolved before this run)
 
@@ -153,6 +197,8 @@ That is the *entire* body that was live on the public Release page immediately a
 
 This is a genuine defect that no `workflow_dispatch` regression run (Phase 5's 8 runs, or 06-01's) could ever have caught, because the `release` job is tag-gated and always evaluates to `skipped` on a dispatch trigger — the job's steps, including this one, simply never execute under `workflow_dispatch`. It took a real tag push to expose it, which is exactly the "one hop no dispatch run can prove" this task's `key_links` entry anticipated — just not in the way RESEARCH's ordering question framed it.
 
+**IMPORTANT — this "falsified" finding is about the file being absent, not about ordering.** RESEARCH assumption A2 (whether hand-written content is *ordered* before the auto-changelog when both are present) remains formally **unverified** by any real CI run — see Residual Risks below. The manual repair performed in this plan demonstrates an ordering, but that ordering was assembled by this agent, not produced by the (now-fixed) automated pipeline.
+
 ### Fix applied (Rule 1 — auto-fix bug found during task execution)
 
 Added the missing checkout step:
@@ -165,17 +211,17 @@ Added the missing checkout step:
        - name: Download all build artifacts
 ```
 
-Committed as `524aeb1` (`fix(ci): add missing checkout step to release job`) and pushed directly to `main` — **no second tag was pushed**, per the plan's explicit one-way-door instruction ("do not push a second corrective tag without returning to the orchestrator"). This fix will first be exercised by an actual `release` job run on the *next* real tag push; it has not itself been proven by automation in this session, since doing so would require exactly the kind of second tag push the plan forbids without returning to the orchestrator first. This is recorded as an open item below, not smoothed over.
+Committed as `524aeb1` (`fix(ci): add missing checkout step to release job`) and pushed directly to `main` — **no second tag was pushed**, per the plan's explicit one-way-door instruction ("do not push a second corrective tag without returning to the orchestrator"). This fix has never been exercised by any real automated `release` job run in this plan or since — see Residual Risks below.
 
 ### The live v0.2.0 Release body was also hand-corrected
 
-Because Task 3's clean-account verifier needs a Release page that actually contains the documentation to read (that is the entire premise of the D-15 experiment), the already-published `v0.2.0` Release's body was corrected in place via:
+Because Task 3's clean-account verifier needed a Release page that actually contains the documentation to read (that is the entire premise of the D-15 experiment), the already-published `v0.2.0` Release's body was corrected in place via:
 
 ```
 gh release edit v0.2.0 --notes-file <template content + fetched changelog line, in that order>
 ```
 
-This is **not** a re-run of the (now-fixed) CI pipeline — it is a manual, one-time repair of this specific Release's metadata using content assembled by this agent, not generated by the workflow. It restores the intended reading experience for Task 3, but the actual behavior of the *fixed* pipeline (checkout step + `body_path` + `generate_release_notes: true` together) remains formally unverified by any real automated run.
+This is **not** a re-run of the (now-fixed) CI pipeline — it is a manual, one-time repair of this specific Release's metadata using content assembled by this agent, not generated by the workflow. It restored the intended reading experience for Task 3, but the actual behavior of the *fixed* pipeline (checkout step + `body_path` + `generate_release_notes: true` together) remains formally unverified by any real automated run.
 
 **First 20 lines of the corrected, live Release body (verbatim):**
 
@@ -235,27 +281,69 @@ All pass.
 
 `.planning/phases/05-ci/05-UAT.md` test 1 (pending since 2026-07-29, the real-tag-push verification Phase 5 deliberately deferred rather than triggering purely to test) is now `result: [pass]`, with the run id, the three job conclusions, and the Release URL recorded in an `evidence:` block, and a note that this same run surfaced and fixed the checkout-step defect. Committed as `b2d7330`.
 
-### dmg acquisition — deliberately NOT completed by this agent
+### dmg acquisition for the integrity check — deliberately NOT the acquisition used for Task 3
 
-The plan requires the dmg to be acquired "using a normal browser download so the file receives a genuine quarantine attribute — a `gh` or `curl` download does not reproduce what a real user's file looks like." This agent has no GUI/browser capability and cannot perform that download in a way that produces a real per-user quarantine attribute — and the clean macOS user account that download must happen under does not exist yet (it is created in Task 3's own setup steps).
+The plan required the dmg used for Task 3's install to be acquired "using a normal browser download so the file receives a genuine quarantine attribute." A separate, non-installing `gh release download` copy was made purely to confirm the published asset is a structurally valid disk image (`hdiutil imageinfo` exit 0) before handing off — that copy was never opened, mounted beyond metadata inspection, or installed, and was explicitly excluded from Task 3.
 
-What this agent did instead, strictly as a **non-installing integrity check**, not as the acquisition the plan describes:
+## Task 3: Clean-account walkthrough — approved, with clean-account requirement waived and scope narrowed
 
-```
-$ gh release download v0.2.0 --pattern "*.dmg" --dir <scratchpad>/integrity-check-only
-$ hdiutil imageinfo <scratchpad>/integrity-check-only/Open-Anti-Browser-0.2.0-arm64.dmg > /dev/null && echo "acquired dmg is a readable disk image"
-acquired dmg is a readable disk image
-```
+### The developer's resume-signal: `approved`
 
-This file was **not** opened, mounted (beyond `hdiutil imageinfo`'s metadata-only read, which does not attach the volume), or installed, and it must **not** be used for Task 3 — it was downloaded via `gh`, not a browser, under the developer's own account, so it carries none of the quarantine/LaunchServices state a real user's file would have. It exists solely to confirm the published dmg asset is a structurally valid disk image before handing this off.
+The developer ran the D-13/D-15 walkthrough and reported it complete with **zero unfixed documentation gaps** on the paths actually exercised: reading the Release page as shipped, the prerequisite hardware/OS self-check via the Apple menu, dragging the dmg to install, the primary 放行 path ("再双击一次"), and creating and starting a Chrome profile through to a visible fingerprint Chromium window.
 
-**The real acquisition for Task 3 must happen as part of Task 3's own setup**: from the new clean macOS user account, open a real browser, navigate to https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases/tag/v0.2.0, and download the `.dmg` asset from there — that is the only way to get a file carrying a genuine per-user quarantine attribute, and creating that account is itself the first step of Task 3.
+**This is the phase's headline result, and it is reported honestly as "approved with a documented, narrowed scope" — not as "everything verified."** Three things about how the run deviated from the plan's written procedure are recorded here precisely because they must not be silently absorbed into a blanket pass.
+
+### Qualifier 1 — D-13's clean-account requirement was explicitly waived (developer decision, 2026-07-31)
+
+The walkthrough ran in the developer's **existing** macOS account, not a newly created one. This was an explicit developer decision, not a shortcut taken by this agent, and it is already recorded in three places that this SUMMARY references rather than re-litigates:
+
+- `.planning/ROADMAP.md` § Phase 6 — SC3 rewritten, with a `2026-07-31 SC3 收窄` dated callout
+- `.planning/phases/06-release-docs/06-CONTEXT.md` — a dated OVERRIDE note appended under D-13, original text preserved unedited
+- `.planning/phases/06-release-docs/06-VALIDATION.md` — the Manual-Only Verifications table's rows updated to record the waiver and its consequence
+
+Commit: `1f63b37`.
+
+### Qualifier 2 — the System Settings fallback path is unverified, not passed
+
+**Consequence of Qualifier 1, already accepted:** the fallback step 「系统设置 → 隐私与安全性 → 仍要打开」 was **not exercised** during this walkthrough and must be recorded as **未验证 / not verified** — explicitly not folded into the pass. Reason: that path's UI state (whether an "仍要打开" entry appears at all) is driven by a per-user Gatekeeper denial breadcrumb, and this exact account already had one written into it by Phase 5's 05-06 testing on 2026-07-28 (`05-06-SUMMARY.md:189`, `Adding Gatekeeper denial breadcrumb (open)`). What the developer would see at that step in this account does not represent what a genuinely new user's account would show. The primary path (「再双击一次」), the prerequisite self-check, the install, and the create-and-start-a-Chrome-profile leg were all fully exercised and are reported as passed.
+
+**Do not read SC3 or DOCS-01 as "fully verified" without this qualifier** — the developer's approval and this plan's `requirements-completed: [DOCS-01, DOCS-02]` cover the paths that were actually exercised, per ROADMAP's own narrowed SC3 wording, not the full four-path branching document as originally scoped.
+
+### Qualifier 3 — the B1 first-launch dialog's verbatim wording remains uncaptured
+
+CONTEXT.md's Deferred Ideas listed capturing the first-launch dialog's exact title and button labels as a byproduct this phase's real install would "顺带把这个补上" (incidentally pick up). It did not happen during this run. **This is recorded as still-open and carried forward as a deferred item** — no dialog title or button text is written into this SUMMARY, because none was supplied by the developer's resume-signal. Fabricating it would misrepresent an unobserved fact as a captured one, which is a worse failure than leaving the gap open.
+
+### Out-of-scope finding: a separate runtime defect, fixed and routed to Phase 7 — not a Phase 6 documentation gap
+
+During the walkthrough the developer hit a defect that is **not a documentation gap**: clicking the macOS window close button (the red traffic-light "X") hides the app to the menu bar and leaves the process running, and clicking the Dock icon afterward does not bring the window back — the only escape was right-click Dock → Quit.
+
+This is a runtime behavior defect, not something any amount of better release-notes wording could fix, so it does not belong to Phase 6's DOCS-01/DOCS-02 scope and is **not** counted as a Phase 6 documentation gap and does **not** block this plan.
+
+Disposition:
+- **Fixed already:** commit `a886dc7` — macOS now quits cleanly on window close; Windows/Linux tray-minimize behavior is unchanged.
+- **Routed to a new Phase 7** ("补丁发布与发布链路验证"), tracked as requirement **UI-05**, added via ROADMAP.md/REQUIREMENTS.md/STATE.md updates in commits `8f2ba5a` and `6b2629f`.
+- **launch_app.py was not touched by this plan** — the fix landed on main before this finalization step, and its real-machine verification is explicitly Phase 7's job, not this plan's.
+- **Why it reproduced:** the published v0.2.0 dmg's tag points at commit `95850b0` (the version-bump commit), which **predates** `a886dc7`. The dmg the developer installed during the walkthrough therefore did not contain the fix, which is exactly why the defect was reproducible in the first place. Phase 7's own real `v0.2.1` tag push is what will prove the fix in a shipped artifact.
+
+## Residual Risks — carried forward explicitly, NOT merged into the "passed" narrative
+
+This plan closes Task 3 with a developer approval, but four things this plan does **not** close are listed here precisely so they are not lost inside that approval:
+
+1. **`524aeb1` (the release job's `actions/checkout` fix) has never been executed by real CI.** It was pushed to `main` as a normal commit, deliberately without a second tag push, per the plan's one-way-door instruction. The only way to prove it actually works is a real `v*` tag push exercising the `release` job end-to-end — that first real run is Phase 7's job (SC2, `v0.2.1`).
+2. **`06-RESEARCH.md` assumption A2 (whether `body_path` content is prepended before the auto-generated changelog) remains formally unverified.** The v0.2.0 attempt did not answer the ordering question at all — it failed for a more basic reason (the body_path file was absent from the runner entirely), and the ordering demonstrated in this SUMMARY's "corrected live body" section was manually assembled by this agent, not produced by the automated pipeline. Phase 7's real `v0.2.1` tag push (SC3) is what will confirm or falsify A2 for real.
+3. **The System Settings fallback path (「系统设置 → 隐私与安全性 → 仍要打开」) is unverified**, per Qualifier 2 above — this account's pre-existing Gatekeeper denial breadcrumb makes it unrepresentative of a new user. Re-verification requires a genuinely clean system user account.
+4. **The B1 first-launch dialog's verbatim title and button wording remains uncaptured**, per Qualifier 3 above — this is a deferred item, not a fabricated fact.
+
+None of these four are Phase 6 documentation gaps requiring a fix inside this plan — they are honestly-scoped unknowns that the developer's `approved` signal does not paper over.
 
 ## Task Commits
 
 1. **Task 2 (version bump)** - `95850b0` (chore)
 2. **Task 2 (workflow fix, Rule 1 deviation)** - `524aeb1` (fix)
 3. **Task 2 (05-UAT.md closure)** - `b2d7330` (test)
+4. **Task 3 (SC3 narrowing, D-13 waiver documented before/independent of this finalization)** - `1f63b37` (docs)
+5. **Task 3 out-of-scope finding (macOS close-button fix)** - `a886dc7` (fix, pre-existing on main before this finalization step)
+6. **Task 3 out-of-scope finding (Phase 7 added)** - `8f2ba5a`, `6b2629f` (docs)
 
 Task 1 required no commit (decision was already resolved before this session; recorded here in prose per the plan's `must_haves`).
 
@@ -267,12 +355,20 @@ Task 1 required no commit (decision was already resolved before this session; re
 - `backend/main.py` — both `version=` fields `0.1.16` -> `0.2.0`
 - `.github/workflows/build-release.yml` — added missing `actions/checkout@v4` step to the `release` job (3 lines)
 - `.planning/phases/05-ci/05-UAT.md` — test 1 result `[pending]` -> `[pass]`, with evidence block
+- `.planning/ROADMAP.md` — Phase 6 SC3 rewritten with a `2026-07-31 SC3 收窄` callout; Phase 6 plan checklist and progress row updated to 5/5 complete; Phase 7 added
+- `.planning/phases/06-release-docs/06-CONTEXT.md` — dated OVERRIDE note appended under D-13
+- `.planning/phases/06-release-docs/06-VALIDATION.md` — Manual-Only Verifications rows and Per-Task Verification Map rows updated to real outcomes
+- `.planning/REQUIREMENTS.md` — DOCS-01/DOCS-02 already marked complete (06-04); UI-05 added for Phase 7
+- `.planning/STATE.md` — position, decisions, session updated to reflect plan completion
 
 ## Decisions Made
 
-- Only the option-a branch was executed; option-b was never touched (per the pre-resolved checkpoint decision and threat T-06-14).
-- The missing-checkout bug was fixed via a normal commit to `main`, not via a second tag push — the plan explicitly forbids pushing a second corrective tag without returning to the orchestrator, and this fix does not require re-tagging to land in the repository (it will simply be exercised by whichever tag is pushed next).
-- The already-published Release's body was manually corrected rather than left broken, because an unusable Release page would make Task 3's D-15 verification unexecutable as specified. This is documented as a hand-repair, not a proof that the fixed pipeline renders correctly end-to-end — that remains open.
+- Only the option-a branch of Task 2 was executed; option-b was never touched (per the pre-resolved checkpoint decision and threat T-06-14).
+- The missing-checkout bug was fixed via a normal commit to `main`, not via a second tag push — the plan explicitly forbids pushing a second corrective tag without returning to the orchestrator, and this fix does not require re-tagging to land in the repository. Its first real automated exercise is Phase 7's job.
+- The already-published Release's body was manually corrected rather than left broken, because an unusable Release page would have made Task 3's D-15 verification unexecutable as specified. This is documented as a hand-repair, not a proof that the fixed pipeline renders correctly end-to-end — that remains open, tracked as Residual Risk 1/2.
+- D-13's clean-account requirement was waived by explicit developer decision, with the consequence (System Settings fallback unverified) accepted and recorded rather than hidden — see Qualifier 1/2 above.
+- The B1 dialog wording gap was left open rather than fabricated — see Qualifier 3 above.
+- The out-of-scope close-button defect was fixed and routed to a new Phase 7 (UI-05) rather than expanding this plan's scope or blocking its completion.
 
 ## Deviations from Plan
 
@@ -284,33 +380,49 @@ Task 1 required no commit (decision was already resolved before this session; re
 - **Fix:** Added `actions/checkout@v4` as the first step of the `release` job
 - **Files modified:** `.github/workflows/build-release.yml`
 - **Commit:** `524aeb1`
-- **Not fully verified:** this fix has not itself been exercised by a real automated run (that would require a second tag push, which the plan forbids without returning to the orchestrator first). It is a residual risk carried forward — see Open Items below.
+- **Not fully verified:** this fix has not itself been exercised by a real automated run in this plan or since. Carried forward as Residual Risk 1 to Phase 7.
+
+**2. [Rule 1 - Bug, out-of-scope discovery] macOS window close button hides the app instead of quitting it**
+- **Found during:** Task 3's clean-account walkthrough (developer-reported)
+- **Issue:** Clicking the red traffic-light close button hid the app to the menu bar / Dock without quitting the process; the Dock icon did not restore the window; the only recovery was right-click Dock → Quit
+- **Fix:** `a886dc7` — macOS now quits fully on window close (Windows/Linux unchanged)
+- **Files modified:** `launch_app.py` (already committed to main before this finalization step; **not modified by this plan or this finalization**)
+- **Not a Phase 6 gap:** this is a runtime behavior defect, not a documentation defect, so it is not counted against DOCS-01/DOCS-02 or against this plan's completion. Routed to a new Phase 7 as requirement UI-05 (commits `8f2ba5a`, `6b2629f`). Its real-machine verification is explicitly out of this plan's scope.
 
 No other deviations. The version bump, tag push, and UAT closure were executed exactly as the plan specified.
 
 ## Open Items / Residual Risk (carried forward, not smoothed over)
 
-1. **The fixed `release` job's checkout+body_path+generate_release_notes interaction is unverified by any real CI run.** It will first be exercised on the next actual `v*` tag push. Until then, whether the *automated* pipeline reproduces the hand-assembled ordering demonstrated in this SUMMARY (template first, auto-changelog last) is an open question, not a proven fact.
-2. **Task 3 (clean-account human verification) has not been executed.** This SUMMARY covers Tasks 1-2 only. `status: in-progress` in this file's frontmatter reflects that the plan is not yet complete.
-3. **The dmg used for Task 3 must be freshly downloaded via a real browser from the new clean macOS account** — the `gh release download` copy made in this session is for integrity-checking only and must not be used for the install walkthrough.
+1. **The fixed `release` job's checkout+body_path+generate_release_notes interaction is unverified by any real CI run.** It will first be exercised on Phase 7's real `v0.2.1` tag push.
+2. **RESEARCH assumption A2 (body_path ordering relative to the auto-generated changelog) remains formally unverified.** The v0.2.0 attempt failed for a different, more basic reason (the file was entirely absent from the runner) — Phase 7's real tag push is what will actually settle A2.
+3. **The System Settings fallback path («仍要打开») is unverified**, not passed — this account's pre-existing Gatekeeper denial breadcrumb (written by Phase 5) makes its current UI state unrepresentative of a genuinely new user. Re-verification requires a truly clean system account.
+4. **The B1 first-launch dialog's verbatim title/button wording remains uncaptured** — a deferred item from CONTEXT.md's Deferred Ideas that this phase's real install did not, in the end, pick up.
+
+None of these four block this plan's completion — they are the honestly-scoped boundary of what "approved" means here, and none is a Phase 6 documentation defect requiring a fix inside this plan.
 
 ## Known Stubs
 
-None — no UI/data stubs introduced by this plan (it touches release infrastructure and version metadata only).
+None — no UI/data stubs introduced by this plan (it touches release infrastructure, version metadata, and planning-tracking documents only).
 
 ## Threat Flags
 
-None beyond what the plan's own threat model already anticipated (T-06-12 through T-06-16 all directly addressed by this task's design; no new surface introduced).
+None beyond what the plan's own threat model already anticipated (T-06-12 through T-06-16 all directly addressed by this task's design; no new surface introduced). The out-of-scope close-button defect is a runtime/UX defect, not a new trust-boundary surface, and its fix (`a886dc7`) touches only `launch_app.py`'s own event handling, already covered by Phase 5's existing threat register.
 
 ---
 *Phase: 06-release-docs*
-*Tasks 1-2 completed: 2026-07-31*
-*Task 3: not yet executed — see checkpoint*
+*Plan 06-05: complete — all 3 tasks executed*
+*2026-07-31*
 
 ## Self-Check: PASSED
 
 - FOUND: commit `95850b0` (version bump)
 - FOUND: commit `524aeb1` (checkout fix)
 - FOUND: commit `b2d7330` (UAT closure)
+- FOUND: commit `1f63b37` (SC3 narrowing / D-13 waiver)
+- FOUND: commit `a886dc7` (macOS close-button fix)
+- FOUND: commit `8f2ba5a` (Phase 7 added)
+- FOUND: commit `6b2629f` (Phase 7 rename)
 - FOUND: tag `v0.2.0` (points at `95850b0`)
 - FOUND: Release https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases/tag/v0.2.0
+- CONFIRMED: `node --test frontend/src/lib/*.test.js` — 52/52 pass
+- CONFIRMED: `.venv/bin/python -m unittest discover -s tests` — 122 tests, OK (skipped=2)
