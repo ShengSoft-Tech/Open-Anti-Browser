@@ -5,16 +5,16 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 06
 current_phase_name: release-docs
 status: executing
-stopped_at: "06-05-PLAN.md Tasks 1-2 complete; STOPPED at Task 3 checkpoint:human-verify (clean-account walkthrough)"
-last_updated: "2026-07-31T19:00:35.577Z"
-last_activity: 2026-07-30
-last_activity_desc: Phase 06 execution started
+stopped_at: Completed 06-05-PLAN.md (all 3 tasks) — Phase 6 all plans executed, awaiting /gsd-verify-work
+last_updated: "2026-07-31T21:29:18.744Z"
+last_activity: 2026-07-31
+last_activity_desc: 06-05-PLAN.md finalized (Task 3 clean-account walkthrough approved with narrowed scope)
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 6
   total_plans: 28
   completed_plans: 28
-  percent: 100
+  percent: 86
 ---
 
 # Project State
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 
 ## Current Position
 
-Phase: 06 (release-docs) — EXECUTING
-Plan: 5 of 5
-Status: Ready to execute
-Last activity: 2026-07-30 — Phase 06 execution started
+Phase: 06 (release-docs) — All plans executed (5/5), awaiting /gsd-verify-work
+Plan: 5 of 5 (complete)
+Status: Ready for verification
+Last activity: 2026-07-31 — 06-05-PLAN.md finalized (Task 3 clean-account walkthrough approved with narrowed scope)
 
-Progress: [██████████] 96%
+Progress: [████████░░] 86%
 
 ## Performance Metrics
 
@@ -86,6 +86,7 @@ Progress: [██████████] 96%
 | Phase 06 P02 | 6min | 2 tasks | 3 files |
 | Phase 06 P03 | 15min | 2 tasks | 5 files |
 | Phase 06 P04 | 20min | 2 tasks | 3 files |
+| Phase 06 P05 | 50min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -143,6 +144,8 @@ Recent decisions affecting current work:
 - [Phase ?]: 06-04: ROADMAP Phase 6 SC1-3 and REQUIREMENTS DOCS-01/02 rewritten to the measured double-click-again flow and single-architecture prerequisite checklist, with a dated callout naming both 2026-07-28 (05-06 real-hardware capture) and 2026-07-27 (second-architecture removal from v0.2); the callout paraphrases the removed architecture to avoid tripping its own forbidden-word verify gate
 - [Phase ?]: 06-04: cross-surface parity audit confirms xattr command / primary 放行 step / macOS 15 floor consistent across release template, both locale files, both READMEs, and build-release.yml; full suite green (118 Python + 52 node:test) run via repo's existing .venv
 - [Phase ?]: 06-05: real v0.2.0 tag pushed (option-a); found and fixed release job missing checkout step that silently dropped body_path content; hand-corrected live Release body; closed 05-ci UAT test 1
+- [Phase ?]: 06-05: D-13 干净账户要求经开发者豁免,在既有账户中验收;备选放行路径「系统设置 → 仍要打开」记为未验证(该账户已带 Phase 5 写入的 Gatekeeper denial breadcrumb),主路径/自查/安装/创建启动 Chrome 配置四段全额通过
+- [Phase ?]: 06-05: 走查发现真机运行缺陷(macOS 关闭按钮不退出应用,仅隐藏到菜单栏),已在 a886dc7 修复并路由到新增 Phase 7(UI-05),不计入 Phase 6 文档缺口,不阻塞本计划完成
 
 ### Pending Todos
 
@@ -165,6 +168,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T19:00:35.566Z
-Stopped at: 06-05-PLAN.md Tasks 1-2 complete; STOPPED at Task 3 checkpoint:human-verify (clean-account walkthrough)
-Resume file: .planning/phases/06-release-docs/06-05-PLAN.md
+Last session: 2026-07-31T21:29:18.733Z
+Stopped at: Completed 06-05-PLAN.md (all 3 tasks) — Phase 6 all plans executed, awaiting /gsd-verify-work
+Resume file: None

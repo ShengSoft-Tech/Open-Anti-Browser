@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: macOS Chrome 启动与能力 API** - macOS 用户可一键启动指纹 Chrome 配置,后端暴露平台能力供前端门控 (completed 2026-07-27)
 - [x] **Phase 4: 前端平台门控** - macOS 上 Firefox 隐藏、窗口同步/排列置灰提示、平台说明与放行指引上线 (completed 2026-07-27)
 - [ ] **Phase 5: CI 打包发布** - CI 新增 macOS job,产出签名 dmg(arm64+x64)并与 Windows 安装包挂到同一 Release
-- [ ] **Phase 6: 发布文档与端到端验证** - Release notes 放行说明齐全,真机端到端验证通过
+- [ ] **Phase 6: 发布文档与端到端验证** - Release notes 放行说明齐全,真机端到端验证通过(现有账户,范围收窄见 SC3 澄清;所有 5 个计划已执行,等待 /gsd-verify-work)
 - [ ] **Phase 7: 补丁发布与发布链路验证** - 修复 macOS 关闭按钮后台挂起,并借真实 tag push 核销 Phase 6 遗留的两项未验证事项
 
 ## Phase Details
@@ -186,7 +186,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 > ⚠ **2026-07-31 SC3 收窄:干净账户要求经开发者决定豁免,备选放行路径记为未验证。** CONTEXT.md D-13 原要求在新建的干净系统用户账户中验收,依据是 `LSQuarantineEventsV2` 与 Gatekeeper 记录按用户隔离。开发者于本日明确选择不新建账户,在现有账户中验收。**后果(已知并接受)**:`05-06-SUMMARY.md:189` 记录 2026-07-28 的真机日志在该账户写入过 `Adding Gatekeeper denial breadcrumb (open)`,而这条 breadcrumb 正是决定「系统设置 → 隐私与安全性」是否出现「仍要打开」条目的状态源;因此备选第 2 步在本次验收中所处的界面状态不代表新用户所见,该步骤记为**未验证**,不计入通过。主路径(「再双击一次」)、前置要求自查、安装、创建并启动 Chrome 配置四段不受此影响,仍按 D-15 全额验收。此项为验收范围收窄,非文档缺陷;若将来需要补验备选路径,需在干净账户中重跑该步骤。
 
-**Plans**: 4/5 plans executed
+**Plans**: 5/5 plans executed
 
 **Wave 1**
 
@@ -203,7 +203,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 4** *(depends on 06-04;含决策门与人工验收)*
 
-- [ ] 06-05-PLAN.md — 真实 `v*` tag 与 workflow_dispatch 的取包决策门 + 按选择取包并核对 Release 正文 + 干净系统账户仅凭文档走完全程的真机验收 [DOCS-01/DOCS-02]
+- [x] 06-05-PLAN.md — 真实 `v*` tag 与 workflow_dispatch 的取包决策门 + 按选择取包并核对 Release 正文 + 现有账户(D-13 干净账户要求已豁免)仅凭文档走完全程的真机验收,批准且范围收窄 [DOCS-01/DOCS-02]
 
 ### Phase 7: 补丁发布与发布链路验证
 
@@ -224,7 +224,6 @@ Plans:
 
 - [ ] TBD (run /gsd-plan-phase 7 to break down)
 
-
 ## Progress
 
 **Execution Order:**
@@ -238,5 +237,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 3. macOS Chrome 启动与能力 API | 3/3 | Complete    | 2026-07-27 |
 | 4. 前端平台门控 | 6/6 | Complete    | 2026-07-27 |
 | 5. CI 打包发布 | 6/6 | In Progress|  |
-| 6. 发布文档与端到端验证 | 4/5 | In Progress|  |
+| 6. 发布文档与端到端验证 | 5/5 | In Progress|  |
 | 7. 补丁发布与发布链路验证 | 0/0 | Not Planned|  |
