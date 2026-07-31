@@ -177,9 +177,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Requirements**: DOCS-01, DOCS-02
 **Success Criteria** (what must be TRUE):
 
-  1. Release notes 提供分步放行说明(启动被拦 → 系统设置 → 隐私与安全性 → 仍要打开),并附 `xattr -dr com.apple.quarantine` 终端替代方案
-  2. Release notes/README 提供双架构下载选择指引,帮助用户判断自己的 Mac 是 Apple Silicon 还是 Intel
-  3. 在一台从未安装过本应用的 Mac 上(arm64 与 x64 分别原生验证,不借助 Rosetta),用户仅依据发布文档即可完成下载、放行、安装、创建配置并启动 Chrome 配置的完整流程
+  1. Release notes 按递进三步呈现放行说明:首选(通常已够用)是首次打开被拦截、应用自动退出后**再双击打开一次**;仍打不开则退到「系统设置 → 隐私与安全性 → 仍要打开」;最后手段是终端命令 `xattr -dr com.apple.quarantine "/Applications/Open-Anti-Browser.app"`(bundle 路径加双引号,与实际发布文案逐字一致)
+  2. Release notes/README 提供前置要求清单(Apple Silicon 芯片 + macOS 15 或更新版本),可仅通过苹果菜单「关于本机」自查、无需打开终端;本里程碑只发布一个 arm64 安装包,文档不构造"在两个架构包之间选择"的场景
+  3. 在同一台 Mac 上新建的干净系统用户账户中(该机器共享的 `/Applications` 目录已预先卸载任何此前安装的本应用),仅针对 arm64 验证:验证者只依据发布文档记载的内容完成下载、放行、安装、创建配置并启动 Chrome 配置的完整流程,不得使用文档之外的已有经验(D-15)
+
+> ⚠ **2026-07-28/2026-07-27 scope 澄清:验收标准改写为实测口径 + 单一架构。** SC1 原文「系统设置优先」写于 Phase 5 出结果之前,已被 `05-06-SUMMARY.md` 2026-07-28 的真机时间戳日志推翻——放行实际是靠"再次双击"生效,系统设置从未在系统里产生过针对本应用的放行记录;SC2 原文要求的另一颗处理器架构下载选择指引,在该架构已于 2026-07-27 移出 v0.2(详见 PROJECT.md § Out of Scope 对应条目)后已无第二个包可供选择,遂改写为单包前置要求清单;SC3 原文中对那颗架构的原生验证半句同样因其不在本里程碑构建范围内而不可满足,已删除——该架构的内核资产已提前备好并发布,后续里程碑恢复支持时可直接改回本条。
 
 **Plans**: 3/5 plans executed
 

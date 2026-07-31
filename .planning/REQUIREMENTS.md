@@ -44,8 +44,8 @@ Requirements for the macOS support milestone. Each maps to roadmap phases.
 
 ### 发布文档 (DOCS)
 
-- [x] **DOCS-01**: Release notes 提供分步放行说明(启动被拦 → 系统设置 → 隐私与安全性 → 仍要打开,附 xattr 终端替代方案)
-- [x] **DOCS-02**: Release notes/README 提供双架构下载选择指引(如何判断自己是 Apple Silicon 还是 Intel)
+- [x] **DOCS-01**: Release notes 提供递进三步放行说明:首选是首次被拦截、应用自动退出后再次双击打开;「系统设置 → 隐私与安全性 → 仍要打开」为第一道备选;加引号的终端命令 `xattr -dr com.apple.quarantine "/Applications/Open-Anti-Browser.app"` 为文档化的最后手段
+- [x] **DOCS-02**: Release notes/README 提供前置要求清单(Apple Silicon 芯片 + macOS 15 或更新版本),配 GUI 优先的自查方法(苹果菜单「关于本机」),而非在多个安装包之间做选择的指引
 
 ## Future Requirements
 
@@ -111,3 +111,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 ---
 *Requirements defined: 2026-07-23*
 *Last updated: 2026-07-23 after roadmap creation (traceability mapped, count reconciled 19→22)*
+*Phase 6 (2026-07-31): § 发布文档 (DOCS) 两条需求的文字改写为 Phase 5 的实测放行流程与单一架构前置要求清单,依据 `05-06-SUMMARY.md`(2026-07-28 真机时间戳日志)与 `PROJECT.md`(2026-07-27 记录的架构移出决定);checkbox 状态、Traceability 表与 Coverage 计数均未改动。*
