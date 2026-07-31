@@ -30,9 +30,13 @@ This app is not signed with an Apple Developer ID, so macOS blocks it on first l
 <summary>If it still won't open after the second double-click</summary>
 
 2. Open "System Settings → Privacy & Security", scroll to the "Security" section, find the notice about Open-Anti-Browser, and click "Open Anyway".
-3. If that still doesn't work, open "Terminal" and run the exact command shown in the Chinese
-   section above — it is plain shell syntax and needs no translation. If you installed the app
-   somewhere else, replace the path inside the quotes with the actual install location.
+3. If that still doesn't work, open "Terminal", copy and paste the following command exactly, and press Enter:
+
+   ```
+   xattr -dr com.apple.quarantine "/Applications/Open-Anti-Browser.app"
+   ```
+
+   If you installed the app somewhere else, replace the path inside the quotes with the actual install location.
 
 </details>
 
