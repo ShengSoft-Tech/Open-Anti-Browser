@@ -306,3 +306,11 @@ None beyond what the plan's own threat model already anticipated (T-06-12 throug
 *Phase: 06-release-docs*
 *Tasks 1-2 completed: 2026-07-31*
 *Task 3: not yet executed — see checkpoint*
+
+## Self-Check: PASSED
+
+- FOUND: commit `95850b0` (version bump)
+- FOUND: commit `524aeb1` (checkout fix)
+- FOUND: commit `b2d7330` (UAT closure)
+- FOUND: tag `v0.2.0` (points at `95850b0`)
+- FOUND: Release https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases/tag/v0.2.0
