@@ -181,7 +181,24 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Release notes/README 提供双架构下载选择指引,帮助用户判断自己的 Mac 是 Apple Silicon 还是 Intel
   3. 在一台从未安装过本应用的 Mac 上(arm64 与 x64 分别原生验证,不借助 Rosetta),用户仅依据发布文档即可完成下载、放行、安装、创建配置并启动 Chrome 配置的完整流程
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+**Wave 1**
+
+- [ ] 06-01-PLAN.md — tracer:加引号的 `xattr` 命令端到端(JS 常量 → Python 兜底提示 → 新建 release notes 模板 → release job `body_path`)+ 三方一致性锁 + workflow_dispatch 回归 [DOCS-01]
+
+**Wave 2** *(depends on 06-01;两份计划无文件重叠,可并行)*
+
+- [ ] 06-02-PLAN.md — release notes 前置要求清单(Apple Silicon + macOS 15)/GUI 自查/不受支持硬件的保守措辞/未被信任的说明 + 两份 README 下载章节两行指引 [DOCS-01/DOCS-02]
+- [ ] 06-03-PLAN.md — 另外两个消费面对齐实测流程:应用内 `gatekeeper.step1`–`step4` 中英改写 + 顺序锁单测 + dmg 背景图重生成 [DOCS-01]
+
+**Wave 3** *(depends on 06-02 + 06-03)*
+
+- [ ] 06-04-PLAN.md — ROADMAP SC1/SC2/SC3 与 REQUIREMENTS DOCS-01/DOCS-02 改写(实测口径 + arm64-only,附日期化依据)+ 跨面一致性审计与全量测试门禁 [DOCS-01/DOCS-02]
+
+**Wave 4** *(depends on 06-04;含决策门与人工验收)*
+
+- [ ] 06-05-PLAN.md — 真实 `v*` tag 与 workflow_dispatch 的取包决策门 + 按选择取包并核对 Release 正文 + 干净系统账户仅凭文档走完全程的真机验收 [DOCS-01/DOCS-02]
 
 ## Progress
 
@@ -196,4 +213,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. macOS Chrome 启动与能力 API | 3/3 | Complete    | 2026-07-27 |
 | 4. 前端平台门控 | 6/6 | Complete    | 2026-07-27 |
 | 5. CI 打包发布 | 6/6 | In Progress|  |
-| 6. 发布文档与端到端验证 | 0/TBD | Not started | - |
+| 6. 发布文档与端到端验证 | 0/5 | Not started | - |
