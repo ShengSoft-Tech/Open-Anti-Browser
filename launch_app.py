@@ -120,7 +120,7 @@ def quarantine_command_target(bundle) -> str:
 
 def build_quarantine_failure_message(bundle) -> str:
     target = quarantine_command_target(bundle)
-    command = f"xattr -dr {QUARANTINE_ATTRIBUTE} {target}"
+    command = f'xattr -dr {QUARANTINE_ATTRIBUTE} "{target}"'
     return (
         "首次打开 Open-Anti-Browser 时出现这个提示是正常现象，不代表应用损坏或出错。\n\n"
         "macOS 会给刚安装的应用加上一次性的隔离标记，需要手动清除一次才能正常启动内置的浏览器内核。"

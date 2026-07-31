@@ -127,7 +127,7 @@ class BuildQuarantineFailureMessageTests(unittest.TestCase):
         self.assertIn(expected_command, message)
         self.assertEqual(
             expected_command,
-            "xattr -dr com.apple.quarantine /Applications/Open-Anti-Browser.app",
+            'xattr -dr com.apple.quarantine "/Applications/Open-Anti-Browser.app"',
         )
 
     def test_message_contains_no_dangerous_command_fragments(self) -> None:
@@ -138,7 +138,7 @@ class BuildQuarantineFailureMessageTests(unittest.TestCase):
     def test_non_translocated_bundle_message_points_to_its_own_path(self) -> None:
         bundle = Path("/Applications/Open-Anti-Browser.app")
         message = launch_app.build_quarantine_failure_message(bundle)
-        self.assertIn(f"xattr -dr com.apple.quarantine {bundle}", message)
+        self.assertIn(f'xattr -dr com.apple.quarantine "{bundle}"', message)
 
 
 class MaybeStripQuarantineTests(unittest.TestCase):

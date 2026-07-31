@@ -8,7 +8,7 @@ export const GATEKEEPER_NOTICE_KEY = 'oab:macos-gatekeeper-notice:v1'
 
 // 逐字终端命令：只限定到单个已安装的应用 bundle，不指向 ~/Downloads 或 /Applications
 // 这类宽泛目录，也不引导用户全局关闭 Gatekeeper（不含 spctl，不含 sudo）。
-export const GATEKEEPER_XATTR_COMMAND = 'xattr -dr com.apple.quarantine /Applications/Open-Anti-Browser.app'
+export const GATEKEEPER_XATTR_COMMAND = 'xattr -dr com.apple.quarantine "/Applications/Open-Anti-Browser.app"'
 
 export function hasSeenGatekeeperNotice() {
   try {

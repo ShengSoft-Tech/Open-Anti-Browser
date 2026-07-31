@@ -816,5 +816,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release-assets/*
+          body_path: .github/RELEASE_NOTES_TEMPLATE.md
           generate_release_notes: true
           name: "Open-Anti-Browser ${{ github.ref_name }}"

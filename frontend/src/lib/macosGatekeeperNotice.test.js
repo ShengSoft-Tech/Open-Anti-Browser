@@ -111,7 +111,8 @@ test('buildGatekeeperNoticeHtml includes the verbatim xattr command and referenc
 test('GATEKEEPER_XATTR_COMMAND targets a single .app bundle without sudo or spctl', () => {
   assert.ok(GATEKEEPER_XATTR_COMMAND.startsWith('xattr -dr com.apple.quarantine '))
   const targetPath = GATEKEEPER_XATTR_COMMAND.replace('xattr -dr com.apple.quarantine ', '')
-  assert.ok(targetPath.endsWith('.app'))
+  // D-04：目标路径整体加双引号，防止路径含空格时被 shell 拆成两个参数（05-REVIEW WR-01）。
+  assert.equal(targetPath, '"/Applications/Open-Anti-Browser.app"')
   assert.ok(!GATEKEEPER_XATTR_COMMAND.includes('spctl'))
   assert.ok(!GATEKEEPER_XATTR_COMMAND.includes('sudo'))
 })
