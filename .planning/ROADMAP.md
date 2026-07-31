@@ -181,7 +181,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Release notes/README 提供双架构下载选择指引,帮助用户判断自己的 Mac 是 Apple Silicon 还是 Intel
   3. 在一台从未安装过本应用的 Mac 上(arm64 与 x64 分别原生验证,不借助 Rosetta),用户仅依据发布文档即可完成下载、放行、安装、创建配置并启动 Chrome 配置的完整流程
 
-**Plans**: 1/5 plans executed
+**Plans**: 2/5 plans executed
 
 **Wave 1**
 
@@ -189,7 +189,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 2** *(depends on 06-01;两份计划无文件重叠,可并行)*
 
-- [ ] 06-02-PLAN.md — release notes 前置要求清单(Apple Silicon + macOS 15)/GUI 自查/不受支持硬件的保守措辞/未被信任的说明 + 两份 README 下载章节两行指引 [DOCS-01/DOCS-02]
+- [x] 06-02-PLAN.md — release notes 前置要求清单(Apple Silicon + macOS 15)/GUI 自查/不受支持硬件的保守措辞/未被信任的说明 + 两份 README 下载章节两行指引 [DOCS-01/DOCS-02]
 - [ ] 06-03-PLAN.md — 另外两个消费面对齐实测流程:应用内 `gatekeeper.step1`–`step4` 中英改写 + 顺序锁单测 + dmg 背景图重生成 [DOCS-01]
 
 **Wave 3** *(depends on 06-02 + 06-03)*
@@ -213,4 +213,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. macOS Chrome 启动与能力 API | 3/3 | Complete    | 2026-07-27 |
 | 4. 前端平台门控 | 6/6 | Complete    | 2026-07-27 |
 | 5. CI 打包发布 | 6/6 | In Progress|  |
-| 6. 发布文档与端到端验证 | 1/5 | In Progress|  |
+| 6. 发布文档与端到端验证 | 2/5 | In Progress|  |

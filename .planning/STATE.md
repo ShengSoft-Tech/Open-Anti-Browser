@@ -5,15 +5,15 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 06
 current_phase_name: release-docs
 status: executing
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-07-31T18:11:15.733Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-07-31T18:17:50.615Z"
 last_activity: 2026-07-30
 last_activity_desc: Phase 06 execution started
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 28
-  completed_plans: 24
+  completed_plans: 25
   percent: 83
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 06 (release-docs) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-07-30 — Phase 06 execution started
 
-Progress: [█████████░] 86%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -83,6 +83,7 @@ Progress: [█████████░] 86%
 | Phase 05 P04 | 105min | 3 tasks | 3 files |
 | Phase 05 P05 | 15min | 2 tasks | 1 files |
 | Phase 06 P01 | 42min | 3 tasks | 7 files |
+| Phase 06 P02 | 6min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -130,6 +131,7 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 5] 05-02 gap-fix #2(05-06 二次真机 checkpoint 抓到)：DesktopApplication.event() 把 handle_macos_quit_request(...) 的返回值当 `return True` 早退门禁，super().event(e) 永远跑不到——QCoreApplication::event() 对 QEvent.Quit 的默认处理(真正让事件循环退出的那一步)被跳过，Cmd+Q 后进程停在约 60% CPU 无限循环不退出(非崩溃)。此缺陷并非第一次 gap-fix 引入的回归——原 installEventFilter 实现有完全相同的逻辑缺陷，D-07 的 Cmd+Q 功能从未在任何已发布形态下真正工作过，此前的启动崩溃只是掩盖了它。修复：event() 无条件转发给 super().event(e)；force_exit() 新增 `_closing` 幂等短路防止 Quit 事件重入时重新 showNormal()。新增 AST 结构守卫测试(MacQuitEventLoopConvergenceTests，用全函数 ast.walk 而非仅顶层语句计数，否则对这个具体缺陷是空判定)。build-macos GUI 冒烟门禁新增第二维度：18s 存活确认后再用 `osascript ... to quit`(与 Cmd+Q 同一条 Apple Event 路径，非 POSIX 信号)发真实 Quit 请求，断言进程在 12s 有界超时内退出且无残留进程；经真实 workflow_dispatch 验证：buggy 分支(30418065169)进程存活 18s 但 Quit 后 113.7% CPU 卡死不退出被正确拦下，fix 后(30418547844)Quit 后 2s 内 exit code 0 干净退出。修复过的干净 dmg 见 workflow_dispatch run 30418547844 的 artifact，供用户重跑 05-06 真机 checkpoint 的 C 组三种退出路径。
 - [Phase ?]: D-15 human correction: English 放行 fallback repeats the xattr command verbatim instead of pointing at the Chinese <details> block; acceptance criterion strengthened to byte-identical occurrences >= 1 (not exactly 1)
 - [Phase ?]: 06-01 Task 3: real workflow_dispatch run 30653333767 on main confirms build-release.yml's modified release job still parses (build=success, build-macos=success, release=skipped as designed by tag guard)
+- [Phase ?]: 06-02: Trust caveat uses '担保'/endorsement instead of '认可'/'信任' near Apple/Gatekeeper as an extra safety margin beyond the literal negative-grep regex; README pointer bullets restate only the two prerequisites + Release-page link, no steps duplicated (D-11)
 
 ### Pending Todos
 
@@ -151,6 +153,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T18:11:15.723Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-07-31T18:17:50.602Z
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None

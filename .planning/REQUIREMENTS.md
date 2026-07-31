@@ -45,7 +45,7 @@ Requirements for the macOS support milestone. Each maps to roadmap phases.
 ### 发布文档 (DOCS)
 
 - [x] **DOCS-01**: Release notes 提供分步放行说明(启动被拦 → 系统设置 → 隐私与安全性 → 仍要打开,附 xattr 终端替代方案)
-- [ ] **DOCS-02**: Release notes/README 提供双架构下载选择指引(如何判断自己是 Apple Silicon 还是 Intel)
+- [x] **DOCS-02**: Release notes/README 提供双架构下载选择指引(如何判断自己是 Apple Silicon 还是 Intel)
 
 ## Future Requirements
 
@@ -98,7 +98,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PKG-04 | Phase 5 | Complete |
 | PKG-05 | Phase 5 | Complete |
 | DOCS-01 | Phase 6 | Complete |
-| DOCS-02 | Phase 6 | Pending |
+| DOCS-02 | Phase 6 | Complete |
 
 **Coverage:**
 
