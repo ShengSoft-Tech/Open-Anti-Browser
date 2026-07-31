@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: 前端平台门控** - macOS 上 Firefox 隐藏、窗口同步/排列置灰提示、平台说明与放行指引上线 (completed 2026-07-27)
 - [ ] **Phase 5: CI 打包发布** - CI 新增 macOS job,产出签名 dmg(arm64+x64)并与 Windows 安装包挂到同一 Release
 - [ ] **Phase 6: 发布文档与端到端验证** - Release notes 放行说明齐全,真机端到端验证通过
-- [ ] **Phase 7: v0.2.1 补丁发布** - 修复 macOS 关闭按钮后台挂起,并借真实 tag push 核销 Phase 6 遗留的两项未验证事项
+- [ ] **Phase 7: 补丁发布与发布链路验证** - 修复 macOS 关闭按钮后台挂起,并借真实 tag push 核销 Phase 6 遗留的两项未验证事项
 
 ## Phase Details
 
@@ -205,7 +205,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] 06-05-PLAN.md — 真实 `v*` tag 与 workflow_dispatch 的取包决策门 + 按选择取包并核对 Release 正文 + 干净系统账户仅凭文档走完全程的真机验收 [DOCS-01/DOCS-02]
 
-### Phase 7: v0.2.1 补丁发布
+### Phase 7: 补丁发布与发布链路验证
 
 **Goal**: macOS 用户点窗口关闭按钮后应用真正退出;同一次真实 `v0.2.1` tag push 让 v0.2.0 首发时暴露的两处已修复但从未被验证的发布链路缺陷得到实证
 **Depends on**: Phase 6 (需要 Phase 6 的真机验收结论,且本 phase 的三项验证都依赖 Phase 6 建立的发布链路)
@@ -239,4 +239,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. 前端平台门控 | 6/6 | Complete    | 2026-07-27 |
 | 5. CI 打包发布 | 6/6 | In Progress|  |
 | 6. 发布文档与端到端验证 | 4/5 | In Progress|  |
-| 7. v0.2.1 补丁发布 | 0/0 | Not Planned|  |
+| 7. 补丁发布与发布链路验证 | 0/0 | Not Planned|  |
