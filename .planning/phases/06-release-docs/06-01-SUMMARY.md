@@ -193,3 +193,13 @@ None - no external service configuration required. `gh auth status` was already 
 ---
 *Phase: 06-release-docs*
 *Completed: 2026-07-31*
+
+## Self-Check: PASSED
+
+- FOUND: `.github/RELEASE_NOTES_TEMPLATE.md`
+- FOUND: `frontend/src/lib/releaseNotesTemplate.test.js`
+- FOUND: `.planning/phases/06-release-docs/06-01-SUMMARY.md`
+- FOUND commit: `6fcaee2`
+- FOUND commit: `0908caa`
+- FOUND commit: `9fa7c92`
+- FOUND commit: `e2964f6`
