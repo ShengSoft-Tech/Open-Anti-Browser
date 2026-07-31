@@ -47,6 +47,11 @@ Requirements for the macOS support milestone. Each maps to roadmap phases.
 - [x] **DOCS-01**: Release notes 提供递进三步放行说明:首选是首次被拦截、应用自动退出后再次双击打开;「系统设置 → 隐私与安全性 → 仍要打开」为第一道备选;加引号的终端命令 `xattr -dr com.apple.quarantine "/Applications/Open-Anti-Browser.app"` 为文档化的最后手段
 - [x] **DOCS-02**: Release notes/README 提供前置要求清单(Apple Silicon 芯片 + macOS 15 或更新版本),配 GUI 优先的自查方法(苹果菜单「关于本机」),而非在多个安装包之间做选择的指引
 
+### v0.2.1 补丁 (Phase 7)
+
+- [ ] **UI-05**: macOS 上点窗口关闭按钮直接退出应用,不再隐藏到菜单栏挂在后台(该状态下 Dock 图标点击无法唤回窗口,用户只能右键 Dock 退出);Windows/Linux 的最小化到托盘行为不变
+- [ ] **PKG-06**: 推送 v* tag 后 GitHub Release 正文由流水线自动渲染出 `.github/RELEASE_NOTES_TEMPLATE.md` 内容,无需手工补救;手写正文与自动生成 changelog 的实际先后顺序被记录在案
+
 ## Future Requirements
 
 Deferred to future milestones. Tracked but not in current roadmap.
@@ -99,11 +104,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PKG-05 | Phase 5 | Complete |
 | DOCS-01 | Phase 6 | Complete |
 | DOCS-02 | Phase 6 | Complete |
+| UI-05 | Phase 7 | Pending |
+| PKG-06 | Phase 7 | Pending |
 
 **Coverage:**
 
 - v0.2 requirements: 22 total
-- Mapped to phases: 22
+- v0.2.1 补丁 requirements: 2 (UI-05, PKG-06 — 2026-07-31 新增,见下方注)
+- Mapped to phases: 24
 - Unmapped: 0 ✓
 
 *Note: the "19 total" figure that appeared in the initial draft of this section undercounted XPLAT (5, not 2). The count above (22) was reconciled against the actual requirement list during roadmap creation on 2026-07-23.*
@@ -112,3 +120,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 *Requirements defined: 2026-07-23*
 *Last updated: 2026-07-23 after roadmap creation (traceability mapped, count reconciled 19→22)*
 *Phase 6 (2026-07-31): § 发布文档 (DOCS) 两条需求的文字改写为 Phase 5 的实测放行流程与单一架构前置要求清单,依据 `05-06-SUMMARY.md`(2026-07-28 真机时间戳日志)与 `PROJECT.md`(2026-07-27 记录的架构移出决定);checkbox 状态、Traceability 表与 Coverage 计数均未改动。*
+*Phase 7 (2026-07-31): 新增 § v0.2.1 补丁 两条需求(UI-05、PKG-06),Coverage 计数 22 → 24。来源不是里程碑规划,而是 v0.2.0 发布后的实际发现:UI-05 来自 Phase 6 UAT 中撞到的 macOS 关闭按钮后台挂起缺陷;PKG-06 来自 v0.2.0 首发时 release job 缺 `actions/checkout` 导致 `body_path` 被静默丢弃、正文只剩一行 changelog(当时以 `gh release edit` 手工补救)。两处代码修复(`a886dc7`、`524aeb1`)已在 main 上,尚未经真实发布验证。*

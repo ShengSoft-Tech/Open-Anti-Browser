@@ -89,6 +89,10 @@ Progress: [██████████] 96%
 
 ## Accumulated Context
 
+### Roadmap Evolution
+
+- Phase 7 added (2026-07-31): v0.2.1 补丁发布 — 修复 macOS 关闭按钮后台挂起(UI-05),并借真实 `v0.2.1` tag push 核销 Phase 6 遗留的两项未验证事项(PKG-06:release job checkout 修复的首次真实执行 + RESEARCH 假设 A2 的正反判定)。触发来源是 Phase 6 UAT 中的实际发现,不是里程碑规划。两处修复 `a886dc7` / `524aeb1` 已在 main 上,本 phase 的工作是发布并验证。
+
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.

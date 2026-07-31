@@ -19,6 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: 前端平台门控** - macOS 上 Firefox 隐藏、窗口同步/排列置灰提示、平台说明与放行指引上线 (completed 2026-07-27)
 - [ ] **Phase 5: CI 打包发布** - CI 新增 macOS job,产出签名 dmg(arm64+x64)并与 Windows 安装包挂到同一 Release
 - [ ] **Phase 6: 发布文档与端到端验证** - Release notes 放行说明齐全,真机端到端验证通过
+- [ ] **Phase 7: v0.2.1 补丁发布** - 修复 macOS 关闭按钮后台挂起,并借真实 tag push 核销 Phase 6 遗留的两项未验证事项
 
 ## Phase Details
 
@@ -204,11 +205,31 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] 06-05-PLAN.md — 真实 `v*` tag 与 workflow_dispatch 的取包决策门 + 按选择取包并核对 Release 正文 + 干净系统账户仅凭文档走完全程的真机验收 [DOCS-01/DOCS-02]
 
+### Phase 7: v0.2.1 补丁发布
+
+**Goal**: macOS 用户点窗口关闭按钮后应用真正退出;同一次真实 `v0.2.1` tag push 让 v0.2.0 首发时暴露的两处已修复但从未被验证的发布链路缺陷得到实证
+**Depends on**: Phase 6 (需要 Phase 6 的真机验收结论,且本 phase 的三项验证都依赖 Phase 6 建立的发布链路)
+**Requirements**: UI-05, PKG-06
+**Success Criteria** (what must be TRUE):
+
+  1. 在真机上点窗口关闭按钮后,应用进程**真正消失** —— 以 `ps`/活动监视器确认,而不是停在约 60% CPU 空转。这一条必须实测:`launch_app.py` 里的注释记录了 05-02(崩溃)与 05-06(Quit 事件无限循环)两次真机缺陷都出在这条路径上,`a886dc7` 的修复至今只有单测和结构断言,没有真机证据
+  2. 推送 `v0.2.1` tag 后,GitHub Release 正文**由流水线自动渲染出手写模板内容**,无需任何 `gh release edit` 手工补救 —— 这是 `524aeb1`(为 release job 补 `actions/checkout`)的首次真实执行。v0.2.0 首发时 release job 缺 checkout,`body_path` 指向不存在的文件被 `softprops/action-gh-release` 静默丢弃,正文只剩一行 Full Changelog
+  3. 观察并记录手写正文与自动生成 changelog 的**实际先后顺序**,据此判定或推翻 `06-RESEARCH.md` 假设 A2(该假设称 `body_path` 内容前置)。A2 至今未验证 —— v0.2.0 那次没验成的原因是文件压根不在,不是顺序错了
+
+> 本 phase 的三条标准共享同一个验证动作(一次真实 `v0.2.1` tag push),因此不应拆到不同 wave 分别发版。SC1 的代码修复 `a886dc7` 与 SC2 的流水线修复 `524aeb1` 都已提交在 main 上,本 phase 的工作是**发布并验证**,而非重新实现。
+
+**Plans**: 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 7 to break down)
+
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
-(Phase 2 内核构建可与 Phase 1 并行开展,但 Phase 5 打包前必须等待 Phase 2 产出内核资产)
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
+(Phase 2 内核构建可与 Phase 1 并行开展,但 Phase 5 打包前必须等待 Phase 2 产出内核资产;Phase 7 是 v0.2.0 发布后新增的补丁 phase,依赖 Phase 6 的真机验收结论)
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -218,3 +239,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. 前端平台门控 | 6/6 | Complete    | 2026-07-27 |
 | 5. CI 打包发布 | 6/6 | In Progress|  |
 | 6. 发布文档与端到端验证 | 4/5 | In Progress|  |
+| 7. v0.2.1 补丁发布 | 0/0 | Not Planned|  |
