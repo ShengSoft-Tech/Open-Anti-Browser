@@ -5,15 +5,15 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 06
 current_phase_name: release-docs
 status: executing
-stopped_at: Completed 06-02-PLAN.md
-last_updated: "2026-07-31T18:17:50.615Z"
+stopped_at: Completed 06-03-PLAN.md
+last_updated: "2026-07-31T18:23:11.687Z"
 last_activity: 2026-07-30
 last_activity_desc: Phase 06 execution started
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 28
-  completed_plans: 25
+  completed_plans: 26
   percent: 83
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 06 (release-docs) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-07-30 — Phase 06 execution started
 
-Progress: [█████████░] 89%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -84,6 +84,7 @@ Progress: [█████████░] 89%
 | Phase 05 P05 | 15min | 2 tasks | 1 files |
 | Phase 06 P01 | 42min | 3 tasks | 7 files |
 | Phase 06 P02 | 6min | 2 tasks | 3 files |
+| Phase 06 P03 | 15min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -132,6 +133,8 @@ Recent decisions affecting current work:
 - [Phase ?]: D-15 human correction: English 放行 fallback repeats the xattr command verbatim instead of pointing at the Chinese <details> block; acceptance criterion strengthened to byte-identical occurrences >= 1 (not exactly 1)
 - [Phase ?]: 06-01 Task 3: real workflow_dispatch run 30653333767 on main confirms build-release.yml's modified release job still parses (build=success, build-macos=success, release=skipped as designed by tag guard)
 - [Phase ?]: 06-02: Trust caveat uses '担保'/endorsement instead of '认可'/'信任' near Apple/Gatekeeper as an extra safety margin beyond the literal negative-grep regex; README pointer bullets restate only the two prerequisites + Release-page link, no steps duplicated (D-11)
+- [Phase ?]: 06-03: gatekeeper.step1 rewritten to the double-click-again path (measured on real hardware); step2-4 preserved as System-Settings/confirm/terminal fallback chain; gatekeeperCopyParity.test.js locks the ordering and forbidden-fragment gate
+- [Phase ?]: 06-03: dmg background footer regenerated to the same double-click-again flow, replacing the never-exercised right-click route; same 600x400/1200x800 geometry create-dmg depends on
 
 ### Pending Todos
 
@@ -153,6 +156,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T18:17:50.602Z
-Stopped at: Completed 06-02-PLAN.md
+Last session: 2026-07-31T18:23:11.676Z
+Stopped at: Completed 06-03-PLAN.md
 Resume file: None
