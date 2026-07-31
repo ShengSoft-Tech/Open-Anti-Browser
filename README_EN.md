@@ -69,6 +69,8 @@ The interface follows an iOS-inspired style and supports light and dark mode swi
 
 ## Download
 
+- **Before you download (macOS only):** Apple Silicon (M-series) chip + macOS 15 or newer; Windows users are not affected by this requirement
+- First launch needs a one-time approval — see the notes for your version on the [Releases](https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases) page
 - Installer release page (this fork): [Releases](https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases)
 - This fork's source: [ShengSoft-Tech/Open-Anti-Browser](https://github.com/ShengSoft-Tech/Open-Anti-Browser)
 - Original project: [Wtcity22/Open-Anti-Browser](https://github.com/Wtcity22/Open-Anti-Browser)

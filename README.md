@@ -69,6 +69,8 @@ Open-Anti-Browser 是一个本地桌面端指纹浏览器管理器
 
 ## 下载
 
+- **下载前请确认（仅 macOS）：** Apple Silicon（M 系列）芯片 + macOS 15 或更新版本，Windows 用户无需关注此项
+- 首次打开需要按 Release 页面里的说明放行一次，详见对应版本的 [Releases](https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases) 页面说明
 - 安装包发布页（本 fork）: [Releases](https://github.com/ShengSoft-Tech/Open-Anti-Browser/releases)
 - 本 fork 源码: [ShengSoft-Tech/Open-Anti-Browser](https://github.com/ShengSoft-Tech/Open-Anti-Browser)
 - 原始项目: [Wtcity22/Open-Anti-Browser](https://github.com/Wtcity22/Open-Anti-Browser)
