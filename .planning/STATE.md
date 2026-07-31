@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
-current_phase: 06
-current_phase_name: release-docs
-status: executing
+current_phase: 07
+current_phase_name: 补丁发布与发布链路验证
+status: planning
 stopped_at: Completed 06-05-PLAN.md (all 3 tasks) — Phase 6 all plans executed, awaiting /gsd-verify-work
-last_updated: "2026-07-31T21:29:18.744Z"
+last_updated: "2026-07-31T21:41:15.099Z"
 last_activity: 2026-07-31
-last_activity_desc: 06-05-PLAN.md finalized (Task 3 clean-account walkthrough approved with narrowed scope)
+last_activity_desc: Phase 06 complete, transitioned to Phase 07
 progress:
   total_phases: 7
   completed_phases: 6
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 
 ## Current Position
 
-Phase: 06 (release-docs) — All plans executed (5/5), awaiting /gsd-verify-work
-Plan: 5 of 5 (complete)
-Status: Ready for verification
-Last activity: 2026-07-31 — 06-05-PLAN.md finalized (Task 3 clean-account walkthrough approved with narrowed scope)
+Phase: 07 — 补丁发布与发布链路验证
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-07-31 — Phase 06 complete, transitioned to Phase 07
 
 Progress: [████████░░] 86%
 
@@ -39,7 +39,7 @@ Progress: [████████░░] 86%
 
 **Velocity:**
 
-- Total plans completed: 17
+- Total plans completed: 22
 - Average duration: — min
 - Total execution time: 0 hours
 
@@ -51,6 +51,7 @@ Progress: [████████░░] 86%
 | 02 | 4 | - | - |
 | 03 | 3 | - | - |
 | 04 | 6 | - | - |
+| 06 | 5 | - | - |
 
 **Recent Trend:**
 

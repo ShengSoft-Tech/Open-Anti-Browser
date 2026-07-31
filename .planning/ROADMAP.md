@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: macOS Chrome 启动与能力 API** - macOS 用户可一键启动指纹 Chrome 配置,后端暴露平台能力供前端门控 (completed 2026-07-27)
 - [x] **Phase 4: 前端平台门控** - macOS 上 Firefox 隐藏、窗口同步/排列置灰提示、平台说明与放行指引上线 (completed 2026-07-27)
 - [ ] **Phase 5: CI 打包发布** - CI 新增 macOS job,产出签名 dmg(arm64+x64)并与 Windows 安装包挂到同一 Release
-- [ ] **Phase 6: 发布文档与端到端验证** - Release notes 放行说明齐全,真机端到端验证通过(现有账户,范围收窄见 SC3 澄清;所有 5 个计划已执行,等待 /gsd-verify-work)
+- [x] **Phase 6: 发布文档与端到端验证** - Release notes 放行说明齐全,真机端到端验证通过(现有账户,范围收窄见 SC3 澄清;所有 5 个计划已执行,等待 /gsd-verify-work) (completed 2026-07-31)
 - [ ] **Phase 7: 补丁发布与发布链路验证** - 修复 macOS 关闭按钮后台挂起,并借真实 tag push 核销 Phase 6 遗留的两项未验证事项
 
 ## Phase Details
@@ -237,5 +237,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 3. macOS Chrome 启动与能力 API | 3/3 | Complete    | 2026-07-27 |
 | 4. 前端平台门控 | 6/6 | Complete    | 2026-07-27 |
 | 5. CI 打包发布 | 6/6 | In Progress|  |
-| 6. 发布文档与端到端验证 | 5/5 | In Progress|  |
+| 6. 发布文档与端到端验证 | 5/5 | Complete    | 2026-07-31 |
 | 7. 补丁发布与发布链路验证 | 0/0 | Not Planned|  |
