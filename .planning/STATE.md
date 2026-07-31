@@ -5,16 +5,16 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 06
 current_phase_name: release-docs
 status: executing
-stopped_at: Completed 06-04-PLAN.md
-last_updated: "2026-07-31T18:32:33.216Z"
+stopped_at: "06-05-PLAN.md Tasks 1-2 complete; STOPPED at Task 3 checkpoint:human-verify (clean-account walkthrough)"
+last_updated: "2026-07-31T19:00:35.577Z"
 last_activity: 2026-07-30
 last_activity_desc: Phase 06 execution started
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 28
-  completed_plans: 27
-  percent: 83
+  completed_plans: 28
+  percent: 100
 ---
 
 # Project State
@@ -138,6 +138,7 @@ Recent decisions affecting current work:
 - [Phase ?]: 06-03: dmg background footer regenerated to the same double-click-again flow, replacing the never-exercised right-click route; same 600x400/1200x800 geometry create-dmg depends on
 - [Phase ?]: 06-04: ROADMAP Phase 6 SC1-3 and REQUIREMENTS DOCS-01/02 rewritten to the measured double-click-again flow and single-architecture prerequisite checklist, with a dated callout naming both 2026-07-28 (05-06 real-hardware capture) and 2026-07-27 (second-architecture removal from v0.2); the callout paraphrases the removed architecture to avoid tripping its own forbidden-word verify gate
 - [Phase ?]: 06-04: cross-surface parity audit confirms xattr command / primary 放行 step / macOS 15 floor consistent across release template, both locale files, both READMEs, and build-release.yml; full suite green (118 Python + 52 node:test) run via repo's existing .venv
+- [Phase ?]: 06-05: real v0.2.0 tag pushed (option-a); found and fixed release job missing checkout step that silently dropped body_path content; hand-corrected live Release body; closed 05-ci UAT test 1
 
 ### Pending Todos
 
@@ -148,6 +149,7 @@ None yet.
 - ~~arm64 重构建阻塞~~ 已解决(2026-07-25):兄弟仓库产出 post-D-02 arm64 ditto zip,02-03 已验证并发布到 kernel-149.0.7827.114
 - ~~Phase 2 仅剩 02-04 (x64) 阻塞~~ 已解决(2026-07-27):兄弟仓库交付 post-D-02 x64 交叉编译 ditto zip(fingerprint-chromium 提交 91d6603b/f0985747/30d2553a:补 downloads-macos-x64.ini、flags 拆出 macos-arm64/x64 中立化、x64 build),经架构断言 + Rosetta CDP 冒烟把关后已上传到 kernel-149.0.7827.114,双架构齐备。上传前必须的脚本改动:codesign 阶段改按架构分支(x86_64 平台设计默认不签名,跳过;arm64 从严不变,fix 02b6688)。注:先前"kernel-artifacts/ 与 out/ 目录已消失"的复核判断是路径基准错误——实际位置为 `bfwg/kernel-artifacts/`(仓库同级)与 `build/src/out/`,两者一直都在;此前拒绝 arm64 zip 顶替 x64(lipo 取证 launcher=arm64,A-K02/T-02-05)的处置正确
 - Phase 5 (CI 打包发布) 需要 Phase 2 产出的真实内核资产才能端到端验证——现双架构内核资产(arm64 + x64)已在 kernel-149.0.7827.114 发布,该前置已满足
+- 06-05 Task 3 (clean-account human verification) not yet executed — requires a real macOS machine and a newly created user account; Tasks 1-2 (real v0.2.0 tag push, release-body defect found and fixed, 05-ci UAT closed) are complete and committed
 
 ## Deferred Items
 
@@ -159,6 +161,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T18:32:33.205Z
-Stopped at: Completed 06-04-PLAN.md
-Resume file: None
+Last session: 2026-07-31T19:00:35.566Z
+Stopped at: 06-05-PLAN.md Tasks 1-2 complete; STOPPED at Task 3 checkpoint:human-verify (clean-account walkthrough)
+Resume file: .planning/phases/06-release-docs/06-05-PLAN.md
