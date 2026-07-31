@@ -75,6 +75,8 @@ macOS 用户拿到未签名的 dmg 后，**无需开发者协助**即可自行�
 ### 端到端验证在哪验
 
 - **D-13:** **在同一台 Mac 上新建一个干净的系统用户账户**跑完整验证。`LSQuarantineEventsV2` 数据库与 Gatekeeper 放行记录按用户隔离，但 `/Applications` 全局共享 —— **需先卸载**现有安装。
+
+  > **2026-07-31 OVERRIDE(开发者决定,记录于此不改原文):** 干净账户要求经开发者明确选择后豁免，改为在现有账户中验收。承接的后果:该账户已有 Phase 5 写入的 Gatekeeper denial breadcrumb，备选放行路径「系统设置 → 隐私与安全性 → 仍要打开」的界面状态不代表新用户所见，该步骤记为**未验证**、不计入通过。主路径与其余四段仍按 D-15 全额验收。ROADMAP SC3 已同步收窄(见其 2026-07-31 澄清)。
   背景：开发者当前账户已被 Phase 5 的验收污染（有 `Adding Gatekeeper denial breadcrumb` 记录、多条 LSQuarantine 行、应用仍装着），不满足 SC3 的「从未安装过本应用的 Mac」。
 
 - **D-14:** **改写 ROADMAP SC2/SC3 与 REQUIREMENTS DOCS-02 为 arm64-only**，并记录依据（x64 于 2026-07-27 移出 v0.2，`PROJECT.md` Out of Scope 已录）。不留永远无法满足的验收条目。

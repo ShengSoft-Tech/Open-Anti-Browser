@@ -67,7 +67,8 @@ created: 2026-07-30
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| 用户仅凭 Release notes/README 即可完成下载 → 放行 → 安装 → 创建配置 → 启动 Chrome 配置 | DOCS-01, DOCS-02 | 「文档是否足以让人自助走完全程」本质上无法自动化 —— D-15 明确要求人工执行且全程不得使用文档外知识 | 在同一台 Mac 上新建干净系统用户账户(D-13),先卸载 `/Applications` 中现有安装,再仅依据发布文档走完全程;凡是发现自己动用了文档外知识,记为文档缺口并补文档 |
+| 用户仅凭 Release notes/README 即可完成下载 → 放行 → 安装 → 创建配置 → 启动 Chrome 配置 | DOCS-01, DOCS-02 | 「文档是否足以让人自助走完全程」本质上无法自动化 —— D-15 明确要求人工执行且全程不得使用文档外知识 | **2026-07-31 起改为现有账户执行**(D-13 干净账户要求经开发者决定豁免):先卸载 `/Applications` 中现有安装,再仅依据发布文档走完全程;凡是发现自己动用了文档外知识,记为文档缺口并补文档 |
+| 备选放行路径「系统设置 → 隐私与安全性 → 仍要打开」 | DOCS-01 | 该路径的界面状态由 per-user 的 Gatekeeper denial breadcrumb 驱动,现有账户已被 Phase 5 写入过该记录 | **不验证**(2026-07-31 随 D-13 豁免一并收窄)。补验条件:在干净系统用户账户中重跑该步骤 |
 | dmg 背景图重生成后 create-dmg 图标坐标仍对齐 | DOCS-01 | 视觉对齐无法由断言表达 | 本地 `create-dmg` 产出 dmg 后挂载目视核对图标与背景文字位置 |
 | `release` job 的 `body_path` 实际渲染效果 | DOCS-01 | `release` job 由 tag 触发,`workflow_dispatch` 下恒为 skipped —— 只能验 YAML 合法性与 job 图,渲染必须真实推 `v*` tag | `workflow_dispatch` 回归验 YAML/job 结构;渲染效果待真实 tag push 后在 Release 页核对(planner 需决定是否在本 phase 内推 tag) |
 
