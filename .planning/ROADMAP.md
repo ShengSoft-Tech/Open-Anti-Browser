@@ -181,11 +181,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Release notes/README 提供双架构下载选择指引,帮助用户判断自己的 Mac 是 Apple Silicon 还是 Intel
   3. 在一台从未安装过本应用的 Mac 上(arm64 与 x64 分别原生验证,不借助 Rosetta),用户仅依据发布文档即可完成下载、放行、安装、创建配置并启动 Chrome 配置的完整流程
 
-**Plans**: 5 plans
+**Plans**: 1/5 plans executed
 
 **Wave 1**
 
-- [ ] 06-01-PLAN.md — tracer:加引号的 `xattr` 命令端到端(JS 常量 → Python 兜底提示 → 新建 release notes 模板 → release job `body_path`)+ 三方一致性锁 + workflow_dispatch 回归 [DOCS-01]
+- [x] 06-01-PLAN.md — tracer:加引号的 `xattr` 命令端到端(JS 常量 → Python 兜底提示 → 新建 release notes 模板 → release job `body_path`)+ 三方一致性锁 + workflow_dispatch 回归 [DOCS-01]
 
 **Wave 2** *(depends on 06-01;两份计划无文件重叠,可并行)*
 
@@ -213,4 +213,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. macOS Chrome 启动与能力 API | 3/3 | Complete    | 2026-07-27 |
 | 4. 前端平台门控 | 6/6 | Complete    | 2026-07-27 |
 | 5. CI 打包发布 | 6/6 | In Progress|  |
-| 6. 发布文档与端到端验证 | 0/5 | Not started | - |
+| 6. 发布文档与端到端验证 | 1/5 | In Progress|  |
