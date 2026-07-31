@@ -5,15 +5,15 @@ milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 06
 current_phase_name: release-docs
 status: executing
-stopped_at: Completed 06-03-PLAN.md
-last_updated: "2026-07-31T18:23:11.687Z"
+stopped_at: Completed 06-04-PLAN.md
+last_updated: "2026-07-31T18:32:33.216Z"
 last_activity: 2026-07-30
 last_activity_desc: Phase 06 execution started
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 28
-  completed_plans: 26
+  completed_plans: 27
   percent: 83
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 ## Current Position
 
 Phase: 06 (release-docs) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-07-30 — Phase 06 execution started
 
-Progress: [█████████░] 93%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
@@ -85,6 +85,7 @@ Progress: [█████████░] 93%
 | Phase 06 P01 | 42min | 3 tasks | 7 files |
 | Phase 06 P02 | 6min | 2 tasks | 3 files |
 | Phase 06 P03 | 15min | 2 tasks | 5 files |
+| Phase 06 P04 | 20min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -135,6 +136,8 @@ Recent decisions affecting current work:
 - [Phase ?]: 06-02: Trust caveat uses '担保'/endorsement instead of '认可'/'信任' near Apple/Gatekeeper as an extra safety margin beyond the literal negative-grep regex; README pointer bullets restate only the two prerequisites + Release-page link, no steps duplicated (D-11)
 - [Phase ?]: 06-03: gatekeeper.step1 rewritten to the double-click-again path (measured on real hardware); step2-4 preserved as System-Settings/confirm/terminal fallback chain; gatekeeperCopyParity.test.js locks the ordering and forbidden-fragment gate
 - [Phase ?]: 06-03: dmg background footer regenerated to the same double-click-again flow, replacing the never-exercised right-click route; same 600x400/1200x800 geometry create-dmg depends on
+- [Phase ?]: 06-04: ROADMAP Phase 6 SC1-3 and REQUIREMENTS DOCS-01/02 rewritten to the measured double-click-again flow and single-architecture prerequisite checklist, with a dated callout naming both 2026-07-28 (05-06 real-hardware capture) and 2026-07-27 (second-architecture removal from v0.2); the callout paraphrases the removed architecture to avoid tripping its own forbidden-word verify gate
+- [Phase ?]: 06-04: cross-surface parity audit confirms xattr command / primary 放行 step / macOS 15 floor consistent across release template, both locale files, both READMEs, and build-release.yml; full suite green (118 Python + 52 node:test) run via repo's existing .venv
 
 ### Pending Todos
 
@@ -156,6 +159,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T18:23:11.676Z
-Stopped at: Completed 06-03-PLAN.md
+Last session: 2026-07-31T18:32:33.205Z
+Stopped at: Completed 06-04-PLAN.md
 Resume file: None

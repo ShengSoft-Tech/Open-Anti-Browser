@@ -183,7 +183,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 > ⚠ **2026-07-28/2026-07-27 scope 澄清:验收标准改写为实测口径 + 单一架构。** SC1 原文「系统设置优先」写于 Phase 5 出结果之前,已被 `05-06-SUMMARY.md` 2026-07-28 的真机时间戳日志推翻——放行实际是靠"再次双击"生效,系统设置从未在系统里产生过针对本应用的放行记录;SC2 原文要求的另一颗处理器架构下载选择指引,在该架构已于 2026-07-27 移出 v0.2(详见 PROJECT.md § Out of Scope 对应条目)后已无第二个包可供选择,遂改写为单包前置要求清单;SC3 原文中对那颗架构的原生验证半句同样因其不在本里程碑构建范围内而不可满足,已删除——该架构的内核资产已提前备好并发布,后续里程碑恢复支持时可直接改回本条。
 
-**Plans**: 3/5 plans executed
+**Plans**: 4/5 plans executed
 
 **Wave 1**
 
@@ -196,7 +196,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 3** *(depends on 06-02 + 06-03)*
 
-- [ ] 06-04-PLAN.md — ROADMAP SC1/SC2/SC3 与 REQUIREMENTS DOCS-01/DOCS-02 改写(实测口径 + arm64-only,附日期化依据)+ 跨面一致性审计与全量测试门禁 [DOCS-01/DOCS-02]
+- [x] 06-04-PLAN.md — ROADMAP SC1/SC2/SC3 与 REQUIREMENTS DOCS-01/DOCS-02 改写(实测口径 + arm64-only,附日期化依据)+ 跨面一致性审计与全量测试门禁 [DOCS-01/DOCS-02]
 
 **Wave 4** *(depends on 06-04;含决策门与人工验收)*
 
@@ -215,4 +215,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. macOS Chrome 启动与能力 API | 3/3 | Complete    | 2026-07-27 |
 | 4. 前端平台门控 | 6/6 | Complete    | 2026-07-27 |
 | 5. CI 打包发布 | 6/6 | In Progress|  |
-| 6. 发布文档与端到端验证 | 3/5 | In Progress|  |
+| 6. 发布文档与端到端验证 | 4/5 | In Progress|  |
