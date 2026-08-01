@@ -179,3 +179,7 @@ None - no external service configuration required.
 ---
 *Phase: 07-patch-release*
 *Completed: 2026-08-01*
+
+## Self-Check: PASSED
+
+All 6 modified files and the SUMMARY.md itself confirmed present on disk; all 4 commit hashes (1a94b57, 7a191d9, 9957f80, eb6493b) confirmed present in `git log --oneline --all`.
