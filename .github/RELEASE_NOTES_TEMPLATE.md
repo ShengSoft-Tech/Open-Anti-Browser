@@ -1,4 +1,9 @@
-<!-- RELEASE_VERSION: 0.2.0 -->
+<!-- RELEASE_VERSION: 0.2.1 -->
+
+## 本次更新
+
+- **macOS：** 修复点击窗口关闭按钮后应用仍在后台运行的问题——现在点关闭按钮会直接退出应用
+- **Windows：** 本版本无功能变更
 
 ## 下载前必读：系统要求
 
@@ -53,6 +58,11 @@ uname -m && sw_vers -productVersion
 </details>
 
 应用能够正常运行，是因为它不再带有系统隔离标记（quarantine），并不代表它已通过 Apple 签名认证或已被 Gatekeeper 信任——这是这类未签名应用的预期正常状态，不是安全隐患。
+
+## What's Changed
+
+- **macOS:** Fixed the app staying alive in the background after clicking the window close button — clicking it now quits the app directly
+- **Windows:** No functional changes in this release
 
 ## Before You Download: System Requirements
 
