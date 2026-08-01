@@ -54,6 +54,11 @@ class CurrentRepoStateTests(unittest.TestCase):
         main_versions = vc.read_main_versions()
         self.assertEqual(package_version, main_versions[0])
 
+    def test_template_anchor_version_matches_package_version_in_current_repo(self) -> None:
+        template_version = vc.read_template_version()
+        package_version = vc.read_package_version()
+        self.assertEqual(template_version, package_version)
+
 
 class CheckVersionConsistencyTagModeTests(unittest.TestCase):
     def test_tag_mode_all_three_consistent_returns_version(self) -> None:
@@ -138,6 +143,50 @@ class CheckVersionConsistencyTemplateTests(unittest.TestCase):
                 template_path=template_path,
             )
             self.assertEqual(result, "1.2.3")
+
+    def test_tag_mode_template_not_bumped_raises_with_template_value_in_message(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            package_path = _write_package_json(tmp_path, "1.2.3")
+            main_path = _write_main_py(tmp_path, ["1.2.3", "1.2.3"])
+            # 模拟漏改模板:package.json/main.py 都已 bump,模板锚点还停留在旧版本。
+            template_path = _write_template(tmp_path, "1.2.2")
+            with self.assertRaises(vc.VersionMismatch) as ctx:
+                vc.check_version_consistency(
+                    "v1.2.3",
+                    True,
+                    package_path=package_path,
+                    main_path=main_path,
+                    template_path=template_path,
+                )
+            message = str(ctx.exception)
+            self.assertIn("template=1.2.2", message)
+
+    def test_non_tag_mode_template_not_bumped_raises(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            package_path = _write_package_json(tmp_path, "2.0.0")
+            main_path = _write_main_py(tmp_path, ["2.0.0", "2.0.0"])
+            template_path = _write_template(tmp_path, "2.0.1")
+            with self.assertRaises(vc.VersionMismatch):
+                vc.check_version_consistency(
+                    "main",
+                    False,
+                    package_path=package_path,
+                    main_path=main_path,
+                    template_path=template_path,
+                )
+
+    def test_missing_template_anchor_raises(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            template_path = tmp_path / "RELEASE_NOTES_TEMPLATE.md"
+            template_path.write_text(
+                "# 没有锚点的模板\n\n这份文件里没有任何 RELEASE_VERSION 注释。\n",
+                encoding="utf-8",
+            )
+            with self.assertRaises(vc.VersionMismatch):
+                vc.read_template_version(template_path)
 
 
 class MainPyMatchCountTests(unittest.TestCase):

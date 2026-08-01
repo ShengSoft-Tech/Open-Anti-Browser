@@ -64,3 +64,10 @@ test('build-release.yml 仍保留 generate_release_notes: true，自动生成的
     '未找到 generate_release_notes: true'
   )
 })
+
+test('模板顶部含唯一一处 RELEASE_VERSION 锚点且为 semver 形状', () => {
+  const template = readTemplate()
+  const matches = [...template.matchAll(/<!--\s*RELEASE_VERSION:\s*(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)\s*-->/g)]
+  assert.equal(matches.length, 1, `期望恰好一处 RELEASE_VERSION 锚点，实际 ${matches.length} 处`)
+  assert.match(matches[0][1], /^\d+\.\d+\.\d+$/, `锚点版本号不是 semver 形状: ${matches[0][1]}`)
+})
