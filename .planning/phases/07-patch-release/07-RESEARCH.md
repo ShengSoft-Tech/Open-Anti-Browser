@@ -456,17 +456,21 @@ class CheckVersionConsistencyTemplateTests(unittest.TestCase):
 | A3 | Accessibility(`kTCCServiceAccessibility`)权限在 GitHub-hosted macOS runner 上无法被非交互式、编程方式授予(SIP 保持开启,阻止直接改写 TCC.db) | Common Pitfalls #3、Architecture Patterns Pattern 2 | 基于多个 `actions/runner-images` 公开 issue 与社区文章交叉印证(`[CITED: 见 Sources]`),但不是本仓库直接实测。若判断错误(例如 GitHub 后续更新了 runner 镜像的预授权策略),SC1 的「第三维度自动化不可行」结论需要重新评估——建议 planner 在实现前用一次快速的 `workflow_dispatch` 冒烟(尝试最小化的 `click button` AppleScript,观察是否超时/报错)复核这条假设,而不是直接采信本研究 |
 | A4 | 05-02(SIGSEGV)与 05-06(Quit 死循环)两次真机缺陷只在冻结 `.app` 复现、从未在源码直跑复现,这一差异是「冻结态特有运行时因素」导致而非偶然 | Common Pitfalls #4 | 基于 STATE.md 记录的历史事实(缺陷确实只在冻结态被抓到)做出的因果推断,推断本身未被专门验证过。若推断错误(即源码直跑其实也能复现,只是没人试过),放宽 SC1 验证载体到源码跑也许是可以接受的——但风险不对称:错误地采信「源码跑等价」可能让一个只在冻结态出现的真实回归被漏检,而错误地坚持「只能用冻结态」的代价只是多花一点验证时间,故本研究建议保守处理 |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+> 两条问题均已由 planner 在计划中拍板并落盘,见各条末尾的 `RESOLVED` 标记。本节保留原文以供追溯,不再是开放项。
 
 1. **发版与验证的先后排序应该选哪一个?**
    - What we know:CONTEXT.md 已经把这条列为 Claude's Discretion,并列出了两个选项的权衡(先验后发验的不是最终产物;先发后验一旦失败要再发 v0.2.2)。
    - What's unclear:哪个选项更符合项目当前的风险偏好——SC2/SC3 天然要求真实 tag push,SC1 理论上可以在 tag push 前用 `workflow_dispatch` 产出的 dmg 先验证。
    - Recommendation:鉴于 ROADMAP 已明确「三条标准共享同一次真实 tag push,不应拆到不同 wave」,且 SC1 的验证载体本身已经要求「冻结态 `.app`」(Pitfall 4),建议 SC1 也使用 tag push 后 Release 页面上的真实 dmg 进行验证(而不是 tag push 前的 `workflow_dispatch` 产物)——这样三条 SC 共享同一个验证时间点和同一份产物,证据链最干净;代价是如果 SC1 验证失败,回退成本与 Pitfall 5 讨论的一致。这是 planner 需要在计划里显式落盘的决策,不是本研究能替 planner 拍板的。
+   - **RESOLVED:** 采纳本建议 —— 见 `07-02-PLAN.md` 决策 **D-11**(先发后验,SC1 使用 Release 页面上的 v0.2.1 dmg,三条 SC 锚定同一份产物)。
 
 2. **失败回退策略(A2 被推翻,或正文未渲染)时,是否允许 `gh release edit`?**
    - What we know:D-04 的动机是「证明不再需要手工补救」;若真的失败,`gh release edit` 能止损但会削弱本 phase 的验收结论。
    - What's unclear:CONTEXT.md 明确把这条留给 planner。
    - Recommendation:参见 Pitfall 5 列出的三条路径(接受失败+手工补救 / 删除重推 tag / 烧新版本号)。建议 planner 在计划中预先声明「如果验证失败,采用路径 X」,而不是等失败发生时再临场决定——这本身也是本 phase「操作型」性质的一部分,应该被当作 verification 步骤的一部分提前设计。
+   - **RESOLVED:** 见 `07-02-PLAN.md` 决策 **D-15**(证据优先的三步失败策略:先落盘原始正文再谈补救;不删除重推 tag;不为纯文案缺陷烧 v0.2.2;`gh release edit` 仅在证据已落盘、且同一记录中写明「PKG-06 未达成」的前提下允许)。
 
 ## Environment Availability
 

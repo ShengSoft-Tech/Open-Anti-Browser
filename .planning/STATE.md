@@ -4,15 +4,15 @@ milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 07
 current_phase_name: 补丁发布与发布链路验证
-status: planning
+status: executing
 stopped_at: Phase 7 context gathered
-last_updated: "2026-07-31T23:16:41.639Z"
+last_updated: "2026-08-01T00:27:49.737Z"
 last_activity: 2026-07-31
 last_activity_desc: Phase 06 complete, transitioned to Phase 07
 progress:
   total_phases: 7
   completed_phases: 6
-  total_plans: 28
+  total_plans: 31
   completed_plans: 28
   percent: 86
 ---
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-23)
 
 Phase: 07 — 补丁发布与发布链路验证
 Plan: Not started
-Status: Ready to plan
+Status: Ready to execute
 Last activity: 2026-07-31 — Phase 06 complete, transitioned to Phase 07
 
 Progress: [████████░░] 86%
