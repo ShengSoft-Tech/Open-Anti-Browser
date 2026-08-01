@@ -218,11 +218,19 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 > 本 phase 的三条标准共享同一个验证动作(一次真实 `v0.2.1` tag push),因此不应拆到不同 wave 分别发版。SC1 的代码修复 `a886dc7` 与 SC2 的流水线修复 `524aeb1` 都已提交在 main 上,本 phase 的工作是**发布并验证**,而非重新实现。
 
-**Plans**: 0 plans
+**Plans**: 3 plans
 
-Plans:
+**Wave 1**
 
-- [ ] TBD (run /gsd-plan-phase 7 to break down)
+- [ ] 07-01-PLAN.md — 版本一致性门禁扩展到模板锚点 + 双语「本次更新」章节 + 三处版本号 bump 到 0.2.1 (D-01/D-02/D-03/D-04) [PKG-06]
+
+**Wave 2** *(blocked on Wave 1;本 phase 唯一一次真实发版动作)*
+
+- [ ] 07-02-PLAN.md — 推送真实 `v0.2.1` tag 并对已发布 Release 正文取证与 SC2/SC3 自动断言(含单向门 checkpoint) [PKG-06]
+
+**Wave 3** *(blocked on Wave 2;消费同一份 Release 产物,不另行发版)*
+
+- [ ] 07-03-PLAN.md — SC1 冻结 `.app` 真机验收(三条退出路径)+ SC2/SC3 人工复核 + 假设 A2 判定落盘 [UI-05, PKG-06]
 
 ## Progress
 
