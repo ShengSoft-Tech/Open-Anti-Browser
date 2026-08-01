@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: macOS 支持(仅 Chrome 内核)
 current_phase: 07
-current_phase_name: 补丁发布与发布链路验证
+current_phase_name: patch-release
 status: executing
-stopped_at: Phase 7 context gathered
-last_updated: "2026-08-01T00:27:49.737Z"
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-08-01T00:37:52.416Z"
 last_activity: 2026-07-31
-last_activity_desc: Phase 06 complete, transitioned to Phase 07
+last_activity_desc: Phase 07 execution started
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 31
-  completed_plans: 28
+  completed_plans: 29
   percent: 86
 ---
 
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-23)
 
 **Core value:** 一键创建并启动相互隔离、指纹可信的浏览器环境——配置即用,无需用户理解指纹参数细节。
-**Current focus:** Phase 06 — release-docs
+**Current focus:** Phase 07 — patch-release
 
 ## Current Position
 
-Phase: 07 — 补丁发布与发布链路验证
-Plan: Not started
+Phase: 07 (patch-release) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-07-31 — Phase 06 complete, transitioned to Phase 07
+Last activity: 2026-07-31 — Phase 07 execution started
 
-Progress: [████████░░] 86%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -88,6 +88,7 @@ Progress: [████████░░] 86%
 | Phase 06 P03 | 15min | 2 tasks | 5 files |
 | Phase 06 P04 | 20min | 2 tasks | 3 files |
 | Phase 06 P05 | 50min | 3 tasks | 9 files |
+| Phase 07 P01 | 20min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -147,6 +148,9 @@ Recent decisions affecting current work:
 - [Phase ?]: 06-05: real v0.2.0 tag pushed (option-a); found and fixed release job missing checkout step that silently dropped body_path content; hand-corrected live Release body; closed 05-ci UAT test 1
 - [Phase ?]: 06-05: D-13 干净账户要求经开发者豁免,在既有账户中验收;备选放行路径「系统设置 → 仍要打开」记为未验证(该账户已带 Phase 5 写入的 Gatekeeper denial breadcrumb),主路径/自查/安装/创建启动 Chrome 配置四段全额通过
 - [Phase ?]: 06-05: 走查发现真机运行缺陷(macOS 关闭按钮不退出应用,仅隐藏到菜单栏),已在 a886dc7 修复并路由到新增 Phase 7(UI-05),不计入 Phase 6 文档缺口,不阻塞本计划完成
+- [Phase ?]: [Phase 7] 07-01: D-09 version anchor as single top-of-file HTML comment (not per-locale), decoupling release-notes prose from the check_version_consistency.py gate regex
+- [Phase ?]: [Phase 7] 07-01: D-10 three-commit split, each leaving main's four version sources self-consistent (anchor introduced at 0.2.0 in Task 1, all four bumped to 0.2.1 together in Task 3)
+- [Phase ?]: [Phase 7] 07-01: D-01 costly property confirmed in effect — RELEASE_NOTES_TEMPLATE.md is no longer version-agnostic; check_version_consistency.py now hard-enforces the anchor via a fourth comparison term
 
 ### Pending Todos
 
@@ -169,6 +173,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-31T23:16:41.621Z
-Stopped at: Phase 7 context gathered
-Resume file: .planning/phases/07-patch-release/07-CONTEXT.md
+Last session: 2026-08-01T00:37:44.337Z
+Stopped at: Completed 07-01-PLAN.md
+Resume file: None

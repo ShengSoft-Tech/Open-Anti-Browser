@@ -50,7 +50,7 @@ Requirements for the macOS support milestone. Each maps to roadmap phases.
 ### v0.2.1 补丁 (Phase 7)
 
 - [ ] **UI-05**: macOS 上点窗口关闭按钮直接退出应用,不再隐藏到菜单栏挂在后台(该状态下 Dock 图标点击无法唤回窗口,用户只能右键 Dock 退出);Windows/Linux 的最小化到托盘行为不变
-- [ ] **PKG-06**: 推送 v* tag 后 GitHub Release 正文由流水线自动渲染出 `.github/RELEASE_NOTES_TEMPLATE.md` 内容,无需手工补救;手写正文与自动生成 changelog 的实际先后顺序被记录在案
+- [x] **PKG-06**: 推送 v* tag 后 GitHub Release 正文由流水线自动渲染出 `.github/RELEASE_NOTES_TEMPLATE.md` 内容,无需手工补救;手写正文与自动生成 changelog 的实际先后顺序被记录在案
 
 ## Future Requirements
 
@@ -105,7 +105,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOCS-01 | Phase 6 | Complete |
 | DOCS-02 | Phase 6 | Complete |
 | UI-05 | Phase 7 | Pending |
-| PKG-06 | Phase 7 | Pending |
+| PKG-06 | Phase 7 | Complete |
 
 **Coverage:**
 

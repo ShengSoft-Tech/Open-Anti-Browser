@@ -218,11 +218,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 > 本 phase 的三条标准共享同一个验证动作(一次真实 `v0.2.1` tag push),因此不应拆到不同 wave 分别发版。SC1 的代码修复 `a886dc7` 与 SC2 的流水线修复 `524aeb1` 都已提交在 main 上,本 phase 的工作是**发布并验证**,而非重新实现。
 
-**Plans**: 3 plans
+**Plans**: 1/3 plans executed
 
 **Wave 1**
 
-- [ ] 07-01-PLAN.md — 版本一致性门禁扩展到模板锚点 + 双语「本次更新」章节 + 三处版本号 bump 到 0.2.1 (D-01/D-02/D-03/D-04) [PKG-06]
+- [x] 07-01-PLAN.md — 版本一致性门禁扩展到模板锚点 + 双语「本次更新」章节 + 三处版本号 bump 到 0.2.1 (D-01/D-02/D-03/D-04) [PKG-06]
 
 **Wave 2** *(blocked on Wave 1;本 phase 唯一一次真实发版动作)*
 
@@ -246,4 +246,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. 前端平台门控 | 6/6 | Complete    | 2026-07-27 |
 | 5. CI 打包发布 | 6/6 | In Progress|  |
 | 6. 发布文档与端到端验证 | 5/5 | Complete    | 2026-07-31 |
-| 7. 补丁发布与发布链路验证 | 0/0 | Not Planned|  |
+| 7. 补丁发布与发布链路验证 | 1/3 | In Progress|  |
