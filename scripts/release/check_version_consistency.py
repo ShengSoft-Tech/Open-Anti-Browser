@@ -33,11 +33,19 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PACKAGE_JSON_PATH = REPO_ROOT / "frontend" / "package.json"
 DEFAULT_MAIN_PY_PATH = REPO_ROOT / "backend" / "main.py"
+DEFAULT_TEMPLATE_PATH = REPO_ROOT / ".github" / "RELEASE_NOTES_TEMPLATE.md"
 
 # semver 形状(三段数字,可选 -prerelease/+build 后缀)而非宽松的 [^"]+,
 # 避免 backend/main.py 里任何其他 version="..." 字面量把校验误伤成不一致。
 _SEMVER_VERSION_RE = re.compile(
     r'version\s*=\s*"(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)"'
+)
+
+# 模板顶部的 HTML 注释锚点(D-02),例如 ``<!-- RELEASE_VERSION: 0.2.1 -->``。
+# 用注释锚点而非抓标题文案,是为了让「给读者看的措辞」与「给脚本读的版本号」
+# 彻底解耦——正文排版怎么调都不会碰坏这条正则。
+_TEMPLATE_VERSION_RE = re.compile(
+    r'<!--\s*RELEASE_VERSION:\s*(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)\s*-->'
 )
 
 
@@ -59,6 +67,25 @@ def read_main_versions(path: "Path | None" = None) -> list[str]:
     return _SEMVER_VERSION_RE.findall(text)
 
 
+def read_template_version(path: "Path | None" = None) -> str:
+    """读取 ``.github/RELEASE_NOTES_TEMPLATE.md`` 顶部的 ``RELEASE_VERSION`` 注释锚点。
+
+    锚点缺失或形状不对时显式抛 ``VersionMismatch``,不返回空值静默放行——
+    这是 D-01「本次更新」章节从此每次发版必改这条约束的门禁落点。
+    """
+    template_path = path or DEFAULT_TEMPLATE_PATH
+    text = template_path.read_text(encoding="utf-8")
+    match = _TEMPLATE_VERSION_RE.search(text)
+    if match is None:
+        raise VersionMismatch(
+            "在 .github/RELEASE_NOTES_TEMPLATE.md 中未找到 "
+            '`<!-- RELEASE_VERSION: X.Y.Z -->` 锚点。'
+            "该模板由 D-01 决策引入的「本次更新」章节起,每次发版都必须同步"
+            "更新顶部的版本号锚点,不允许缺失或形状不匹配。"
+        )
+    return match.group(1)
+
+
 def normalize_tag(ref_name: str) -> str:
     """只剥掉一个前导 ``v``(用 ``str.removeprefix``,不是会反复吞掉前导字符的
     那个字符串方法——那个方法会把 ``"vv0.2.0"`` 错误地吞成 ``"0.2.0"``)。
@@ -71,6 +98,7 @@ def check_version_consistency(
     is_tag: bool,
     package_path: "Path | None" = None,
     main_path: "Path | None" = None,
+    template_path: "Path | None" = None,
 ) -> str:
     """判定版本号一致性,返回一致时的版本字符串;不一致时抛 ``VersionMismatch``。"""
     main_versions = read_main_versions(main_path)
@@ -89,23 +117,25 @@ def check_version_consistency(
     main_version = main_versions[0]
 
     package_version = read_package_version(package_path)
+    template_version = read_template_version(template_path)
 
     if is_tag:
         expected_version = normalize_tag(ref_name)
-        if expected_version == package_version == main_version:
+        if expected_version == package_version == main_version == template_version:
             return expected_version
         raise VersionMismatch(
             "版本不一致: "
-            f"tag={expected_version} package.json={package_version} main.py={main_version}"
+            f"tag={expected_version} package.json={package_version} main.py={main_version} "
+            f"template={template_version}"
         )
 
     # 非 tag 模式(workflow_dispatch 手动触发,ref_name 是分支名):不参照
-    # ref_name,只要求 package.json 与 main.py 两者相等。
-    if package_version == main_version:
+    # ref_name,只要求 package.json、main.py、模板锚点三者相等。
+    if package_version == main_version == template_version:
         return package_version
     raise VersionMismatch(
         "版本不一致(非 tag 模式,忽略分支名): "
-        f"package.json={package_version} main.py={main_version}"
+        f"package.json={package_version} main.py={main_version} template={template_version}"
     )
 
 

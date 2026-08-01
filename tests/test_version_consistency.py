@@ -22,6 +22,12 @@ def _write_main_py(dir_path: Path, versions: list[str]) -> Path:
     return path
 
 
+def _write_template(dir_path: Path, version: str) -> Path:
+    path = dir_path / "RELEASE_NOTES_TEMPLATE.md"
+    path.write_text(f"<!-- RELEASE_VERSION: {version} -->\n\n## 本次更新\n", encoding="utf-8")
+    return path
+
+
 class NormalizeTagTests(unittest.TestCase):
     def test_normalize_tag_strips_leading_v(self) -> None:
         self.assertEqual(vc.normalize_tag("v0.2.0"), "0.2.0")
@@ -55,8 +61,13 @@ class CheckVersionConsistencyTagModeTests(unittest.TestCase):
             tmp_path = Path(tmp)
             package_path = _write_package_json(tmp_path, "1.2.3")
             main_path = _write_main_py(tmp_path, ["1.2.3", "1.2.3"])
+            template_path = _write_template(tmp_path, "1.2.3")
             result = vc.check_version_consistency(
-                "v1.2.3", True, package_path=package_path, main_path=main_path
+                "v1.2.3",
+                True,
+                package_path=package_path,
+                main_path=main_path,
+                template_path=template_path,
             )
             self.assertEqual(result, "1.2.3")
 
@@ -65,9 +76,14 @@ class CheckVersionConsistencyTagModeTests(unittest.TestCase):
             tmp_path = Path(tmp)
             package_path = _write_package_json(tmp_path, "1.2.3")
             main_path = _write_main_py(tmp_path, ["1.2.3", "1.2.3"])
+            template_path = _write_template(tmp_path, "1.2.3")
             with self.assertRaises(vc.VersionMismatch) as ctx:
                 vc.check_version_consistency(
-                    "v9.9.9", True, package_path=package_path, main_path=main_path
+                    "v9.9.9",
+                    True,
+                    package_path=package_path,
+                    main_path=main_path,
+                    template_path=template_path,
                 )
             message = str(ctx.exception)
             self.assertIn("9.9.9", message)
@@ -80,12 +96,14 @@ class CheckVersionConsistencyNonTagModeTests(unittest.TestCase):
             tmp_path = Path(tmp)
             package_path = _write_package_json(tmp_path, "2.0.0")
             main_path = _write_main_py(tmp_path, ["2.0.0", "2.0.0"])
+            template_path = _write_template(tmp_path, "2.0.0")
             # ref_name 是分支名,不应影响结果——传一个与实际版本毫不相干的分支名。
             result = vc.check_version_consistency(
                 "feature/something-unrelated",
                 False,
                 package_path=package_path,
                 main_path=main_path,
+                template_path=template_path,
             )
             self.assertEqual(result, "2.0.0")
 
@@ -94,10 +112,32 @@ class CheckVersionConsistencyNonTagModeTests(unittest.TestCase):
             tmp_path = Path(tmp)
             package_path = _write_package_json(tmp_path, "2.0.0")
             main_path = _write_main_py(tmp_path, ["2.0.1", "2.0.1"])
+            template_path = _write_template(tmp_path, "2.0.0")
             with self.assertRaises(vc.VersionMismatch):
                 vc.check_version_consistency(
-                    "main", False, package_path=package_path, main_path=main_path
+                    "main",
+                    False,
+                    package_path=package_path,
+                    main_path=main_path,
+                    template_path=template_path,
                 )
+
+
+class CheckVersionConsistencyTemplateTests(unittest.TestCase):
+    def test_tag_mode_all_four_consistent_returns_version(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            package_path = _write_package_json(tmp_path, "1.2.3")
+            main_path = _write_main_py(tmp_path, ["1.2.3", "1.2.3"])
+            template_path = _write_template(tmp_path, "1.2.3")
+            result = vc.check_version_consistency(
+                "v1.2.3",
+                True,
+                package_path=package_path,
+                main_path=main_path,
+                template_path=template_path,
+            )
+            self.assertEqual(result, "1.2.3")
 
 
 class MainPyMatchCountTests(unittest.TestCase):
